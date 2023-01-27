@@ -21,7 +21,7 @@ def test_panther_python_and_expression(panther_python_backend : pantherBackend):
                     fieldB: valueB
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ["event.get('fieldA') == 'valueA' and event.get('fieldB') == 'valueB'"]
 
 def test_panther_python_or_expression(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -38,7 +38,7 @@ def test_panther_python_or_expression(panther_python_backend : pantherBackend):
                     fieldB: valueB
                 condition: 1 of sel*
         """)
-    ) == ['<insert expected result here>']
+    ) == ["event.get('fieldA') == 'valueA' or event.get('fieldB') == 'valueB'"]
 
 def test_panther_python_and_or_expression(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -58,7 +58,7 @@ def test_panther_python_and_or_expression(panther_python_backend : pantherBacken
                         - valueB2
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == [["event.get('fieldA') in ['valueA1', 'valueA2'] and event.get('fieldB') in ['valueB1', 'valueB2']"]]
 
 def test_panther_python_or_and_expression(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -77,7 +77,7 @@ def test_panther_python_or_and_expression(panther_python_backend : pantherBacken
                     fieldB: valueB2
                 condition: 1 of sel*
         """)
-    ) == ['<insert expected result here>']
+    ) == ["(event.get('fieldA') == 'valueA1' and event.get('fieldB') == 'valueB1') or (event.get('fieldA') == 'valueA2' and event.get('fieldB') == 'valueB2')"]
 
 def test_panther_python_in_expression(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -95,7 +95,7 @@ def test_panther_python_in_expression(panther_python_backend : pantherBackend):
                         - valueC*
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ["""event.get('fieldA') == 'valueA' or event.get('fieldA') == 'valueB' or re.compile(r'valueC.*').search(event.get('fieldA'))"""]
 
 def test_panther_python_regex_query(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -111,7 +111,7 @@ def test_panther_python_regex_query(panther_python_backend : pantherBackend):
                     fieldB: foo
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ["re.compile(r'foo.*bar').search(event.get('fieldA')) and event.get('fieldB') == 'valueB2'"]
 
 def test_panther_python_cidr_query(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -126,7 +126,8 @@ def test_panther_python_cidr_query(panther_python_backend : pantherBackend):
                     field|cidr: 192.168.0.0/16
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ["""from ipaddress import ip_address, ip_network
+ipaddress.ip_address(event.get('field')) in ipaddress.ip_network('192.168.0.0/16')"""]
 
 def test_panther_python_field_name_with_whitespace(panther_python_backend : pantherBackend):
     assert panther_python_backend.convert(
@@ -141,7 +142,7 @@ def test_panther_python_field_name_with_whitespace(panther_python_backend : pant
                     field name: value
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ["event.get('field name') == 'value'"]
 
 # TODO: implement tests for all backend features that don't belong to the base class defaults, e.g. features that were
 # implemented with custom code, deferred expressions etc.
