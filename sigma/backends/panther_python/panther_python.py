@@ -78,7 +78,7 @@ class PantherBackend(TextQueryBackend):
     # Regular expressions
     # Regular expression query as format string with placeholders {field} and {regex}
     # re_expression: ClassVar[str] = "{field}=~{regex}"
-    re_expression: ClassVar[str] = 're.compile(r"{regex}").search(event.get("{field}"))'
+    re_expression: ClassVar[str] = 're.compile(r"{regex}").search({field})'
 
     re_escape_char: ClassVar[str] = "\\"  # Character used for escaping in regular expressions
     re_escape: ClassVar[Tuple[str]] = ()  # List of strings that are escaped

@@ -111,7 +111,7 @@ def test_panther_python_regex_query(panther_python_backend : PantherBackend):
                     fieldB: foo
                 condition: sel
         """)
-    ) == ['re.compile(r"foo.*bar").search(event.get("fieldA")) and event.get("fieldB") == "valueB2"']
+    ) == ['re.compile(r"foo.*bar").search(event.get("fieldA")) and event.get("fieldB") == "foo"']
 
 def test_panther_python_cidr_query(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
