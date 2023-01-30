@@ -5,3 +5,10 @@
 cov.xml
 dist/
 docs/_build
+
+# User's environment-specific stuff
+.idea/**
+
+# Mac DS_Store
+.DS_Store
+**/.DS_Store.DS_Store
