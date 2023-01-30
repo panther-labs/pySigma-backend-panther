@@ -4,7 +4,7 @@ from sigma.processing.resolver import ProcessingPipelineResolver
 from sigma.backends.test import TextQueryTestBackend
 
 from sigma.backends.panther_python import PantherBackend
-from sigma.pipelines.panther_python.panther_pipeline import panther_pipeline
+# from sigma.pipelines.panther_python.panther_pipeline import panther_pipeline
 
 
 # @pytest.fixture

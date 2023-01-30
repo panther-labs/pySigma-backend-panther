@@ -21,7 +21,7 @@ def test_panther_python_and_expression(panther_python_backend : PantherBackend):
                     fieldB: valueB
                 condition: sel
         """)
-    ) == ["event.get('fieldA') == 'valueA' and event.get('fieldB') == 'valueB'"]
+    ) == ['event.get("fieldA") == "valueA" and event.get("fieldB") == "valueB"']
 
 def test_panther_python_or_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -38,7 +38,7 @@ def test_panther_python_or_expression(panther_python_backend : PantherBackend):
                     fieldB: valueB
                 condition: 1 of sel*
         """)
-    ) == ["event.get('fieldA') == 'valueA' or event.get('fieldB') == 'valueB'"]
+    ) == ['event.get("fieldA") == "valueA" or event.get("fieldB") == "valueB"']
 
 def test_panther_python_and_or_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -58,7 +58,7 @@ def test_panther_python_and_or_expression(panther_python_backend : PantherBacken
                         - valueB2
                 condition: sel
         """)
-    ) == [["event.get('fieldA') in ['valueA1', 'valueA2'] and event.get('fieldB') in ['valueB1', 'valueB2']"]]
+    ) == ['(event.get("fieldA") in ["valueA1", "valueA2"]) and (event.get("fieldB") in ["valueB1", "valueB2"])']
 
 def test_panther_python_or_and_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -77,7 +77,7 @@ def test_panther_python_or_and_expression(panther_python_backend : PantherBacken
                     fieldB: valueB2
                 condition: 1 of sel*
         """)
-    ) == ["(event.get('fieldA') == 'valueA1' and event.get('fieldB') == 'valueB1') or (event.get('fieldA') == 'valueA2' and event.get('fieldB') == 'valueB2')"]
+    ) == ['(event.get("fieldA") == "valueA1" and event.get("fieldB") == "valueB1") or (event.get("fieldA") == "valueA2" and event.get("fieldB") == "valueB2")']
 
 def test_panther_python_in_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -95,7 +95,7 @@ def test_panther_python_in_expression(panther_python_backend : PantherBackend):
                         - valueC*
                 condition: sel
         """)
-    ) == ["""event.get('fieldA') == 'valueA' or event.get('fieldA') == 'valueB' or re.compile(r'valueC.*').search(event.get('fieldA'))"""]
+    ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or re.compile(r"valueC.*").search(event.get("fieldA"))']
 
 def test_panther_python_regex_query(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -111,7 +111,7 @@ def test_panther_python_regex_query(panther_python_backend : PantherBackend):
                     fieldB: foo
                 condition: sel
         """)
-    ) == ["re.compile(r'foo.*bar').search(event.get('fieldA')) and event.get('fieldB') == 'valueB2'"]
+    ) == ['re.compile(r"foo.*bar").search(event.get("fieldA")) and event.get("fieldB") == "valueB2"']
 
 def test_panther_python_cidr_query(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -126,8 +126,7 @@ def test_panther_python_cidr_query(panther_python_backend : PantherBackend):
                     field|cidr: 192.168.0.0/16
                 condition: sel
         """)
-    ) == ["""from ipaddress import ip_address, ip_network
-ipaddress.ip_address(event.get('field')) in ipaddress.ip_network('192.168.0.0/16')"""]
+    ) == ['ipaddress.ip_address(event.get("field")) in ipaddress.ip_network("192.168.0.0/16")']
 
 def test_panther_python_field_name_with_whitespace(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -142,16 +141,16 @@ def test_panther_python_field_name_with_whitespace(panther_python_backend : Pant
                     field name: value
                 condition: sel
         """)
-    ) == ["event.get('field name') == 'value'"]
+    ) == ['event.get("field name") == "value"']
 
 # TODO: implement tests for all backend features that don't belong to the base class defaults, e.g. features that were
 # implemented with custom code, deferred expressions etc.
 
 
 
-def test_panther_python_panther_rule_output(panther_python_backend : PantherBackend):
-    """Test for output format panther_rule."""
-    # TODO: implement a test for the output format
-    pass
+# def test_panther_python_panther_rule_output(panther_python_backend : PantherBackend):
+#     """Test for output format panther_rule."""
+#     # TODO: implement a test for the output format
+#     assert False
 
 

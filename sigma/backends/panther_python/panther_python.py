@@ -13,9 +13,6 @@ class PantherBackend(TextQueryBackend):
     # TODO: change the token definitions according to the syntax. Delete these not supported by your backend.
     # See the pySigma documentation for further infromation:
     # https://sigmahq-pysigma.readthedocs.io/en/latest/Backends.html
-
-    # Operator precedence: tuple of Condition{AND,OR,NOT} in order of precedence.
-    # The backend generates grouping if required
     name: ClassVar[str] = "panther_python backend"
     formats: Dict[str, str] = {
         "default": "panther_python queries"
@@ -24,33 +21,45 @@ class PantherBackend(TextQueryBackend):
     # TODO: does the backend requires that a processing pipeline is provided? This information can be used by user interface programs like Sigma CLI to warn users about inappropriate usage of the backend.
     requires_pipeline: bool = False
 
+
+    # Operator precedence: tuple of Condition{AND,OR,NOT} in order of precedence.
+    # The backend generates grouping if required
     precedence: ClassVar[Tuple[ConditionItem, ConditionItem, ConditionItem]] = (ConditionNOT, ConditionAND, ConditionOR)
     group_expression: ClassVar[str] = "({expr})"  # Expression for precedence override grouping as format string with {expr} placeholder
+    # Reflect parse tree by putting parenthesis around all expressions - use this for target systems without strict precedence rules.
+    parenthesize : bool = True
 
     # Generated query tokens
     token_separator: str = " "  # separator inserted between all boolean operators
     or_token: ClassVar[str] = "or"
     and_token: ClassVar[str] = "and"
     not_token: ClassVar[str] = "not"
-    eq_token: ClassVar[str] = "=="  # Token inserted between field and value (without separator)
+    eq_token: ClassVar[str] = " == "  # Token inserted between field and value (without separator)
 
     # String output
     ## Fields
     ### Quoting
-    field_quote: ClassVar[
-        str] = "'"  # Character used to quote field characters if field_quote_pattern matches (or not, depending on field_quote_pattern_negation). No field name quoting is done if not set.
+
+    # Character used to quote field characters if field_quote_pattern matches (or not, depending on field_quote_pattern_negation). No field name quoting is done if not set.
+    # before: ['\'event.get(\'fieldA\')\'=="valueA" and \'event.get(\'fieldB\')\'=="valueB"']
+    # after:  ['event.get(\'fieldA\')=="valueA" and event.get(\'fieldB\')=="valueB"']
+    # field_quote: ClassVar[str] = "'"
+    field_quote: ClassVar[str] = ""
     field_quote_pattern: ClassVar[Pattern] = re.compile(
         "^\\w+$")  # Quote field names if this pattern (doesn't) matches, depending on field_quote_pattern_negation. Field name is always quoted if pattern is not set.
     field_quote_pattern_negation: ClassVar[bool] = True  # Negate field_quote_pattern result. Field name is quoted if pattern doesn't matches if set to True (default).
 
     ### Escaping
-    field_escape: ClassVar[str] = "\\"  # Character to escape particular parts defined in field_escape_pattern.
+    # Character to escape particular parts defined in field_escape_pattern.
+    # field_escape: ClassVar[str] = "\\"
+    field_escape: ClassVar[str] = ""
     field_escape_quote: ClassVar[bool] = True  # Escape quote string defined in field_quote
     field_escape_pattern: ClassVar[Pattern] = re.compile("\\s")  # All matches of this pattern are prepended with the string contained in field_escape.
 
     ## Values
     str_quote: ClassVar[str] = '"'  # string quoting character (added as escaping character)
-    escape_char: ClassVar[str] = "\\"  # Escaping character for special characters inside string
+    # Escaping character for special characters inside string
+    escape_char: ClassVar[str] = "\\"
     wildcard_multi: ClassVar[str] = "*"  # Character used as multi-character wildcard
     wildcard_single: ClassVar[str] = "*"  # Character used as single-character wildcard
     add_escaped: ClassVar[str] = "\\"  # Characters quoted in addition to wildcards and string quote
@@ -67,14 +76,21 @@ class PantherBackend(TextQueryBackend):
     wildcard_match_expression: ClassVar[str] = "match"  # Special expression if wildcards can't be matched with the eq_token operator
 
     # Regular expressions
-    re_expression: ClassVar[str] = "{field}=~{regex}"  # Regular expression query as format string with placeholders {field} and {regex}
+    # Regular expression query as format string with placeholders {field} and {regex}
+    # re_expression: ClassVar[str] = "{field}=~{regex}"
+    re_expression: ClassVar[str] = 're.compile(r"{regex}").search(event.get("{field}"))'
+
     re_escape_char: ClassVar[str] = "\\"  # Character used for escaping in regular expressions
     re_escape: ClassVar[Tuple[str]] = ()  # List of strings that are escaped
     re_escape_escape_char: bool = True  # If True, the escape character is also escaped
 
     # cidr expressions
     cidr_wildcard: ClassVar[str] = "*"  # Character used as single wildcard
-    cidr_expression: ClassVar[str] = "cidrmatch({field}, {value})"  # CIDR expression query as format string with placeholders {field} = {value}
+
+    # CIDR expression query as format string with placeholders {field} = {value}
+    # cidr_expression: ClassVar[str] = "cidrmatch({field}, {value})"
+    cidr_expression: ClassVar[str] = 'ipaddress.ip_address(event.get("field")) in ipaddress.ip_network("{value}")'
+
     cidr_in_list_expression: ClassVar[str] = "{field} in ({value})"  # CIDR expression query as format string with placeholders {field} = in({list})
 
     # Numeric comparison operators
@@ -92,11 +108,13 @@ class PantherBackend(TextQueryBackend):
 
     # Field value in list, e.g. "field in (value list)" or "field containsall (value list)"
     convert_or_as_in: ClassVar[bool] = True  # Convert OR as in-expression
-    convert_and_as_in: ClassVar[bool] = True  # Convert AND as in-expression
+    convert_and_as_in: ClassVar[bool] = False  # Convert AND as in-expression
     in_expressions_allow_wildcards: ClassVar[bool] = True  # Values in list can contain wildcards. If set to False (default) only plain values are converted into in-expressions.
-    field_in_list_expression: ClassVar[str] = "{field} {op} ({list})"  # Expression for field in list of values as format string with placeholders {field}, {op} and {list}
+
+    # Expression for field in list of values as format string with placeholders {field}, {op} and {list}
+    field_in_list_expression: ClassVar[str] = "{field} {op} [{list}]"
     or_in_operator: ClassVar[str] = "in"  # Operator used to convert OR into in-expressions. Must be set if convert_or_as_in is set
-    and_in_operator: ClassVar[str] = "contains-all"  # Operator used to convert AND into in-expressions. Must be set if convert_and_as_in is set
+    # and_in_operator: ClassVar[str] = "contains-all"  # Operator used to convert AND into in-expressions. Must be set if convert_and_as_in is set
     list_separator: ClassVar[str] = ", "  # List element separator
 
     # Value not bound to a field
@@ -129,3 +147,7 @@ class PantherBackend(TextQueryBackend):
         # - list of str: output each item as is separated by two newlines.
         # - list of dict: serialize each item as JSON and output all separated by newlines.
         return "\n".join(queries)
+
+    def escape_and_quote_field(self, field_name : str) -> str:
+        field_name = f'event.get("{field_name}")'
+        return super().escape_and_quote_field(field_name)
