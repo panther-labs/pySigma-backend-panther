@@ -21,13 +21,13 @@ class PantherBackend(TextQueryBackend):
     # TODO: does the backend requires that a processing pipeline is provided? This information can be used by user interface programs like Sigma CLI to warn users about inappropriate usage of the backend.
     requires_pipeline: bool = False
 
-
     # Operator precedence: tuple of Condition{AND,OR,NOT} in order of precedence.
     # The backend generates grouping if required
     precedence: ClassVar[Tuple[ConditionItem, ConditionItem, ConditionItem]] = (ConditionNOT, ConditionAND, ConditionOR)
     group_expression: ClassVar[str] = "({expr})"  # Expression for precedence override grouping as format string with {expr} placeholder
+
     # Reflect parse tree by putting parenthesis around all expressions - use this for target systems without strict precedence rules.
-    parenthesize : bool = True
+    parenthesize: bool = True
 
     # Generated query tokens
     token_separator: str = " "  # separator inserted between all boolean operators
@@ -70,9 +70,9 @@ class PantherBackend(TextQueryBackend):
     }
 
     # String matching operators. if none is appropriate eq_token is used.
-    startswith_expression: ClassVar[str] = "startswith"
-    endswith_expression: ClassVar[str] = "endswith"
-    contains_expression: ClassVar[str] = "contains"
+    startswith_expression: ClassVar[str] = '{field}.startswith({value})'
+    endswith_expression: ClassVar[str] = '{field}.endswith({value})'
+    contains_expression: ClassVar[str] = "{value} in {field}"
     wildcard_match_expression: ClassVar[str] = "match"  # Special expression if wildcards can't be matched with the eq_token operator
 
     # Regular expressions
@@ -109,7 +109,7 @@ class PantherBackend(TextQueryBackend):
     # Field value in list, e.g. "field in (value list)" or "field containsall (value list)"
     convert_or_as_in: ClassVar[bool] = True  # Convert OR as in-expression
     convert_and_as_in: ClassVar[bool] = False  # Convert AND as in-expression
-    in_expressions_allow_wildcards: ClassVar[bool] = True  # Values in list can contain wildcards. If set to False (default) only plain values are converted into in-expressions.
+    in_expressions_allow_wildcards: ClassVar[bool] = False  # Values in list can contain wildcards. If set to False (default) only plain values are converted into in-expressions.
 
     # Expression for field in list of values as format string with placeholders {field}, {op} and {list}
     field_in_list_expression: ClassVar[str] = "{field} {op} [{list}]"
@@ -148,6 +148,6 @@ class PantherBackend(TextQueryBackend):
         # - list of dict: serialize each item as JSON and output all separated by newlines.
         return "\n".join(queries)
 
-    def escape_and_quote_field(self, field_name : str) -> str:
+    def escape_and_quote_field(self, field_name: str) -> str:
         field_name = f'event.get("{field_name}")'
         return super().escape_and_quote_field(field_name)

@@ -92,10 +92,64 @@ def test_panther_python_in_expression(panther_python_backend : PantherBackend):
                     fieldA:
                         - valueA
                         - valueB
+                        - valueC
+                condition: sel
+        """)
+    ) == ['event.get("fieldA") in ["valueA", "valueB", "valueC"]']
+
+def test_panther_python_in_expression_with_wildcard_startswith(panther_python_backend : PantherBackend):
+    assert panther_python_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    fieldA:
+                        - valueA
+                        - valueB
                         - valueC*
                 condition: sel
         """)
-    ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or re.compile(r"valueC.*").search(event.get("fieldA"))']
+    ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or event.get("fieldA").startswith("valueC")']
+
+def test_panther_python_in_expression_with_wildcard_endswith(panther_python_backend : PantherBackend):
+    assert panther_python_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    fieldA:
+                        - valueA
+                        - valueB
+                        - "*valueC"
+                condition: sel
+        """)
+    ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or event.get("fieldA").endswith("valueC")']
+
+def test_panther_python_in_expression_with_wildcard_contains(panther_python_backend : PantherBackend):
+    assert panther_python_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    fieldA:
+                        - valueA
+                        - valueB
+                        - "*valueC*"
+                condition: sel
+        """)
+    ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or "valueC" in event.get("fieldA")']
 
 def test_panther_python_regex_query(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
@@ -145,12 +199,4 @@ def test_panther_python_field_name_with_whitespace(panther_python_backend : Pant
 
 # TODO: implement tests for all backend features that don't belong to the base class defaults, e.g. features that were
 # implemented with custom code, deferred expressions etc.
-
-
-
-# def test_panther_python_panther_rule_output(panther_python_backend : PantherBackend):
-#     """Test for output format panther_rule."""
-#     # TODO: implement a test for the output format
-#     assert False
-
 
