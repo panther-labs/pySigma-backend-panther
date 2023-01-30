@@ -1,13 +1,13 @@
 import pytest
 from sigma.collection import SigmaCollection
-from sigma.backends.panther_python import pantherBackend
+from sigma.backends.panther_python import PantherBackend
 
 @pytest.fixture
 def panther_python_backend():
-    return pantherBackend()
+    return PantherBackend()
 
 # TODO: implement tests for some basic queries and their expected results.
-def test_panther_python_and_expression(panther_python_backend : pantherBackend):
+def test_panther_python_and_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -23,7 +23,7 @@ def test_panther_python_and_expression(panther_python_backend : pantherBackend):
         """)
     ) == ["event.get('fieldA') == 'valueA' and event.get('fieldB') == 'valueB'"]
 
-def test_panther_python_or_expression(panther_python_backend : pantherBackend):
+def test_panther_python_or_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -40,7 +40,7 @@ def test_panther_python_or_expression(panther_python_backend : pantherBackend):
         """)
     ) == ["event.get('fieldA') == 'valueA' or event.get('fieldB') == 'valueB'"]
 
-def test_panther_python_and_or_expression(panther_python_backend : pantherBackend):
+def test_panther_python_and_or_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -60,7 +60,7 @@ def test_panther_python_and_or_expression(panther_python_backend : pantherBacken
         """)
     ) == [["event.get('fieldA') in ['valueA1', 'valueA2'] and event.get('fieldB') in ['valueB1', 'valueB2']"]]
 
-def test_panther_python_or_and_expression(panther_python_backend : pantherBackend):
+def test_panther_python_or_and_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -79,7 +79,7 @@ def test_panther_python_or_and_expression(panther_python_backend : pantherBacken
         """)
     ) == ["(event.get('fieldA') == 'valueA1' and event.get('fieldB') == 'valueB1') or (event.get('fieldA') == 'valueA2' and event.get('fieldB') == 'valueB2')"]
 
-def test_panther_python_in_expression(panther_python_backend : pantherBackend):
+def test_panther_python_in_expression(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -97,7 +97,7 @@ def test_panther_python_in_expression(panther_python_backend : pantherBackend):
         """)
     ) == ["""event.get('fieldA') == 'valueA' or event.get('fieldA') == 'valueB' or re.compile(r'valueC.*').search(event.get('fieldA'))"""]
 
-def test_panther_python_regex_query(panther_python_backend : pantherBackend):
+def test_panther_python_regex_query(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -113,7 +113,7 @@ def test_panther_python_regex_query(panther_python_backend : pantherBackend):
         """)
     ) == ["re.compile(r'foo.*bar').search(event.get('fieldA')) and event.get('fieldB') == 'valueB2'"]
 
-def test_panther_python_cidr_query(panther_python_backend : pantherBackend):
+def test_panther_python_cidr_query(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -129,7 +129,7 @@ def test_panther_python_cidr_query(panther_python_backend : pantherBackend):
     ) == ["""from ipaddress import ip_address, ip_network
 ipaddress.ip_address(event.get('field')) in ipaddress.ip_network('192.168.0.0/16')"""]
 
-def test_panther_python_field_name_with_whitespace(panther_python_backend : pantherBackend):
+def test_panther_python_field_name_with_whitespace(panther_python_backend : PantherBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -149,7 +149,7 @@ def test_panther_python_field_name_with_whitespace(panther_python_backend : pant
 
 
 
-def test_panther_python_panther_rule_output(panther_python_backend : pantherBackend):
+def test_panther_python_panther_rule_output(panther_python_backend : PantherBackend):
     """Test for output format panther_rule."""
     # TODO: implement a test for the output format
     pass
