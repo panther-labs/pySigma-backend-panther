@@ -1,13 +1,13 @@
 import pytest
 from sigma.collection import SigmaCollection
-from sigma.backends.panther_python import PantherBackend
+from sigma.backends.panther_python import PantherPythonBackend
 
 @pytest.fixture
 def panther_python_backend():
-    return PantherBackend()
+    return PantherPythonBackend()
 
 # TODO: implement tests for some basic queries and their expected results.
-def test_panther_python_and_expression(panther_python_backend : PantherBackend):
+def test_panther_python_and_expression(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -23,7 +23,7 @@ def test_panther_python_and_expression(panther_python_backend : PantherBackend):
         """)
     ) == ['event.get("fieldA") == "valueA" and event.get("fieldB") == "valueB"']
 
-def test_panther_python_or_expression(panther_python_backend : PantherBackend):
+def test_panther_python_or_expression(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -40,7 +40,7 @@ def test_panther_python_or_expression(panther_python_backend : PantherBackend):
         """)
     ) == ['event.get("fieldA") == "valueA" or event.get("fieldB") == "valueB"']
 
-def test_panther_python_and_or_expression(panther_python_backend : PantherBackend):
+def test_panther_python_and_or_expression(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -60,7 +60,7 @@ def test_panther_python_and_or_expression(panther_python_backend : PantherBacken
         """)
     ) == ['(event.get("fieldA") in ["valueA1", "valueA2"]) and (event.get("fieldB") in ["valueB1", "valueB2"])']
 
-def test_panther_python_or_and_expression(panther_python_backend : PantherBackend):
+def test_panther_python_or_and_expression(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -79,7 +79,7 @@ def test_panther_python_or_and_expression(panther_python_backend : PantherBacken
         """)
     ) == ['(event.get("fieldA") == "valueA1" and event.get("fieldB") == "valueB1") or (event.get("fieldA") == "valueA2" and event.get("fieldB") == "valueB2")']
 
-def test_panther_python_in_expression(panther_python_backend : PantherBackend):
+def test_panther_python_in_expression(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -97,7 +97,7 @@ def test_panther_python_in_expression(panther_python_backend : PantherBackend):
         """)
     ) == ['event.get("fieldA") in ["valueA", "valueB", "valueC"]']
 
-def test_panther_python_in_expression_with_wildcard_startswith(panther_python_backend : PantherBackend):
+def test_panther_python_in_expression_with_wildcard_startswith(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -115,7 +115,7 @@ def test_panther_python_in_expression_with_wildcard_startswith(panther_python_ba
         """)
     ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or event.get("fieldA").startswith("valueC")']
 
-def test_panther_python_in_expression_with_wildcard_endswith(panther_python_backend : PantherBackend):
+def test_panther_python_in_expression_with_wildcard_endswith(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -133,7 +133,7 @@ def test_panther_python_in_expression_with_wildcard_endswith(panther_python_back
         """)
     ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or event.get("fieldA").endswith("valueC")']
 
-def test_panther_python_in_expression_with_wildcard_contains(panther_python_backend : PantherBackend):
+def test_panther_python_in_expression_with_wildcard_contains(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -151,7 +151,7 @@ def test_panther_python_in_expression_with_wildcard_contains(panther_python_back
         """)
     ) == ['event.get("fieldA") == "valueA" or event.get("fieldA") == "valueB" or "valueC" in event.get("fieldA")']
 
-def test_panther_python_regex_query(panther_python_backend : PantherBackend):
+def test_panther_python_regex_query(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -167,7 +167,7 @@ def test_panther_python_regex_query(panther_python_backend : PantherBackend):
         """)
     ) == ['re.compile(r"foo.*bar").search(event.get("fieldA")) and event.get("fieldB") == "foo"']
 
-def test_panther_python_cidr_query(panther_python_backend : PantherBackend):
+def test_panther_python_cidr_query(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -177,12 +177,12 @@ def test_panther_python_cidr_query(panther_python_backend : PantherBackend):
                 product: test_product
             detection:
                 sel:
-                    field|cidr: 192.168.0.0/16
+                    fieldA|cidr: 192.168.0.0/16
                 condition: sel
         """)
-    ) == ['ipaddress.ip_address(event.get("field")) in ipaddress.ip_network("192.168.0.0/16")']
+    ) == ['ipaddress.ip_address(event.get("fieldA")) in ipaddress.ip_network("192.168.0.0/16")']
 
-def test_panther_python_field_name_with_whitespace(panther_python_backend : PantherBackend):
+def test_panther_python_field_name_with_whitespace(panther_python_backend : PantherPythonBackend):
     assert panther_python_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test

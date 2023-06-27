@@ -8,7 +8,7 @@ from sigma.rule import SigmaRule
 from sigma.types import SigmaCompareExpression
 
 
-class PantherBackend(TextQueryBackend):
+class PantherPythonBackend(TextQueryBackend):
     """panther_python backend."""
     # TODO: change the token definitions according to the syntax. Delete these not supported by your backend.
     # See the pySigma documentation for further infromation:
@@ -89,7 +89,7 @@ class PantherBackend(TextQueryBackend):
 
     # CIDR expression query as format string with placeholders {field} = {value}
     # cidr_expression: ClassVar[str] = "cidrmatch({field}, {value})"
-    cidr_expression: ClassVar[str] = 'ipaddress.ip_address(event.get("field")) in ipaddress.ip_network("{value}")'
+    cidr_expression: ClassVar[str] = 'ipaddress.ip_address(event.get("{field}")) in ipaddress.ip_network("{value}")'
 
     cidr_in_list_expression: ClassVar[str] = "{field} in ({value})"  # CIDR expression query as format string with placeholders {field} = in({list})
 

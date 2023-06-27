@@ -3,7 +3,7 @@ from sigma.collection import SigmaCollection
 from sigma.processing.resolver import ProcessingPipelineResolver
 from sigma.backends.test import TextQueryTestBackend
 
-from sigma.backends.panther_python import PantherBackend
+from sigma.backends.panther_python import PantherPythonBackend
 # from sigma.pipelines.panther_python.panther_pipeline import panther_pipeline
 
 
@@ -29,6 +29,6 @@ from sigma.backends.panther_python import PantherBackend
 # def test_basic(resolver : ProcessingPipelineResolver, sigma_rule_basic):
 #     pipeline = resolver.resolve_pipeline("panther")
 #     backend = TextQueryTestBackend(pipeline)
-#     # backend = PantherBackend(pipeline)
+#     # backend = PantherPythonBackend(pipeline)
 #     assert backend.convert(sigma_rule_basic) == ['event.get("Field1")="banana"']
 
