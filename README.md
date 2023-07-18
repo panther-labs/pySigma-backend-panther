@@ -1,14 +1,17 @@
-![Tests](https://github.com/josh-panther/pySigma-backend-panther/actions/workflows/test.yml/badge.svg)
-![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/josh-panther/GitHub Gist identifier containing coverage badge JSON expected by shields.io./raw/jehockey-pySigma-backend-panther.json)
+# pySigma panther_sdyaml Backend
+
+![Tests](https://github.com/josh-panther/pySigma-backend-panther-wip/actions/workflows/test.yml/badge.svg)
 ![Status](https://img.shields.io/badge/Status-pre--release-orange)
 
-# pySigma panther_python Backend
-
-This is the panther_python backend for pySigma. It provides the package `sigma.backends.panther_sdyaml` with the `PantherSdYamlBackend` class.
+This is the panther_python backend for pySigma. It provides the package `sigma.backends.panther` with the `PantherSdYamlBackend` class.
 
 It supports the following output formats:
 
 * default: Panther SDYAML "Simple Detections" .yaml format
+
+Further, it contains the following processing pipelines in `sigma.pipelines.panther_sdyaml`:
+
+* panther_sdyaml_pipeline: Convert known Sigma field names into their Panther schema equivalent
 
 This backend is currently maintained by:
 

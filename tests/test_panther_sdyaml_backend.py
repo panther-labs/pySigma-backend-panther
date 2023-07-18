@@ -3,7 +3,7 @@ import json
 import pytest
 import yaml
 
-from sigma.backends.panther_sdyaml import PantherSdYamlBackend
+from sigma.backends.panther import PantherSdYamlBackend
 from sigma.collection import SigmaCollection
 
 # TODO: Test all conditions, inversions

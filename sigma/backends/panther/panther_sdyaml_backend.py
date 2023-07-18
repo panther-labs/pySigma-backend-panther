@@ -9,9 +9,9 @@ from sigma.types import SigmaString, SpecialChars
 
 
 class PantherSdYamlBackend(Backend):
-    name: ClassVar[str] = "panther_sdyaml backend"
+    name: ClassVar[str] = "panther backend"
     formats: Dict[str, str] = {
-        "default": "panther_sdyaml"
+        "default": "panther"
     }
 
     # todo: Enable these later
