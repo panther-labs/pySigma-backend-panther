@@ -1,37 +1,45 @@
 from typing import ClassVar, Dict, List, Any, Union, Optional, Iterable
 
-from sigma.conditions import ConditionOR, ConditionAND, ConditionValueExpression, ConditionFieldEqualsValueExpression, ConditionNOT, ParentChainMixin, ConditionItem
+import yaml
+from sigma.conditions import (
+    ConditionOR,
+    ConditionAND,
+    ConditionValueExpression,
+    ConditionFieldEqualsValueExpression,
+    ConditionNOT,
+    ParentChainMixin,
+    ConditionItem,
+)
 from sigma.conversion.base import Backend
 from sigma.conversion.state import ConversionState
-from sigma.exceptions import SigmaError
+from sigma.exceptions import SigmaError, SigmaFeatureNotSupportedByBackendError
 from sigma.rule import SigmaRule
 from sigma.types import SigmaString, SpecialChars
 
 
-class PantherSdYamlBackend(Backend):
-    name: ClassVar[str] = "panther backend"
-    formats: Dict[str, str] = {
-        "default": "panther"
-    }
+class PantherSdyamlBackend(Backend):
+    name: ClassVar[str] = "panther sdyaml backend"
+    formats: Dict[str, str] = {"default": "sdyaml"}
 
     # todo: Enable these later
     convert_or_as_in: ClassVar[bool] = False
     convert_and_as_in: ClassVar[bool] = False
 
-    SDYAML_CONDITION_EXISTS = 'Exists'
-    SDYAML_CONDITION_EQUALS = 'Equals'
-    SDYAML_CONDITION_STARTS_WITH = 'StartsWith'
-    SDYAML_CONDITION_ENDS_WITH = 'EndsWith'
-    SDYAML_CONDITION_CONTAINS = 'Contains'
-    SDYAML_ALL = 'All'
-    SDYAML_ANY = 'Any'
+    SDYAML_CONDITION_EXISTS = "Exists"
+    SDYAML_CONDITION_EQUALS = "Equals"
+    SDYAML_CONDITION_STARTS_WITH = "StartsWith"
+    SDYAML_CONDITION_ENDS_WITH = "EndsWith"
+    SDYAML_CONDITION_CONTAINS = "Contains"
+    SDYAML_ALL = "All"
+    SDYAML_ANY = "Any"
+    SDYAML_IS_NULL = "IsNull"
 
     Inverted_Conditions = {
         SDYAML_CONDITION_EXISTS: "DoesNotExist",
         SDYAML_CONDITION_EQUALS: "DoesNotEqual",
         SDYAML_CONDITION_STARTS_WITH: "DoesNotStartWith",
         SDYAML_CONDITION_ENDS_WITH: "DoesNotEndWith",
-        SDYAML_CONDITION_CONTAINS: "DoesNotContain"
+        SDYAML_CONDITION_CONTAINS: "DoesNotContain",
     }
 
     def get_key_condition_values(self, cond, state):
@@ -42,16 +50,12 @@ class PantherSdYamlBackend(Backend):
     def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
 
-        return {
-            self.SDYAML_ALL: key_cond_values
-        }
+        return {self.SDYAML_ALL: key_cond_values}
 
     def convert_condition_or(self, cond: ConditionOR, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
 
-        return {
-            self.SDYAML_ANY: key_cond_values
-        }
+        return {self.SDYAML_ANY: key_cond_values}
 
     def invert_kcv(self, key_cond_value):
         rv = key_cond_value.copy()
@@ -64,16 +68,15 @@ class PantherSdYamlBackend(Backend):
         rv["Condition"] = self.Inverted_Conditions[rv["Condition"]]
         return rv
 
-
     def convert_condition_not(self, cond: ConditionNOT, state: ConversionState) -> Any:
-        raise NotImplementedError("NOT is handled within convert_condition_field_eq_val_str - If you see this message, please report the bug and how to reproduce it")
-
+        raise NotImplementedError(
+            "NOT is handled within convert_condition_field_eq_val_str - If you see this message, please report the bug and how to reproduce it"
+        )
 
     def convert_condition_as_in_expression(self, cond: Union[ConditionOR, ConditionAND], state: ConversionState) -> Any:
         raise NotImplementedError()
 
-
-    def convert_condition_field_eq_val_str(self, cond : ConditionFieldEqualsValueExpression, state : ConversionState) -> Dict:
+    def convert_condition_field_eq_val_str(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Dict:
         """Conversion of field = string value expressions"""
 
         # cond.value.startswith / endswith: Wants SigmaString, but is typed as base SigmaType
@@ -86,29 +89,26 @@ class PantherSdYamlBackend(Backend):
             rv.append(key_cond_val)
 
         if len(rv) > 1:
-            return {
-                self.SDYAML_ALL: rv
-            }
+            return {self.SDYAML_ALL: rv}
         else:
             return rv[0]
 
     def generate_sdyaml_key_cond_value(self, sigma_cond, state, sdyaml_condition, rv_value):
         # Todo: Official "not preprocessing" flag will be supported later and invert the conditions
         #   https://github.com/SigmaHQ/pySigma/discussions/80
-        negated = getattr(sigma_cond, "negated", False)  # We kind of hackily added 'negated' onto the object in update_parsed_conditions, so need to do this
+        negated = getattr(
+            sigma_cond, "negated", False
+        )  # We kind of hackily added 'negated' onto the object in update_parsed_conditions, so need to do this
         if negated:
             if sdyaml_condition not in self.Inverted_Conditions:
                 raise NotImplementedError(f"Inverted condition not implemented: '{sdyaml_condition}'")
 
             sdyaml_condition = self.Inverted_Conditions[sdyaml_condition]
 
-        rv = {
-            'Key': sigma_cond.field,
-            'Condition': sdyaml_condition
-        }
+        rv = {"Key": sigma_cond.field, "Condition": sdyaml_condition}
 
         if rv_value:  # 'Exists' etc. have no value
-            rv['Value'] = self.convert_value_str(rv_value, state)
+            rv["Value"] = self.convert_value_str(rv_value, state)
 
         return rv
 
@@ -116,15 +116,15 @@ class PantherSdYamlBackend(Backend):
         condition = self.SDYAML_CONDITION_EQUALS
         rv_value = cond_value
 
-        is_exists = len(cond_value) == 1 and cond_value.s[0] == SpecialChars.WILDCARD_MULTI  # ['*']
+        is_exists = (len(cond_value) == 1 and cond_value.s[0] == SpecialChars.WILDCARD_MULTI)  # ['*']
         is_starts_with = cond_value.endswith(SpecialChars.WILDCARD_MULTI)  # ['*', 'banana']
         is_ends_with = cond_value.startswith(SpecialChars.WILDCARD_MULTI)  # ['banana', '*']
         is_contains = is_starts_with and is_ends_with  # ['*', 'banana', '*']
 
-        too_many_wildcards__not_contains = cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1 and not is_contains
-        too_many_wildcards__is_contains = cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 2 and is_contains
+        too_many_wildcards__not_contains = (cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1 and not is_contains)
+        too_many_wildcards__is_contains = (cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 2 and is_contains)
         if too_many_wildcards__not_contains or too_many_wildcards__is_contains:
-            raise NotImplementedError(f"This configuration of wildcards currently not supported: [{cond_value}]")
+            raise SigmaFeatureNotSupportedByBackendError(f"This configuration of wildcards currently not supported: [{cond_value}]")
 
         # rv_value: remove the SpecialChars.WILDCARD_MULTI
         if is_exists:
@@ -140,7 +140,6 @@ class PantherSdYamlBackend(Backend):
             condition = self.SDYAML_CONDITION_ENDS_WITH
             rv_value = cond_value[1:]
         elif cond_value.contains_special():  # string like 'blah*banana'
-
             # we want to be really sure there's just 1 wildcard
             if cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1:
                 NotImplementedError(f"This configuration of wildcards currently not supported: [{cond_value}]")
@@ -152,7 +151,7 @@ class PantherSdYamlBackend(Backend):
 
             return [
                 (self.SDYAML_CONDITION_STARTS_WITH, SigmaString(rv_value_starts_with)),
-                (self.SDYAML_CONDITION_ENDS_WITH, SigmaString(rv_value_ends_with))
+                (self.SDYAML_CONDITION_ENDS_WITH, SigmaString(rv_value_ends_with)),
             ]
 
         return [(condition, rv_value)]
@@ -160,11 +159,23 @@ class PantherSdYamlBackend(Backend):
     def convert_condition_field_eq_val_num(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()
 
+    def convert_condition_field_eq_field(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
+        raise NotImplementedError()
+
+    def convert_condition_field_eq_val_str_case_sensitive(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
+        raise NotImplementedError()
+
+    def convert_condition_field_exists(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
+        raise NotImplementedError()
+
+    def convert_condition_field_not_exists(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
+        raise NotImplementedError()
+
     def convert_condition_field_eq_val_bool(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()
 
     def convert_condition_field_eq_val_re(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError("Regexp is not suppoerted in sdyaml")
 
     def convert_condition_field_eq_val_cidr(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()
@@ -173,13 +184,13 @@ class PantherSdYamlBackend(Backend):
         raise NotImplementedError()
 
     def convert_condition_field_eq_val_null(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        return {"KeyPath": cond.field, "Condition": self.SDYAML_IS_NULL}
 
     def convert_condition_field_eq_query_expr(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()
 
     def convert_condition_val_str(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError(f"Search without specifying a Key is not supported: {cond.value.to_plain()}.")
 
     def convert_condition_val_num(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()
@@ -191,7 +202,7 @@ class PantherSdYamlBackend(Backend):
         raise NotImplementedError()
 
     @staticmethod
-    def convert_value_str(s : SigmaString, state : ConversionState) -> str:
+    def convert_value_str(s: SigmaString, state: ConversionState) -> str:
         """Convert a SigmaString into a plain string which can be used in query."""
 
         # From TextQueryBackend
@@ -210,7 +221,6 @@ class PantherSdYamlBackend(Backend):
         # return s
 
         return s.convert()
-
 
     def update_parsed_conditions(self, condition: ParentChainMixin, negated: bool = False) -> ParentChainMixin:
         """
@@ -238,34 +248,32 @@ class PantherSdYamlBackend(Backend):
                     newcond.parent = condition.parent
                     for i in range(len(condition.args)):
                         condition.args[i].parent = newcond
-                        condition.args[i] = self.update_parsed_conditions(
-                            condition.args[i], negated
-                        )
+                        condition.args[i] = self.update_parsed_conditions(condition.args[i], negated)
                     setattr(newcond, "negated", negated)
                     return newcond
                 else:
                     for i in range(len(condition.args)):
-                        condition.args[i] = self.update_parsed_conditions(
-                            condition.args[i], negated
-                        )
+                        condition.args[i] = self.update_parsed_conditions(condition.args[i], negated)
         # Record negation appropriately
         # NOTE: the negated property does not exist on the above classes,
         # so using setattr to set it dynamically
         setattr(condition, "negated", negated)
         return condition
 
-
-    def convert_rule(self, rule : SigmaRule, output_format : Optional[str] = None) -> List[Any]:
+    def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None) -> List[Any]:
         """
         Copy-pasted base class convert_rule, with the addition of update_parsed_conditions
         """
         state = ConversionState()
         try:
-            processing_pipeline = self.backend_processing_pipeline + self.processing_pipeline + self.output_format_processing_pipeline[output_format or self.default_format]
+            self.last_processing_pipeline = (
+                self.backend_processing_pipeline + self.processing_pipeline +
+                self.output_format_processing_pipeline[output_format or self.default_format]
+            )
 
             error_state = "applying processing pipeline on"
-            processing_pipeline.apply(rule)             # 1. Apply transformations
-            state.processing_state = processing_pipeline.state
+            self.last_processing_pipeline.apply(rule)  # 1. Apply transformations
+            state.processing_state = self.last_processing_pipeline.state
 
             # 1.5. Apply SDYAML parse tree changes BEFORE attempting to convert a rule
             # When finalising a query from a condition, the index it is associated with
@@ -273,21 +281,18 @@ class PantherSdYamlBackend(Backend):
             # code may partition one or more of these conditions into multiple
             # conditions, we explicitly associate them together here so the
             # relationship can be maintained throughout.
-            conditions = [
-                (index, self.update_parsed_conditions(cond.parsed))
-                for index, cond in enumerate(rule.detection.parsed_condition)
-            ]
+            conditions = [(index, self.update_parsed_conditions(cond.parsed)) for index, cond in enumerate(rule.detection.parsed_condition)]
 
             error_state = "converting"
 
-            queries = [                                 # 2. Convert condition
-                self.convert_condition(cond, state)
-                for index, cond in conditions
+            queries = [  # 2. Convert condition
+                self.convert_condition(cond, state) for index, cond in conditions
             ]
 
             error_state = "finalizing query for"
             rv = [  # 3. Postprocess generated query
-                self.finalize_query(rule, query, index, state, output_format or self.default_format)
+                self.finalize_query(rule, query, index, state, output_format
+                                    or self.default_format)
                 for index, query in enumerate(queries)
             ]
             return rv
@@ -297,10 +302,16 @@ class PantherSdYamlBackend(Backend):
                 return []
             else:
                 raise e
-        except Exception as e:      # enrich all other exceptions with Sigma-specific context information
+        except (Exception) as e:  # enrich all other exceptions with Sigma-specific context information
             msg = f" (while {error_state} rule {str(rule.source)})"
-            if len (e.args) > 1:
+            if len(e.args) > 1:
                 e.args = (e.args[0] + msg,) + e.args[1:]
+            elif len(e.args) == 0:
+                e.args = (msg,)
             else:
                 e.args = (e.args[0] + msg,)
             raise
+
+    def finalize_output_default(self, queries: List[Any]) -> Any:
+
+        return yaml.dump(queries)

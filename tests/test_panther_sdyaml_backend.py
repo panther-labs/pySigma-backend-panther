@@ -9,6 +9,7 @@ from sigma.collection import SigmaCollection
 # TODO: Test all conditions, inversions
 # TODO: Support "IN"
 
+
 @pytest.fixture
 def backend():
     return PantherSdYamlBackend()
@@ -25,34 +26,32 @@ detection:
 
 
 def matcher(key, condition, value=None):
-    rv = {
-        'Key': key,
-        'Condition': condition
-    }
+    rv = {"Key": key, "Condition": condition}
 
     if value:
-        rv['Value'] = value
+        rv["Value"] = value
 
     return rv
 
 
 def matcher_equals(key, value):
-    return matcher(key, 'Equals', value)
+    return matcher(key, "Equals", value)
 
 
 def matcher_does_not_equal(key, value):
-    return matcher(key, 'DoesNotEqual', value)
+    return matcher(key, "DoesNotEqual", value)
 
 
 def matcher_starts_with(key, value):
-    return matcher(key, 'StartsWith', value)
+    return matcher(key, "StartsWith", value)
 
 
 def matcher_ends_with(key, value):
-    return matcher(key, 'EndsWith', value)
+    return matcher(key, "EndsWith", value)
+
 
 def matcher_exists(key):
-    return matcher(key, 'Exists')
+    return matcher(key, "Exists")
 
 
 def execute_test(backend, sigma_detection_input, expected_obj_or_str):
@@ -93,10 +92,10 @@ def test_implicit_and(backend):
     """
 
     expected = [{
-        'All': [
-            matcher_equals('fieldA', 'valueA'),
-            matcher_equals('fieldB', 'valueB'),
-            matcher_equals('fieldC', 'valueC')
+        "All": [
+            matcher_equals("fieldA", "valueA"),
+            matcher_equals("fieldB", "valueB"),
+            matcher_equals("fieldC", "valueC"),
         ]
     }]
 
@@ -114,10 +113,10 @@ def test_implicit_or(backend):
     """
 
     expected = [{
-        'Any': [
-            matcher_equals('fieldA', 'valueA'),
-            matcher_equals('fieldA', 'valueB'),
-            matcher_equals('fieldA', 'valueC')
+        "Any": [
+            matcher_equals("fieldA", "valueA"),
+            matcher_equals("fieldA", "valueB"),
+            matcher_equals("fieldA", "valueC"),
         ]
     }]
 
@@ -134,9 +133,9 @@ def test_condition_and(backend):
     """
 
     expected = [{
-        'All': [
-            matcher_equals('fieldA', 'valueA'),
-            matcher_equals('fieldB', 'valueB')
+        "All": [
+            matcher_equals("fieldA", "valueA"),
+            matcher_equals("fieldB", "valueB"),
         ]
     }]
 
@@ -153,15 +152,20 @@ def test_condition_and__with_implicit_and(backend):
     condition: selection and filter
     """
 
-    expected = [{
-        'All': [
-            {'All': [
-                matcher_equals('fieldA1', 'valueA1'),
-                matcher_equals('fieldA2', 'valueA2')
-            ]},
-            matcher_equals('fieldB', 'valueB')
-        ]
-    }]
+    expected = [
+        {
+            "All":
+                [
+                    {
+                        "All": [
+                            matcher_equals("fieldA1", "valueA1"),
+                            matcher_equals("fieldA2", "valueA2"),
+                        ]
+                    },
+                    matcher_equals("fieldB", "valueB"),
+                ]
+        }
+    ]
 
     execute_test(backend, sigma_detection_input, expected)
 
@@ -177,15 +181,20 @@ def test_condition_and__with_implicit_or(backend):
     condition: selection and filter
     """
 
-    expected = [{
-        'All': [
-            {'Any': [
-                matcher_equals('fieldA1', 'valueA1'),
-                matcher_equals('fieldA1', 'valueA2')
-            ]},
-            matcher_equals('fieldB', 'valueB')
-        ]
-    }]
+    expected = [
+        {
+            "All":
+                [
+                    {
+                        "Any": [
+                            matcher_equals("fieldA1", "valueA1"),
+                            matcher_equals("fieldA1", "valueA2"),
+                        ]
+                    },
+                    matcher_equals("fieldB", "valueB"),
+                ]
+        }
+    ]
 
     execute_test(backend, sigma_detection_input, expected)
 
@@ -200,9 +209,9 @@ def test_condition_and__with_condition_not(backend):
     """
 
     expected = [{
-        'All': [
-            matcher_equals('fieldA', 'valueA'),
-            matcher_does_not_equal('fieldB', 'valueB')
+        "All": [
+            matcher_equals("fieldA", "valueA"),
+            matcher_does_not_equal("fieldB", "valueB"),
         ]
     }]
 
@@ -219,9 +228,9 @@ def test_condition_not_one_of(backend):
     """
 
     expected = [{
-        'All': [
-            matcher_does_not_equal('fieldA', 'valueA'),
-            matcher_does_not_equal('fieldB', 'valueB')
+        "All": [
+            matcher_does_not_equal("fieldA", "valueA"),
+            matcher_does_not_equal("fieldB", "valueB"),
         ]
     }]
 
@@ -253,13 +262,14 @@ def test_one_wildcard_in_middle(backend):
     """
 
     expected = [{
-        'All': [
-            matcher_starts_with('fieldA', 'abc'),
-            matcher_ends_with('fieldA', '123'),
+        "All": [
+            matcher_starts_with("fieldA", "abc"),
+            matcher_ends_with("fieldA", "123"),
         ]
     }]
 
     execute_test(backend, sigma_detection_input, expected)
+
 
 # Real rules
 # https://www.notion.so/pantherlabs/Sigma-SDYAML-Detection-Parity-6abef8d18c964477b14f41859cb89161

@@ -2,7 +2,6 @@ import pytest
 from sigma.collection import SigmaCollection
 from sigma.processing.resolver import ProcessingPipelineResolver
 
-
 # @pytest.fixture
 # def resolver():
 #     return ProcessingPipelineResolver({
@@ -27,4 +26,3 @@ from sigma.processing.resolver import ProcessingPipelineResolver
 #     backend = TextQueryTestBackend(pipeline)
 #     # backend = PantherPythonBackend(pipeline)
 #     assert backend.convert(sigma_rule_basic) == ['event.get("Field1")="banana"']
-
