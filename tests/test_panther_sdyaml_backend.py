@@ -1,9 +1,11 @@
 import json
+import logging
 
 import pytest
 import yaml
+from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
-from sigma.backends.panther import PantherSdYamlBackend
+from sigma.backends.panther import PantherSdyamlBackend
 from sigma.collection import SigmaCollection
 
 # TODO: Test all conditions, inversions
@@ -12,7 +14,7 @@ from sigma.collection import SigmaCollection
 
 @pytest.fixture
 def backend():
-    return PantherSdYamlBackend()
+    return PantherSdyamlBackend()
 
 
 def sigma_query(detection):
@@ -55,31 +57,25 @@ def matcher_exists(key):
 
 
 def execute_test(backend, sigma_detection_input, expected_obj_or_str):
-    print()
-    print()
-
     sigma_input = sigma_query(sigma_detection_input.strip())
-    print("> Sigma Input:")
-    print(sigma_input.strip())
+    logging.debug("> Sigma Input:")
+    logging.debug(sigma_input.strip())
     actual = backend.convert(SigmaCollection.from_yaml(sigma_input))
 
-    print()
-    print("> Actual (JSON):")
+    logging.debug("> Actual (JSON):")
     print(json.dumps(actual))
 
-    print()
-    print("> Actual (YAML):")
-    print(yaml.dump(actual))
+    logging.debug("> Actual (YAML):")
+    logging.debug(yaml.dump(actual))
 
     expected = expected_obj_or_str
     if isinstance(expected_obj_or_str, str):
         expected = [yaml.safe_load(expected_obj_or_str)]
 
-    print()
-    print("> Expected (YAML):")
-    print(yaml.dump(expected))
+    logging.debug("> Expected (YAML):")
+    logging.debug(yaml.dump(expected))
 
-    assert actual == expected
+    assert actual == yaml.dump(expected)
 
 
 def test_implicit_and(backend):
@@ -692,3 +688,35 @@ def test_jxa_in_memory_execution_via_osascript(backend):
     """
 
     execute_test(backend, sigma_detection_input, expected)
+
+
+def test_convert_condition_field_eq_val_null(backend):
+    sigma_detection_input = """
+    selection:
+        - CommandLine: null
+    condition: selection
+    """
+
+    expected = """
+    KeyPath: CommandLine
+    Condition: IsNull
+    """
+
+    execute_test(backend, sigma_detection_input, expected)
+
+
+def test_convert_condition_field_eq_val_re(backend):
+    sigma_detection_input = """
+    selection:
+        - CommandLine|re: '"(\\{\\d\\})+"\\s*-f'
+    condition: selection
+    """
+
+    expected = [{
+        "All": [
+            matcher_starts_with("fieldA", "abc"),
+            matcher_ends_with("fieldA", "123"),
+        ]
+    }]
+    with pytest.raises(SigmaFeatureNotSupportedByBackendError):
+        execute_test(backend, sigma_detection_input, expected)

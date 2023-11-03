@@ -19,7 +19,7 @@ from sigma.types import SigmaString, SpecialChars
 
 class PantherSdyamlBackend(Backend):
     name: ClassVar[str] = "panther sdyaml backend"
-    formats: Dict[str, str] = {"default": "sdyaml"}
+    formats: ClassVar[Dict[str, str]] = {"default": "sdyaml"}
 
     # todo: Enable these later
     convert_or_as_in: ClassVar[bool] = False
@@ -101,7 +101,7 @@ class PantherSdyamlBackend(Backend):
         )  # We kind of hackily added 'negated' onto the object in update_parsed_conditions, so need to do this
         if negated:
             if sdyaml_condition not in self.Inverted_Conditions:
-                raise NotImplementedError(f"Inverted condition not implemented: '{sdyaml_condition}'")
+                raise SigmaFeatureNotSupportedByBackendError(f"Inverted condition not implemented: '{sdyaml_condition}'")
 
             sdyaml_condition = self.Inverted_Conditions[sdyaml_condition]
 
@@ -142,7 +142,7 @@ class PantherSdyamlBackend(Backend):
         elif cond_value.contains_special():  # string like 'blah*banana'
             # we want to be really sure there's just 1 wildcard
             if cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1:
-                NotImplementedError(f"This configuration of wildcards currently not supported: [{cond_value}]")
+                raise SigmaFeatureNotSupportedByBackendError(f"This configuration of wildcards currently not supported: [{cond_value}]")
 
             # todo: Can this be handled more natively within SigmaString? I didn't find a way at a quick glance
             parts = cond_value.original.split("*")
@@ -313,5 +313,4 @@ class PantherSdyamlBackend(Backend):
             raise
 
     def finalize_output_default(self, queries: List[Any]) -> Any:
-
         return yaml.dump(queries)
