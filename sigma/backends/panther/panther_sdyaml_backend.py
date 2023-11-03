@@ -157,7 +157,7 @@ class PantherSdyamlBackend(Backend):
         return [(condition, rv_value)]
 
     def convert_condition_field_eq_val_num(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        return {"Key": cond.field, "Condition": self.SDYAML_CONDITION_EQUALS, "Value": cond.value.to_plain()}
 
     def convert_condition_field_eq_field(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()
@@ -193,7 +193,7 @@ class PantherSdyamlBackend(Backend):
         raise SigmaFeatureNotSupportedByBackendError(f"Search without specifying a Key is not supported: {cond.value.to_plain()}.")
 
     def convert_condition_val_num(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError("Enums are not supported right now")
 
     def convert_condition_val_re(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
         raise NotImplementedError()

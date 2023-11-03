@@ -705,6 +705,26 @@ def test_convert_condition_field_eq_val_null(backend):
     execute_test(backend, sigma_detection_input, expected)
 
 
+def test_convert_convert_condition_field_eq_val_num(backend):
+    sigma_detection_input = """
+    selection:
+        dst_port:
+            - 80
+            - 8080
+            - 21
+    condition: selection
+    """
+
+    expected = [{
+        "Any": [
+            matcher_equals("dst_port", 80),
+            matcher_equals("dst_port", 8080),
+            matcher_equals("dst_port", 21),
+        ]
+    }]
+    execute_test(backend, sigma_detection_input, expected)
+
+
 def test_convert_condition_field_eq_val_re(backend):
     sigma_detection_input = """
     selection:
