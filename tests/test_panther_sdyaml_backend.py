@@ -8,9 +8,6 @@ from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 from sigma.backends.panther import PantherSdyamlBackend
 from sigma.collection import SigmaCollection
 
-# TODO: Test all conditions, inversions
-# TODO: Support "IN"
-
 
 @pytest.fixture
 def backend():
@@ -48,6 +45,14 @@ def matcher_starts_with(key, value):
     return matcher(key, "StartsWith", value)
 
 
+def matcher_is_in(key, values):
+    return {
+        "Key": key,
+        "Condition": "IsIn",
+        "Values": values,
+    }
+
+
 def matcher_ends_with(key, value):
     return matcher(key, "EndsWith", value)
 
@@ -63,7 +68,7 @@ def execute_test(backend, sigma_detection_input, expected_obj_or_str):
     actual = backend.convert(SigmaCollection.from_yaml(sigma_input))
 
     logging.debug("> Actual (JSON):")
-    print(json.dumps(actual))
+    logging.debug(json.dumps(actual))
 
     logging.debug("> Actual (YAML):")
     logging.debug(yaml.dump(actual))
@@ -108,13 +113,9 @@ def test_implicit_or(backend):
     condition: selection
     """
 
-    expected = [{
-        "Any": [
-            matcher_equals("fieldA", "valueA"),
-            matcher_equals("fieldA", "valueB"),
-            matcher_equals("fieldA", "valueC"),
-        ]
-    }]
+    expected = [
+        matcher_is_in("fieldA", ["valueA", "valueB", "valueC"]),
+    ]
 
     execute_test(backend, sigma_detection_input, expected)
 
@@ -177,20 +178,12 @@ def test_condition_and__with_implicit_or(backend):
     condition: selection and filter
     """
 
-    expected = [
-        {
-            "All":
-                [
-                    {
-                        "Any": [
-                            matcher_equals("fieldA1", "valueA1"),
-                            matcher_equals("fieldA1", "valueA2"),
-                        ]
-                    },
-                    matcher_equals("fieldB", "valueB"),
-                ]
-        }
-    ]
+    expected = [{
+        "All": [
+            matcher_is_in("fieldA1", ["valueA1", "valueA2"]),
+            matcher_equals("fieldB", "valueB"),
+        ]
+    }]
 
     execute_test(backend, sigma_detection_input, expected)
 
@@ -283,13 +276,11 @@ def test_okta_policy_rule_modified_or_deleted(backend):
     """
 
     expected = """
-    Any: # eventtype implicit OR
-        - Key: eventtype
-          Condition: Equals
-          Value: 'policy.rule.update'
-        - Key: eventtype
-          Condition: Equals
-          Value: 'policy.rule.delete'
+    Key: eventtype
+    Condition: IsIn
+    Values:
+        - policy.rule.update
+        - policy.rule.delete
     """
 
     execute_test(backend, sigma_detection_input, expected)
@@ -363,16 +354,12 @@ def test_aws_cloudtrail_important_change(backend):
         - Key: eventSource
           Condition: Equals
           Value: 'cloudtrail.amazonaws.com'
-        - Any: # eventName implicit OR
-            - Key: eventName
-              Condition: Equals
-              Value: 'StopLogging'
-            - Key: eventName
-              Condition: Equals
-              Value: 'UpdateTrail'
-            - Key: eventName
-              Condition: Equals
-              Value: 'DeleteTrail'
+        - Key: eventName
+          Condition: IsIn
+          Values:
+              - StopLogging
+              - UpdateTrail
+              - DeleteTrail
     """
 
     execute_test(backend, sigma_detection_input, expected)
@@ -715,13 +702,7 @@ def test_convert_convert_condition_field_eq_val_num(backend):
     condition: selection
     """
 
-    expected = [{
-        "Any": [
-            matcher_equals("dst_port", 80),
-            matcher_equals("dst_port", 8080),
-            matcher_equals("dst_port", 21),
-        ]
-    }]
+    expected = [matcher_is_in("dst_port", [80, 8080, 21])]
     execute_test(backend, sigma_detection_input, expected)
 
 

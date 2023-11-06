@@ -21,9 +21,8 @@ class PantherSdyamlBackend(Backend):
     name: ClassVar[str] = "panther sdyaml backend"
     formats: ClassVar[Dict[str, str]] = {"default": "sdyaml"}
 
-    # todo: Enable these later
-    convert_or_as_in: ClassVar[bool] = False
-    convert_and_as_in: ClassVar[bool] = False
+    convert_or_as_in: ClassVar[bool] = True
+    convert_and_as_in: ClassVar[bool] = True
 
     SDYAML_CONDITION_EXISTS = "Exists"
     SDYAML_CONDITION_EQUALS = "Equals"
@@ -33,6 +32,7 @@ class PantherSdyamlBackend(Backend):
     SDYAML_ALL = "All"
     SDYAML_ANY = "Any"
     SDYAML_IS_NULL = "IsNull"
+    SDYAML_IS_IN = "IsIn"
 
     Inverted_Conditions = {
         SDYAML_CONDITION_EXISTS: "DoesNotExist",
@@ -74,7 +74,14 @@ class PantherSdyamlBackend(Backend):
         )
 
     def convert_condition_as_in_expression(self, cond: Union[ConditionOR, ConditionAND], state: ConversionState) -> Any:
-        raise NotImplementedError()
+        keys = [x.field for x in cond.args]
+
+        assert len(keys) and len(set(keys)) == 1
+        return {
+            "Key": keys[0],
+            "Condition": self.SDYAML_IS_IN,
+            "Values": [x.value.to_plain() for x in cond.args],
+        }
 
     def convert_condition_field_eq_val_str(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Dict:
         """Conversion of field = string value expressions"""
@@ -124,7 +131,7 @@ class PantherSdyamlBackend(Backend):
         too_many_wildcards__not_contains = (cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1 and not is_contains)
         too_many_wildcards__is_contains = (cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 2 and is_contains)
         if too_many_wildcards__not_contains or too_many_wildcards__is_contains:
-            raise SigmaFeatureNotSupportedByBackendError(f"This configuration of wildcards currently not supported: [{cond_value}]")
+            raise SigmaFeatureNotSupportedByBackendError(f'This configuration of wildcards currently not supported: "[{cond_value}]"')
 
         # rv_value: remove the SpecialChars.WILDCARD_MULTI
         if is_exists:
@@ -190,7 +197,7 @@ class PantherSdyamlBackend(Backend):
         raise NotImplementedError()
 
     def convert_condition_val_str(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError(f"Search without specifying a Key is not supported: {cond.value.to_plain()}.")
+        raise SigmaFeatureNotSupportedByBackendError(f'Search without specifying a Key is not supported: "{cond.value.to_plain()}".')
 
     def convert_condition_val_num(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
         raise SigmaFeatureNotSupportedByBackendError("Enums are not supported right now")
@@ -204,22 +211,6 @@ class PantherSdyamlBackend(Backend):
     @staticmethod
     def convert_value_str(s: SigmaString, state: ConversionState) -> str:
         """Convert a SigmaString into a plain string which can be used in query."""
-
-        # From TextQueryBackend
-        # converted = s.convert(
-        #     self.escape_char,
-        #     self.wildcard_multi,
-        #     self.wildcard_single,
-        #     self.str_quote + self.add_escaped,
-        #     self.filter_chars,
-        # )
-        # if self.decide_string_quoting(s):
-        #     return self.quote_string(converted)
-        # else:
-        #     return converted
-        #
-        # return s
-
         return s.convert()
 
     def update_parsed_conditions(self, condition: ParentChainMixin, negated: bool = False) -> ParentChainMixin:
