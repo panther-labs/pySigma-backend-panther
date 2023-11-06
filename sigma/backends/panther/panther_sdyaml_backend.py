@@ -60,16 +60,16 @@ class PantherSdyamlBackend(Backend):
     def invert_kcv(self, key_cond_value):
         rv = key_cond_value.copy()
         if "Condition" not in rv:
-            raise NotImplementedError("Cannot invert this condition yet")
+            raise SigmaFeatureNotSupportedByBackendError("Cannot invert this condition yet")
 
         if rv["Condition"] not in self.Inverted_Conditions:
-            raise NotImplementedError(f"Inverted condition not implemented: '{rv['Condition']}'")
+            raise SigmaFeatureNotSupportedByBackendError(f"Inverted condition not implemented: '{rv['Condition']}'")
 
         rv["Condition"] = self.Inverted_Conditions[rv["Condition"]]
         return rv
 
     def convert_condition_not(self, cond: ConditionNOT, state: ConversionState) -> Any:
-        raise NotImplementedError(
+        raise SigmaFeatureNotSupportedByBackendError(
             "NOT is handled within convert_condition_field_eq_val_str - If you see this message, please report the bug and how to reproduce it"
         )
 
@@ -167,34 +167,34 @@ class PantherSdyamlBackend(Backend):
         return {"Key": cond.field, "Condition": self.SDYAML_CONDITION_EQUALS, "Value": cond.value.to_plain()}
 
     def convert_condition_field_eq_field(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_eq_val_str_case_sensitive(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_exists(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_not_exists(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_eq_val_bool(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_eq_val_re(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise SigmaFeatureNotSupportedByBackendError("Regexp is not suppoerted in sdyaml")
 
     def convert_condition_field_eq_val_cidr(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_compare_op_val(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_eq_val_null(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         return {"KeyPath": cond.field, "Condition": self.SDYAML_IS_NULL}
 
     def convert_condition_field_eq_query_expr(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_val_str(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
         raise SigmaFeatureNotSupportedByBackendError(f'Search without specifying a Key is not supported: "{cond.value.to_plain()}".')
@@ -203,10 +203,10 @@ class PantherSdyamlBackend(Backend):
         raise SigmaFeatureNotSupportedByBackendError("Enums are not supported right now")
 
     def convert_condition_val_re(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_query_expr(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
-        raise NotImplementedError()
+        raise SigmaFeatureNotSupportedByBackendError()
 
     @staticmethod
     def convert_value_str(s: SigmaString, state: ConversionState) -> str:
