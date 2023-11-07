@@ -13,12 +13,14 @@ def panther_sdyaml_pipeline():
         # priority=20,
         items=[
             ProcessingItem(
-                transformation=FieldMappingTransformation({
-                    "CommandLine": "command_line",
-                    "Image": "image",
-                    "ParentCommandLine": "parent_command_line",
-                    "ParentImage": "parent_image",
-                }),
+                transformation=FieldMappingTransformation(
+                    {
+                        "CommandLine": "command_line",
+                        "Image": "image",
+                        "ParentCommandLine": "parent_command_line",
+                        "ParentImage": "parent_image",
+                    }
+                ),
                 rule_conditions=[
                     logsource_windows_process_creation(),
                 ]

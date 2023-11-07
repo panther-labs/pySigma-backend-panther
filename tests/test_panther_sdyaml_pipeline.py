@@ -16,7 +16,8 @@ def sigma_sdyaml_backend():
 
 
 def test_basic(sigma_sdyaml_backend):
-    rule = SigmaCollection.from_yaml("""
+    rule = SigmaCollection.from_yaml(
+        """
         title: Test Title
         logsource:
             category: anything
@@ -25,7 +26,8 @@ def test_basic(sigma_sdyaml_backend):
             sel:
                 Field1: "banana"
             condition: sel
-    """)
+    """
+    )
 
     expected = yaml.dump([{
         "Condition": "Equals",
