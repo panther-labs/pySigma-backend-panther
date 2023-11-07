@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "pySigma-backend-panther"
+name = "pySigma-backend-panther-sdyaml"
 version = "0.1.0"
 description = "pySigma backend for Panther"
-authors = ["Josh Esbrook <jehockey@umich.edu>"]
+authors = ["Josh Esbrook <jehockey@umich.edu>", "Oleh Melenevskyi <olehmelenevskyi@gmail.com>"]
 license = "LGPL-3.0-only"
-repository = "https://github.com/jehockey/pySigma-backend-panther"
+repository = "https://github.com/panther-labs/pySigma-backend-panther-sdyaml"
 packages = [
     { include = "sigma" }
 ]
