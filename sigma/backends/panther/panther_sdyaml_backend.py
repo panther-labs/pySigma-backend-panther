@@ -1,4 +1,4 @@
-from typing import ClassVar, Dict, List, Any, Union, Optional, Iterable
+from typing import ClassVar, Dict, List, Any, Union, Optional, Iterable, Tuple
 
 import yaml
 from sigma.conditions import (
@@ -119,7 +119,7 @@ class PantherSdyamlBackend(Backend):
 
         return rv
 
-    def handle_wildcards(self, cond_value: SigmaString) -> Iterable[tuple[str, SigmaString]]:
+    def handle_wildcards(self, cond_value: SigmaString) -> Iterable[Tuple[str, SigmaString]]:
         condition = self.SDYAML_CONDITION_EQUALS
         rv_value = cond_value
 
@@ -188,7 +188,7 @@ class PantherSdyamlBackend(Backend):
         raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_field_compare_op_val(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise (SigmaFeatureNotSupportedByBackendError())
 
     def convert_condition_field_eq_val_null(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         return {"KeyPath": cond.field, "Condition": self.SDYAML_IS_NULL}
