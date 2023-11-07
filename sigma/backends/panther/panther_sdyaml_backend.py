@@ -97,8 +97,7 @@ class PantherSdyamlBackend(Backend):
 
         if len(rv) > 1:
             return {self.SDYAML_ALL: rv}
-        else:
-            return rv[0]
+        return rv[0]
 
     def generate_sdyaml_key_cond_value(self, sigma_cond, state, sdyaml_condition, rv_value):
         # Todo: Official "not preprocessing" flag will be supported later and invert the conditions
@@ -291,8 +290,7 @@ class PantherSdyamlBackend(Backend):
             if self.collect_errors:
                 self.errors.append((rule, e))
                 return []
-            else:
-                raise e
+            raise e
         except (Exception) as e:  # enrich all other exceptions with Sigma-specific context information
             msg = f" (while {error_state} rule {str(rule.source)})"
             if len(e.args) > 1:
