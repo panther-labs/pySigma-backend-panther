@@ -25,7 +25,7 @@ detection:
 
 
 def matcher(key, condition, value=None):
-    rv = {"Key": key, "Condition": condition}
+    rv = {"KeyPath": key, "Condition": condition}
 
     if value:
         rv["Value"] = value
@@ -47,7 +47,7 @@ def matcher_starts_with(key, value):
 
 def matcher_is_in(key, values):
     return {
-        "Key": key,
+        "KeyPath": key,
         "Condition": "IsIn",
         "Values": values,
     }
@@ -236,7 +236,7 @@ def test_string_contains_asterisk(backend):
     """
 
     expected = """
-      'Key': 'fieldA'
+      'KeyPath': 'fieldA'
       'Condition': 'Exists'
     """
 
@@ -276,7 +276,7 @@ def test_okta_policy_rule_modified_or_deleted(backend):
     """
 
     expected = """
-    Key: eventtype
+    KeyPath: eventtype
     Condition: IsIn
     Values:
         - policy.rule.update
@@ -299,13 +299,13 @@ def test_okta_fastpass_phishing_detection(backend):
 
     expected = """
     All: # selection implicit AND
-        - Key: outcome.reason
+        - KeyPath: outcome.reason
           Condition: Equals
           Value: 'FastPass declined phishing attempt'
-        - Key: outcome.result
+        - KeyPath: outcome.result
           Condition: Equals
           Value: FAILURE
-        - Key: eventtype
+        - KeyPath: eventtype
           Condition: Equals
           Value: user.authentication.auth_via_mfa
     """
@@ -325,10 +325,10 @@ def test_aws_attached_malicious_lambda_layer(backend):
 
     expected = """
     All: # selection implicit AND
-        - Key: eventSource
+        - KeyPath: eventSource
           Condition: Equals
           Value: lambda.amazonaws.com
-        - Key: eventName
+        - KeyPath: eventName
           Condition: StartsWith
           Value: UpdateFunctionConfiguration
     """
@@ -351,10 +351,10 @@ def test_aws_cloudtrail_important_change(backend):
 
     expected = """
     All: #selection_source implicit AND
-        - Key: eventSource
+        - KeyPath: eventSource
           Condition: Equals
           Value: 'cloudtrail.amazonaws.com'
-        - Key: eventName
+        - KeyPath: eventName
           Condition: IsIn
           Values:
               - StopLogging
@@ -384,21 +384,21 @@ def test_aws_ec2_vm_export_failure(backend):
     expected = """
     All: # [selection] and [not 1 of filter*]
         - All: # selection implicit AND
-            - Key: eventName
+            - KeyPath: eventName
               Condition: Equals
               Value: 'CreateInstanceExportTask'
-            - Key: eventSource
+            - KeyPath: eventSource
               Condition: Equals
               Value: 'ec2.amazonaws.com'
         - All:
             # not filter1
-            - Key: errorMessage
+            - KeyPath: errorMessage
               Condition: DoesNotExist
             # not filter2
-            - Key: errorCode
+            - KeyPath: errorCode
               Condition: DoesNotExist
             # not filter3
-            - Key: responseElements
+            - KeyPath: responseElements
               Condition: DoesNotContain
               Value: 'Failure'
     """
@@ -421,14 +421,14 @@ def test_potential_bucket_enumeration_on_aws(backend):
     expected = """
     All: # [selection] and [not filter]
         - All: # selection implicit AND
-            - Key: eventSource
+            - KeyPath: eventSource
               Condition: Equals
               Value: 's3.amazonaws.com'
-            - Key: eventName
+            - KeyPath: eventName
               Condition: Equals
               Value: 'ListBuckets'
         # not filter
-        - Key: type
+        - KeyPath: type
           Condition: DoesNotEqual
           Value: 'AssumedRole'
     """
@@ -452,17 +452,17 @@ def test_aws_suspicious_saml_activity(backend):
     expected = """
     Any: # 1 of selection_*
         - All: # selection_sts implicit AND
-            - Key: eventSource
+            - KeyPath: eventSource
               Condition: Equals
               Value: 'sts.amazonaws.com'
-            - Key: eventName
+            - KeyPath: eventName
               Condition: Equals
               Value: 'AssumeRoleWithSAML'
         - All: # selection_iam implicit AND
-            - Key: eventSource
+            - KeyPath: eventSource
               Condition: Equals
               Value: 'iam.amazonaws.com'
-            - Key: eventName
+            - KeyPath: eventName
               Condition: Equals
               Value: 'UpdateSAMLProvider'
     """
@@ -485,17 +485,17 @@ def test_pst_export_alert_using_new_compliancesearchaction(backend):
 
     expected = """
     All: # selection implicit AND
-        - Key: eventSource
+        - KeyPath: eventSource
           Condition: Equals
           Value: 'SecurityComplianceCenter'
         - All: # Payload|contains|all
-            - Key: Payload
+            - KeyPath: Payload
               Condition: Contains
               Value: 'New-ComplianceSearchAction'
-            - Key: Payload
+            - KeyPath: Payload
               Condition: Contains
               Value: 'Export'
-            - Key: Payload
+            - KeyPath: Payload
               Condition: Contains
               Value: 'pst'
     """
@@ -521,24 +521,24 @@ def test_google_cloud_kubernetes_admission_controller(backend):
 
     expected = """
     All: # selection implicit AND
-        - Key: gcp.audit.method_name
+        - KeyPath: gcp.audit.method_name
           Condition: StartsWith
           Value: 'admissionregistration.k8s.io.v'
         - Any: # gcp.audit.method_name|contains
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: Contains
               Value: '.mutatingwebhookconfigurations.'
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: Contains
               Value: '.validatingwebhookconfigurations.'
         - Any: # gcp.audit.method_name|endswith
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: EndsWith
               Value: 'create'
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: EndsWith
               Value: 'patch'
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: EndsWith
               Value: 'replace'
     """
@@ -560,17 +560,17 @@ def test_google_cloud_kubernetes_cronjob(backend):
     expected = """
     Any: # selection implicit AND
         - All: # io.k8s.api.batch.v*.Job
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: StartsWith
               Value: 'io.k8s.api.batch.v'
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: EndsWith
               Value: '.Job'
         - All: # io.k8s.api.batch.v*.CronJob
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: StartsWith
               Value: 'io.k8s.api.batch.v'
-            - Key: gcp.audit.method_name
+            - KeyPath: gcp.audit.method_name
               Condition: EndsWith
               Value: '.CronJob'
     """
@@ -599,28 +599,28 @@ def test_user_added_to_admin_group_macos(backend):
     expected = """
     Any: # 1 of selection_*
         - All: # selection_sysadminctl implicit AND
-            - Key: Image
+            - KeyPath: Image
               Condition: EndsWith
               Value: '/sysadminctl'
             - All: # CommandLine|contains|all
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: ' -addUser '
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: ' -admin '
         - All: # selection_dscl implicit AND
-            - Key: Image
+            - KeyPath: Image
               Condition: EndsWith
               Value: '/dscl'
             - All: # CommandLine|contains|all
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: ' -append '
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: ' /Groups/admin '
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: ' GroupMembership '
     """
@@ -649,27 +649,27 @@ def test_jxa_in_memory_execution_via_osascript(backend):
     expected = """
     All: # all of selection_*
         - All: # CommandLine|contains|all
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: 'osascript'
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: ' -e '
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: 'eval'
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: 'NSData.dataWithContentsOfURL'
         - Any: # selection_js implicit OR
                 - All: # CommandLine|contains|all
-                    - Key: CommandLine
+                    - KeyPath: CommandLine
                       Condition: Contains
                       Value: ' -l '
-                    - Key: CommandLine
+                    - KeyPath: CommandLine
                       Condition: Contains
                       Value: 'JavaScript'
-                - Key: CommandLine
+                - KeyPath: CommandLine
                   Condition: Contains
                   Value: '.js'
     """

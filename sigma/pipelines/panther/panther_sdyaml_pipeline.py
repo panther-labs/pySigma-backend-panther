@@ -15,15 +15,15 @@ def panther_sdyaml_pipeline():
             ProcessingItem(
                 transformation=FieldMappingTransformation(
                     {
-                        "CommandLine": "command_line",
-                        "Image": "image",
-                        "ParentCommandLine": "parent_command_line",
-                        "ParentImage": "parent_image",
+                        "CommandLine": "ExtraEventData.command_line",
+                        "Image": "ExtraEventData.image",
+                        "ParentCommandLine": "ExtraEventData.parent_command_line",
+                        "ParentImage": "ExtraEventData.parent_image",
                     }
                 ),
                 rule_conditions=[
                     logsource_windows_process_creation(),
-                ]
+                ],
             ),
         ],
     )

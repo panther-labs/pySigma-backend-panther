@@ -31,7 +31,7 @@ def test_basic(sigma_sdyaml_backend):
 
     expected = yaml.dump([{
         "Condition": "Equals",
-        "Key": "Field1",
+        "KeyPath": "Field1",
         "Value": "banana",
     }])
 

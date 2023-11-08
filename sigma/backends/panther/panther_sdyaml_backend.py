@@ -19,7 +19,7 @@ from sigma.types import SigmaString, SpecialChars
 
 class PantherSdyamlBackend(Backend):
     name: ClassVar[str] = "panther sdyaml backend"
-    formats: ClassVar[Dict[str, str]] = {"default": "sdyaml"}
+    formats: ClassVar[Dict[str, str]] = {"default": "sdyaml", "yaml": "yaml"}
 
     convert_or_as_in: ClassVar[bool] = True
     convert_and_as_in: ClassVar[bool] = True
@@ -78,7 +78,7 @@ class PantherSdyamlBackend(Backend):
 
         assert len(keys) and len(set(keys)) == 1
         return {
-            "Key": keys[0],
+            "KeyPath": keys[0],
             "Condition": self.SDYAML_IS_IN,
             "Values": [x.value.to_plain() for x in cond.args],
         }
@@ -111,7 +111,7 @@ class PantherSdyamlBackend(Backend):
 
             sdyaml_condition = self.Inverted_Conditions[sdyaml_condition]
 
-        rv = {"Key": sigma_cond.field, "Condition": sdyaml_condition}
+        rv = {"KeyPath": sigma_cond.field, "Condition": sdyaml_condition}
 
         if rv_value:  # 'Exists' etc. have no value
             rv["Value"] = self.convert_value_str(rv_value, state)
@@ -163,7 +163,7 @@ class PantherSdyamlBackend(Backend):
         return [(condition, rv_value)]
 
     def convert_condition_field_eq_val_num(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
-        return {"Key": cond.field, "Condition": self.SDYAML_CONDITION_EQUALS, "Value": cond.value.to_plain()}
+        return {"KeyPath": cond.field, "Condition": self.SDYAML_CONDITION_EQUALS, "Value": cond.value.to_plain()}
 
     def convert_condition_field_eq_field(self, cond: ConditionFieldEqualsValueExpression, state: ConversionState) -> Any:
         raise SigmaFeatureNotSupportedByBackendError()
