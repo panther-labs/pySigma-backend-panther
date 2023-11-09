@@ -1,3 +1,4 @@
+from os import path
 from typing import ClassVar, Dict, List, Any, Union, Optional, Iterable, Tuple
 
 import yaml
@@ -13,13 +14,15 @@ from sigma.conditions import (
 from sigma.conversion.base import Backend
 from sigma.conversion.state import ConversionState
 from sigma.exceptions import SigmaError, SigmaFeatureNotSupportedByBackendError
+from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
 from sigma.types import SigmaString, SpecialChars
 
 
 class PantherSdyamlBackend(Backend):
     name: ClassVar[str] = "panther sdyaml backend"
-    formats: ClassVar[Dict[str, str]] = {"default": "sdyaml", "yaml": "yaml"}
+
+    output_dir: Optional[str] = None
 
     convert_or_as_in: ClassVar[bool] = True
     convert_and_as_in: ClassVar[bool] = True
@@ -41,6 +44,15 @@ class PantherSdyamlBackend(Backend):
         SDYAML_CONDITION_ENDS_WITH: "DoesNotEndWith",
         SDYAML_CONDITION_CONTAINS: "DoesNotContain",
     }
+
+    def __init__(
+        self,
+        processing_pipeline: Optional[ProcessingPipeline] = None,
+        collect_errors: bool = False,
+        output_dir: Optional[str] = "",
+    ):
+        super().__init__(processing_pipeline, collect_errors)
+        self.output_dir = output_dir
 
     def get_key_condition_values(self, cond, state):
         rv = (self.convert_condition(arg, state) for arg in cond.args)  # generator object
@@ -94,7 +106,6 @@ class PantherSdyamlBackend(Backend):
         for condition, rv_value in conditions_and_rv_values:
             key_cond_val = self.generate_sdyaml_key_cond_value(cond, state, condition, rv_value)
             rv.append(key_cond_val)
-
         if len(rv) > 1:
             return {self.SDYAML_ALL: rv}
         return rv[0]
@@ -113,7 +124,7 @@ class PantherSdyamlBackend(Backend):
 
         rv = {"KeyPath": sigma_cond.field, "Condition": sdyaml_condition}
 
-        if rv_value:  # 'Exists' etc. have no value
+        if rv_value is not None:  # 'Exists' etc. have no value
             rv["Value"] = self.convert_value_str(rv_value, state)
 
         return rv
@@ -281,8 +292,7 @@ class PantherSdyamlBackend(Backend):
 
             error_state = "finalizing query for"
             rv = [  # 3. Postprocess generated query
-                self.finalize_query(rule, query, index, state, output_format
-                                    or self.default_format)
+                self.finalize_query(rule, query, index, state, output_format or self.default_format)
                 for index, query in enumerate(queries)
             ]
             return rv
@@ -302,4 +312,9 @@ class PantherSdyamlBackend(Backend):
             raise
 
     def finalize_output_default(self, queries: List[Any]) -> Any:
+        if self.output_dir:
+            for query in queries:
+                with open(path.join(self.output_dir, query["SigmaFile"]), 'w') as file:
+                    yaml.dump(query, file)
+
         return yaml.dump(queries)

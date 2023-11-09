@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 import yaml
 
@@ -16,12 +18,14 @@ def sigma_sdyaml_backend():
 
 
 def test_basic(sigma_sdyaml_backend):
+    rule_id = uuid.uuid4()
     rule = SigmaCollection.from_yaml(
-        """
+        f"""
         title: Test Title
+        id: {rule_id}
         logsource:
-            category: anything
-            product: whatever
+            category: process_creation
+            product: windows
         detection:
             sel:
                 Field1: "banana"
@@ -29,10 +33,23 @@ def test_basic(sigma_sdyaml_backend):
     """
     )
 
-    expected = yaml.dump([{
-        "Condition": "Equals",
-        "KeyPath": "Field1",
-        "Value": "banana",
-    }])
+    expected = yaml.dump(
+        [
+            {
+                "AnalysisType": "rule",
+                "RuleID": str(rule_id),
+                "DisplayName": "Test Title",
+                "Description": None,
+                "Tags": [],
+                "Enabled": True,
+                "LogTypes": ["Windows.EventLogs"],
+                "Detection": [{
+                    "Condition": "Equals",
+                    "KeyPath": "Field1",
+                    "Value": "banana",
+                }],
+            }
+        ]
+    )
 
     assert sigma_sdyaml_backend.convert(rule) == expected
