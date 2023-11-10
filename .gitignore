@@ -1,0 +1,14 @@
+.coverage*
+.vscode/
+**/__pycache__
+.pytest_cache/
+cov.xml
+dist/
+docs/_build
+
+# User's environment-specific stuff
+.idea/**
+
+# Mac DS_Store
+.DS_Store
+**/.DS_Store

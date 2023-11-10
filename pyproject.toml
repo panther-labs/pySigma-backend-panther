@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "pySigma-backend-panther-sdyaml"
+version = "0.1.0"
+description = "pySigma backend for Panther"
+authors = ["Josh Esbrook <jehockey@umich.edu>", "Oleh Melenevskyi <olehmelenevskyi@gmail.com>"]
+license = "LGPL-3.0-only"
+repository = "https://github.com/panther-labs/pySigma-backend-panther-sdyaml"
+packages = [
+    { include = "sigma" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pysigma = "0.10.6"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+pytest-cov = "^4.0.0"
+coverage = "^7.1.0"
+sigma-cli = "^0.7.8"
+yapf = "^0.40.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.yapf]
+allow_split_before_dict_value = false
+based_on_style = "google"
+column_limit = 140
+dedent_closing_brackets = true
