@@ -56,10 +56,10 @@ def panther_sdyaml_pipeline():
             ProcessingItem(
                 transformation=FieldMappingTransformation(
                     {
-                        "CommandLine": "ExtraEventData.command_line",
-                        "Image": "ExtraEventData.image",
-                        "ParentCommandLine": "ExtraEventData.parent_command_line",
-                        "ParentImage": "ExtraEventData.parent_image",
+                        "CommandLine": "command_line",
+                        "Image": "image",
+                        "ParentCommandLine": "parent_command_line",
+                        "ParentImage": "parent_image",
                     }
                 ),
                 rule_conditions=[
