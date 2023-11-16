@@ -25,6 +25,13 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             "Enabled": True,
             "Detection": [query],
         }
+
+        if rule.references:
+            res["Reference"] = ", ".join(rule.references)
+
+        if rule.author:
+            res["Description"] += f"\n\nAuthor: {rule.author}"
+
         rule_id = rule.id or uuid.uuid4()
         res["RuleID"] = str(rule_id)
 
