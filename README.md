@@ -9,6 +9,9 @@ It supports the following output formats:
 
 * default: Panther SDYAML "Simple Detections" .yaml format
 
+To save each rule in separate file you can use `output_dir` backend option.
+> $ convert -t panther_sdyaml path/to/rules -p panther_sdyaml -O output_dir=output/directory
+
 Further, it contains the following processing pipelines in `sigma.pipelines.panther_sdyaml`:
 
 * panther_sdyaml_pipeline: Convert known Sigma field names into their Panther schema equivalent

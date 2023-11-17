@@ -13,16 +13,18 @@ from sigma.conditions import (
 )
 from sigma.conversion.base import Backend
 from sigma.conversion.state import ConversionState
-from sigma.exceptions import SigmaError, SigmaFeatureNotSupportedByBackendError
+from sigma.exceptions import SigmaError, SigmaFeatureNotSupportedByBackendError, SigmaConfigurationError
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
 from sigma.types import SigmaString, SpecialChars
 
 
 class PantherSdyamlBackend(Backend):
-    name: ClassVar[str] = "panther sdyaml backend"
-
+    # `output_dir` param should be used for saving each rule into separate file
+    # `sigma convert -t panther_sdyaml -O output_dir=/tmp/directory`
     output_dir: Optional[str] = None
+
+    name: ClassVar[str] = "panther sdyaml backend"
 
     convert_or_as_in: ClassVar[bool] = True
     convert_and_as_in: ClassVar[bool] = True
@@ -52,7 +54,13 @@ class PantherSdyamlBackend(Backend):
         output_dir: Optional[str] = "",
     ):
         super().__init__(processing_pipeline, collect_errors)
-        self.output_dir = output_dir
+
+        if output_dir:
+            # relative path to absolute
+            output_dir = path.abspath(path.expanduser(output_dir))
+            if not path.isdir(output_dir):
+                raise SigmaConfigurationError(f"{output_dir} is not a directory")
+            self.output_dir = output_dir
 
     def get_key_condition_values(self, cond, state):
         rv = (self.convert_condition(arg, state) for arg in cond.args)  # generator object
@@ -311,10 +319,14 @@ class PantherSdyamlBackend(Backend):
                 e.args = (e.args[0] + msg,)
             raise
 
+    def save_queries_into_individual_files(self, queries: List[Any]):
+        for query in queries:
+            file_path = path.join(self.output_dir, query["SigmaFile"])
+            with open(file_path, 'w') as file:
+                yaml.dump(query, file)
+
     def finalize_output_default(self, queries: List[Any]) -> Any:
         if self.output_dir:
-            for query in queries:
-                with open(path.join(self.output_dir, query["SigmaFile"]), 'w') as file:
-                    yaml.dump(query, file)
+            self.save_queries_into_individual_files(queries)
 
         return yaml.dump(queries)
