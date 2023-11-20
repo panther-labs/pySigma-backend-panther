@@ -328,5 +328,6 @@ class PantherSdyamlBackend(Backend):
     def finalize_output_default(self, queries: List[Any]) -> Any:
         if self.output_dir:
             self.save_queries_into_individual_files(queries)
-
+        if len(queries) == 1:
+            return yaml.dump(queries[0])
         return yaml.dump(queries)

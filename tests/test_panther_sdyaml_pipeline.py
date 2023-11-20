@@ -21,22 +21,20 @@ def test_basic(sigma_sdyaml_backend):
     )
 
     expected = yaml.dump(
-        [
-            {
-                "AnalysisType": "rule",
-                "RuleID": str(rule_id),
-                "DisplayName": "Test Title",
-                "Description": None,
-                "Tags": [],
-                "Enabled": True,
-                "LogTypes": ["Windows.EventLogs"],
-                "Detection": [{
-                    "Condition": "Equals",
-                    "KeyPath": "Field1",
-                    "Value": "banana",
-                }],
-            }
-        ]
+        {
+            "AnalysisType": "rule",
+            "RuleID": str(rule_id),
+            "DisplayName": "Test Title",
+            "Description": None,
+            "Tags": [],
+            "Enabled": True,
+            "LogTypes": ["Windows.EventLogs"],
+            "Detection": [{
+                "Condition": "Equals",
+                "KeyPath": "Field1",
+                "Value": "banana",
+            }]
+        }
     )
 
     assert sigma_sdyaml_backend.convert(rule) == expected
