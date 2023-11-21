@@ -38,7 +38,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
         log_types = self._detect_log_types(rule)
         if len(log_types) == 0:
-            logging.error(f"Can't find ant LogTypes")
+            logging.error(f"Can't find any LogTypes")
         else:
             res["LogTypes"] = log_types
 
