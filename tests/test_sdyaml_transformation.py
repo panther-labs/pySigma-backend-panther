@@ -1,5 +1,5 @@
+from unittest import mock
 from sigma.rule import SigmaRule, SigmaLogSource, SigmaLevel
-
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -38,3 +38,22 @@ class TestSdYamlTransformation:
         rule.level = severity
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["Severity"] == severity.name
+
+    def test_apply_log_types(self, pipeline, rule):
+        transformation = SdYamlTransformation()
+        rule.logsource = SigmaLogSource(product="unknown")
+        res = transformation.apply(pipeline, rule, "")
+        assert "LogTypes" not in res[0]
+
+        rule.logsource = SigmaLogSource(product="windows")
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["LogTypes"] == ["Windows.EventLogs"]
+
+        rule.logsource = SigmaLogSource(product="okta", service="okta")
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["LogTypes"] == ["Okta.SystemLog"]
+
+        with mock.patch("click.get_current_context") as mock_get_current_context:
+            mock_get_current_context.return_value.params = {"pipeline": ["crowdstrike_fdr"]}
+            res = transformation.apply(pipeline, rule, "")
+            assert res[0]["LogTypes"] == ["Okta.SystemLog", "Crowdstrike.FDREvent"]

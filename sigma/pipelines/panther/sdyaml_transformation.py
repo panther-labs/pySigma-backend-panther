@@ -7,10 +7,6 @@ from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
 from sigma.rule import SigmaRule
 
-LOG_TYPES_MAPPING = {
-    "windows": "Windows.EventLogs",
-}
-
 
 class SdYamlTransformation(QueryPostprocessingTransformation):
     identifier = "SDYaml"
@@ -40,15 +36,24 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         if rule.level:
             res["Severity"] = rule.level.name
 
-        key = rule.logsource.product
-        log_type = LOG_TYPES_MAPPING.get(rule.logsource.product)
-        if log_type is None:
-            logging.error(f"Can't find LogTypes mapping for {key}")
+        log_types = self._detect_log_types(rule)
+        if len(log_types) == 0:
+            logging.error(f"Can't find ant LogTypes")
         else:
-            res["LogTypes"] = [log_type]
+            res["LogTypes"] = log_types
+
+        return res, True
+
+    def _detect_log_types(self, rule: SigmaRule) -> [str]:
+        log_types = []
+        if rule.logsource.product == "okta" and rule.logsource.service == "okta":
+            log_types.append("Okta.SystemLog")
+
+        if rule.logsource.product == "windows":
+            log_types.append("Windows.EventLogs")
 
         cli_context = click.get_current_context(silent=True)
         if cli_context and "crowdstrike_fdr" in cli_context.params["pipeline"]:
-            res["LogTypes"].append("Crowdstrike.FDREvent")
+            log_types.append("Crowdstrike.FDREvent")
 
-        return res, True
+        return log_types
