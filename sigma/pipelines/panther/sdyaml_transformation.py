@@ -2,6 +2,7 @@ import logging
 import uuid
 from os import path
 from typing import Any
+import click
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
 from sigma.rule import SigmaRule
@@ -45,5 +46,9 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             logging.error(f"Can't find LogTypes mapping for {key}")
         else:
             res["LogTypes"] = [log_type]
+
+        cli_context = click.get_current_context(silent=True)
+        if cli_context and "crowdstrike_fdr" in cli_context.params["pipeline"]:
+            res["LogTypes"].append("Crowdstrike.FDREvent")
 
         return res, True

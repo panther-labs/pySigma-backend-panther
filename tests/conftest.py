@@ -21,7 +21,7 @@ def pipeline():
 
 @pytest.fixture
 def sigma_detection():
-    return SigmaDetection(detection_items=[SigmaDetectionItem("query", [], value=None)])
+    return SigmaDetection(detection_items=[SigmaDetectionItem("query", [], value=[])])
 
 
 @pytest.fixture
