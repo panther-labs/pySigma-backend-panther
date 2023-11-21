@@ -29,11 +29,32 @@ def test_basic(sigma_sdyaml_backend):
             "Tags": [],
             "Enabled": True,
             "LogTypes": ["Windows.EventLogs"],
-            "Detection": [{
-                "Condition": "Equals",
-                "KeyPath": "Field1",
-                "Value": "banana",
-            }]
+            "Detection":
+                [
+                    {
+                        "All":
+                            [
+                                {
+                                    "Condition": "Equals",
+                                    "KeyPath": "event_platform",
+                                    "Value": "Windows",
+                                }, {
+                                    "All":
+                                        [
+                                            {
+                                                "Condition": "Equals",
+                                                "KeyPath": "event_simpleName",
+                                                "Value": "ProcessRollup2",
+                                            }, {
+                                                "Condition": "Equals",
+                                                "KeyPath": "Field1",
+                                                "Value": "banana",
+                                            }
+                                        ]
+                                }
+                            ]
+                    }
+                ]
         }
     )
 

@@ -149,7 +149,9 @@ class PantherSdyamlBackend(Backend):
         too_many_wildcards__not_contains = (cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1 and not is_contains)
         too_many_wildcards__is_contains = (cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 2 and is_contains)
         if too_many_wildcards__not_contains or too_many_wildcards__is_contains:
-            raise SigmaFeatureNotSupportedByBackendError(f'This configuration of wildcards currently not supported: "[{cond_value}]"')
+            raise SigmaFeatureNotSupportedByBackendError(
+                f'This configuration of wildcards currently not supported: "[{cond_value}]" in sdyaml'
+            )
 
         # rv_value: remove the SpecialChars.WILDCARD_MULTI
         if is_exists:
