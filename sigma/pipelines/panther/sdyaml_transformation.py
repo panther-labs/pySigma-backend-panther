@@ -52,6 +52,9 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         if rule.logsource.product == "windows":
             log_types.append("Windows.EventLogs")
 
+        if rule.logsource.product == "aws" and rule.logsource.service == "cloudtrail":
+            log_types.append("AWS.CloudTrail")
+
         cli_context = click.get_current_context(silent=True)
         if cli_context and "crowdstrike_fdr" in cli_context.params["pipeline"]:
             log_types.append("Crowdstrike.FDREvent")
