@@ -53,7 +53,12 @@ class TestSdYamlTransformation:
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["LogTypes"] == ["Okta.SystemLog"]
 
+        rule.logsource = SigmaLogSource(product="aws", service="cloudtrail")
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["LogTypes"] == ["AWS.CloudTrail"]
+
         with mock.patch("click.get_current_context") as mock_get_current_context:
+            rule.logsource = SigmaLogSource(product="product", service="service")
             mock_get_current_context.return_value.params = {"pipeline": ["crowdstrike_fdr"]}
             res = transformation.apply(pipeline, rule, "")
-            assert res[0]["LogTypes"] == ["Okta.SystemLog", "Crowdstrike.FDREvent"]
+            assert res[0]["LogTypes"] == ["Crowdstrike.FDREvent"]
