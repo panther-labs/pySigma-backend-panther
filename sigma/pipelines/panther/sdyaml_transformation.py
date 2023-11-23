@@ -49,9 +49,6 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         if rule.logsource.product == "okta" and rule.logsource.service == "okta":
             log_types.append("Okta.SystemLog")
 
-        if rule.logsource.product == "windows":
-            log_types.append("Windows.EventLogs")
-
         if rule.logsource.product == "aws" and rule.logsource.service == "cloudtrail":
             log_types.append("AWS.CloudTrail")
 

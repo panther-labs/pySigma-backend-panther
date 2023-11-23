@@ -1,7 +1,9 @@
 import pytest
 from sigma.processing.pipeline import ProcessingPipeline
-from sigma.rule import SigmaDetection, SigmaLogSource, SigmaDetectionItem, SigmaRule
+from sigma.rule import SigmaDetection, SigmaLogSource, SigmaDetectionItem, SigmaRule, SigmaDetections
 from sigma.processing.resolver import ProcessingPipelineResolver
+from sigma.types import SigmaType, SigmaNull
+
 from sigma.backends.panther import PantherSdyamlBackend
 from sigma.pipelines.panther.panther_sdyaml_pipeline import panther_sdyaml_pipeline
 
@@ -21,7 +23,7 @@ def pipeline():
 
 @pytest.fixture
 def sigma_detection():
-    return SigmaDetection(detection_items=[SigmaDetectionItem("query", [], value=[])])
+    return SigmaDetection(detection_items=[SigmaDetectionItem("query", [], value=[SigmaNull()])])
 
 
 @pytest.fixture
@@ -31,4 +33,6 @@ def log_source():
 
 @pytest.fixture
 def rule(sigma_detection):
-    return SigmaRule("rule title", SigmaLogSource(product="windows"), sigma_detection)
+    return SigmaRule(
+        "rule title", SigmaLogSource(product="windows"), detection=SigmaDetections({"query": sigma_detection}, condition=["query"])
+    )

@@ -45,10 +45,6 @@ class TestSdYamlTransformation:
         res = transformation.apply(pipeline, rule, "")
         assert "LogTypes" not in res[0]
 
-        rule.logsource = SigmaLogSource(product="windows")
-        res = transformation.apply(pipeline, rule, "")
-        assert res[0]["LogTypes"] == ["Windows.EventLogs"]
-
         rule.logsource = SigmaLogSource(product="okta", service="okta")
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["LogTypes"] == ["Okta.SystemLog"]
