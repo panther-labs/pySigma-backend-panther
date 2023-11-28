@@ -1,3 +1,2 @@
 from .panther_sdyaml_pipeline import panther_sdyaml_pipeline
-
-# TODO: add all pipelines that should be exposed to the user of your backend in the import statement above.
+from .carbon_black_panther_pipeline import carbon_black_panther_pipeline
