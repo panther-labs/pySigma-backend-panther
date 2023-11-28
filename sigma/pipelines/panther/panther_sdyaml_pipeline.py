@@ -1,8 +1,14 @@
+from dataclasses import dataclass, field
+from typing import Optional
+
+import click
 from sigma.pipelines.common import logsource_windows_process_creation
-from sigma.processing.conditions import LogsourceCondition
+from sigma.processing.conditions import LogsourceCondition, RuleProcessingCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
 from sigma.processing.transformations import FieldMappingTransformation, AddConditionTransformation
+from sigma.rule import SigmaRule
 
+from sigma.pipelines.panther.replace_condition_ends_with import ReplaceConditionEndsWith
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -16,6 +22,19 @@ def logsource_mac():
 
 def logsource_linux():
     return LogsourceCondition(product="linux")
+
+
+@dataclass
+class PipelineWasUsed(RuleProcessingCondition):
+    pipeline: Optional[str] = field(default=None)
+
+    def match(self, pipeline: ProcessingPipeline, rule: SigmaRule) -> bool:
+        cli_context = click.get_current_context(silent=True)
+        return cli_context and self.pipeline in cli_context.params["pipeline"]
+
+
+def crowdstrike_pipeline_was_used():
+    return PipelineWasUsed("crowdstrike_fdr")
 
 
 def panther_sdyaml_pipeline():
@@ -75,6 +94,21 @@ def panther_sdyaml_pipeline():
                     }
                 ),
                 rule_conditions=[LogsourceCondition(category="network_connection")]
+            ),
+            ProcessingItem(
+                transformation=FieldMappingTransformation(
+                    {
+                        "sha256": "event.SHA256HashData",
+                        "sha1": "event.SHA1HashData",
+                        "ParentImage": "event.ParentBaseFileName",
+                        "Image": "event.ImageFileName",
+                        "CommandLine": "event.CommandLine",
+                        "md5": "event.MD5HashData",
+                    }
+                ),
+                rule_conditions=[
+                    crowdstrike_pipeline_was_used(),
+                ],
             ),
         ],
         postprocessing_items=[

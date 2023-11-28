@@ -28,7 +28,6 @@ def test_basic(sigma_sdyaml_backend):
             "Description": None,
             "Tags": [],
             "Enabled": True,
-            "LogTypes": ["Windows.EventLogs"],
             "Detection":
                 [
                     {
