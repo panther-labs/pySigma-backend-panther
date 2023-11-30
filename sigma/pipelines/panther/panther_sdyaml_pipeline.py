@@ -24,7 +24,7 @@ def logsource_windows():
 
 
 def logsource_mac():
-    return LogsourceCondition(product="mac")
+    return LogsourceCondition(product="macos")
 
 
 def logsource_linux():
@@ -96,6 +96,7 @@ def panther_sdyaml_pipeline():
                 ),
                 rule_conditions=[
                     logsource_windows(),
+                    crowdstrike_pipeline_was_used(),
                 ],
             ),
             ProcessingItem(
@@ -104,7 +105,7 @@ def panther_sdyaml_pipeline():
                         "event_platform": "Mac",
                     }
                 ),
-                rule_conditions=[logsource_mac()],
+                rule_conditions=[logsource_mac(), crowdstrike_pipeline_was_used()],
             ),
             ProcessingItem(
                 transformation=AddConditionTransformation(
@@ -112,7 +113,7 @@ def panther_sdyaml_pipeline():
                         "event_platform": "Linux",
                     }
                 ),
-                rule_conditions=[logsource_linux()],
+                rule_conditions=[logsource_linux(), crowdstrike_pipeline_was_used()],
             ),
             ProcessingItem(
                 transformation=AddConditionTransformation(

@@ -31,25 +31,16 @@ def test_basic(sigma_sdyaml_backend):
                     "All": [
                         {
                             "Condition": "Equals",
-                            "KeyPath": "event_platform",
-                            "Value": "Windows",
+                            "KeyPath": "event_simpleName",
+                            "Value": "ProcessRollup2",
                         },
                         {
-                            "All": [
-                                {
-                                    "Condition": "Equals",
-                                    "KeyPath": "event_simpleName",
-                                    "Value": "ProcessRollup2",
-                                },
-                                {
-                                    "Condition": "Equals",
-                                    "KeyPath": "Field1",
-                                    "Value": "banana",
-                                },
-                            ]
+                            "Condition": "Equals",
+                            "KeyPath": "Field1",
+                            "Value": "banana",
                         },
                     ]
-                }
+                },
             ],
         }
     )
