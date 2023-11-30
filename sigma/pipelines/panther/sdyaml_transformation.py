@@ -22,15 +22,19 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         }
 
         if rule.references:
-            res["Reference"] = ", ".join(rule.references)
+            res["Reference"] = rule.references[0]
 
         if rule.author:
             res["Description"] += f"\n\nAuthor: {rule.author}"
 
-        rule_id = rule.id or uuid.uuid4()
-        res["RuleID"] = str(rule_id)
+        if rule.falsepositives:
+            res["Description"] = (res["Description"] or "") + "False Positives: " + ", ".join(rule.falsepositives)
 
         if rule.source:
+            res["RuleID"] = path.split(rule.source.path)[-1].replace(".yml", "")
+
+            # DO NOT FORGET TO REMOVE THIS KEY FROM OUTPUT
+            # used to pass file name to output
             res["SigmaFile"] = path.split(rule.source.path)[-1]
 
         if rule.level:
@@ -41,6 +45,13 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             logging.error(f"Can't find any LogTypes")
         else:
             res["LogTypes"] = log_types
+
+        if rule.tags:
+            mittre_tags = []
+            for tag in rule.tags:
+                if tag.namespace == "attack" and tag.name.startswith("t"):
+                    mittre_tags.append(tag.name.upper())
+            res["Reports"] = {"MITRE ATT&CK": mittre_tags}
 
         return res, True
 
