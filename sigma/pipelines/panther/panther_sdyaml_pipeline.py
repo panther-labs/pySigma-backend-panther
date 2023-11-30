@@ -8,7 +8,6 @@ from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
 from sigma.processing.transformations import FieldMappingTransformation, AddConditionTransformation
 from sigma.rule import SigmaRule
 
-from sigma.pipelines.panther.replace_condition_ends_with import ReplaceConditionEndsWith
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -22,6 +21,18 @@ def logsource_mac():
 
 def logsource_linux():
     return LogsourceCondition(product="linux")
+
+
+def logsource_file_event():
+    return LogsourceCondition(category="file_event")
+
+
+def logsource_network_connection():
+    return LogsourceCondition(category="network_connection")
+
+
+def logsource_process_creation():
+    return LogsourceCondition(category="process_creation")
 
 
 @dataclass
@@ -82,8 +93,7 @@ def panther_sdyaml_pipeline():
             ProcessingItem(
                 transformation=AddConditionTransformation({
                     "event_simpleName": "FileOpenInfo",
-                }),
-                rule_conditions=[LogsourceCondition(category="file_event")]
+                }), rule_conditions=[logsource_file_event()]
             ),
             ProcessingItem(
                 transformation=AddConditionTransformation(
@@ -93,7 +103,7 @@ def panther_sdyaml_pipeline():
                         ],
                     }
                 ),
-                rule_conditions=[LogsourceCondition(category="network_connection")]
+                rule_conditions=[logsource_network_connection()]
             ),
             ProcessingItem(
                 transformation=FieldMappingTransformation(

@@ -53,7 +53,10 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             log_types.append("AWS.CloudTrail")
 
         cli_context = click.get_current_context(silent=True)
-        if cli_context and "crowdstrike_fdr" in cli_context.params["pipeline"]:
-            log_types.append("Crowdstrike.FDREvent")
+        if cli_context:
+            if "crowdstrike_fdr" in cli_context.params["pipeline"]:
+                log_types.append("Crowdstrike.FDREvent")
 
+            if "carbon_black_panther" in cli_context.params["pipeline"]:
+                log_types.append("CarbonBlack.EndpointEvent")
         return log_types
