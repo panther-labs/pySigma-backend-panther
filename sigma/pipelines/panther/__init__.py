@@ -1,2 +1,2 @@
-from .panther_sdyaml_pipeline import panther_sdyaml_pipeline
 from .carbon_black_panther_pipeline import carbon_black_panther_pipeline
+from .panther_sdyaml_pipeline import panther_sdyaml_pipeline

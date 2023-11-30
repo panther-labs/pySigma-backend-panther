@@ -1,13 +1,18 @@
 from unittest import mock
-from sigma.rule import SigmaRule, SigmaLogSource, SigmaLevel, SigmaRuleTag
+
+from sigma.rule import SigmaLevel, SigmaLogSource, SigmaRule, SigmaRuleTag
+
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
 class TestSdYamlTransformation:
-
     def test_apply_reference(self, pipeline, rule):
         transformation = SdYamlTransformation()
-        references = ["https://example.com/", "https://example2.com/", "https://example3.com/"]
+        references = [
+            "https://example.com/",
+            "https://example2.com/",
+            "https://example3.com/",
+        ]
 
         res = transformation.apply(pipeline, rule, "query")
         assert "Reference" not in res[0]
@@ -21,7 +26,12 @@ class TestSdYamlTransformation:
         description = "description"
 
         transformation = SdYamlTransformation()
-        rule = SigmaRule("title", SigmaLogSource(product="windows"), sigma_detection, description=description)
+        rule = SigmaRule(
+            "title",
+            SigmaLogSource(product="windows"),
+            sigma_detection,
+            description=description,
+        )
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["Description"] == description
 
@@ -61,7 +71,12 @@ class TestSdYamlTransformation:
 
     def test_apply_false_positives(self, pipeline, sigma_detection):
         transformation = SdYamlTransformation()
-        rule = SigmaRule("title", SigmaLogSource(product="windows"), sigma_detection, falsepositives=[])
+        rule = SigmaRule(
+            "title",
+            SigmaLogSource(product="windows"),
+            sigma_detection,
+            falsepositives=[],
+        )
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["Description"] is None
 

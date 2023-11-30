@@ -2,6 +2,7 @@ import logging
 import uuid
 from os import path
 from typing import Any
+
 import click
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
@@ -28,7 +29,9 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             res["Description"] += f"\n\nAuthor: {rule.author}"
 
         if rule.falsepositives:
-            res["Description"] = (res["Description"] or "") + "False Positives: " + ", ".join(rule.falsepositives)
+            res["Description"] = (
+                (res["Description"] or "") + "False Positives: " + ", ".join(rule.falsepositives)
+            )
 
         if rule.source:
             res["RuleID"] = path.split(rule.source.path)[-1].replace(".yml", "")

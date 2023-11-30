@@ -3,10 +3,10 @@ import logging
 
 import pytest
 import yaml
+from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
 from sigma.backends.panther import PantherSdyamlBackend
-from sigma.collection import SigmaCollection
 
 
 def assert_yaml_equal(actual, expected):
