@@ -1,6 +1,6 @@
 import uuid
-import yaml
 
+import yaml
 from sigma.collection import SigmaCollection
 
 
@@ -26,32 +26,31 @@ def test_basic(sigma_sdyaml_backend):
             "Description": None,
             "Tags": [],
             "Enabled": True,
-            "Detection":
-                [
-                    {
-                        "All":
-                            [
+            "Detection": [
+                {
+                    "All": [
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "event_platform",
+                            "Value": "Windows",
+                        },
+                        {
+                            "All": [
                                 {
                                     "Condition": "Equals",
-                                    "KeyPath": "event_platform",
-                                    "Value": "Windows",
-                                }, {
-                                    "All":
-                                        [
-                                            {
-                                                "Condition": "Equals",
-                                                "KeyPath": "event_simpleName",
-                                                "Value": "ProcessRollup2",
-                                            }, {
-                                                "Condition": "Equals",
-                                                "KeyPath": "Field1",
-                                                "Value": "banana",
-                                            }
-                                        ]
-                                }
+                                    "KeyPath": "event_simpleName",
+                                    "Value": "ProcessRollup2",
+                                },
+                                {
+                                    "Condition": "Equals",
+                                    "KeyPath": "Field1",
+                                    "Value": "banana",
+                                },
                             ]
-                    }
-                ]
+                        },
+                    ]
+                }
+            ],
         }
     )
 

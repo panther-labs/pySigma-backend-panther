@@ -20,14 +20,18 @@ pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 coverage = "^7.1.0"
 sigma-cli = "^0.7.8"
-yapf = "^0.40.2"
+black = "^23.11.0"
+isort = "^5.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.yapf]
-allow_split_before_dict_value = false
-based_on_style = "google"
-column_limit = 140
-dedent_closing_brackets = true
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+include = '\.pyi?$'
+
+[tool.isort]
+line_length = 100
+profile = "black"

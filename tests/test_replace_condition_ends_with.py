@@ -8,7 +8,6 @@ from sigma.pipelines.panther.replace_condition_ends_with import ReplaceCondition
 
 
 class TestReplaceConditionEndsWith:
-
     def test_with_one_value(self, pipeline, sigma_sdyaml_backend):
         raw_rule = f"""
         title: Test Title
@@ -41,7 +40,9 @@ class TestReplaceConditionEndsWith:
         Enabled: true
         Tags: []
         """
-        transformation = ReplaceConditionEndsWith(source_field_name="Field", target_field_name="UpdatedField")
+        transformation = ReplaceConditionEndsWith(
+            source_field_name="Field", target_field_name="UpdatedField"
+        )
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
@@ -86,7 +87,9 @@ class TestReplaceConditionEndsWith:
         Enabled: true
         Tags: []
         """
-        transformation = ReplaceConditionEndsWith(source_field_name="Field", target_field_name="UpdatedField")
+        transformation = ReplaceConditionEndsWith(
+            source_field_name="Field", target_field_name="UpdatedField"
+        )
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
@@ -149,7 +152,9 @@ class TestReplaceConditionEndsWith:
         Enabled: true
         Tags: []
         """
-        transformation = ReplaceConditionEndsWith(source_field_name="OriginalFileName", target_field_name="ReplacedFileName")
+        transformation = ReplaceConditionEndsWith(
+            source_field_name="OriginalFileName", target_field_name="ReplacedFileName"
+        )
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 

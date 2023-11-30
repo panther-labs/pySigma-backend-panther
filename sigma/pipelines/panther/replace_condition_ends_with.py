@@ -4,7 +4,7 @@ from typing import Optional
 
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.transformations import AddConditionTransformation
-from sigma.rule import SigmaRule, SigmaDetection, SigmaDetectionItem
+from sigma.rule import SigmaDetection, SigmaDetectionItem, SigmaRule
 
 
 def _get_nested_fields_mapping(di):
@@ -47,9 +47,12 @@ class ReplaceConditionEndsWith(AddConditionTransformation):
 
         if self.source_field_name in fields_mapping:
             field = fields_mapping[self.source_field_name]
-            self.conditions = [{
-                f"{self.target_field_name}|endswith": str(value),
-            } for value in field.value]
+            self.conditions = [
+                {
+                    f"{self.target_field_name}|endswith": str(value),
+                }
+                for value in field.value
+            ]
 
         if not self.conditions:
             return

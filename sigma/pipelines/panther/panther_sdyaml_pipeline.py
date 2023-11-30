@@ -3,9 +3,17 @@ from typing import Optional
 
 import click
 from sigma.pipelines.common import logsource_windows_process_creation
-from sigma.processing.conditions import LogsourceCondition, RuleProcessingCondition
+from sigma.processing.conditions import (
+    IncludeFieldCondition,
+    LogsourceCondition,
+    RuleProcessingCondition,
+)
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
-from sigma.processing.transformations import FieldMappingTransformation, AddConditionTransformation
+from sigma.processing.transformations import (
+    AddConditionTransformation,
+    DropDetectionItemTransformation,
+    FieldMappingTransformation,
+)
 from sigma.rule import SigmaRule
 
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
@@ -71,39 +79,61 @@ def panther_sdyaml_pipeline():
                 ],
             ),
             ProcessingItem(
-                transformation=AddConditionTransformation({
-                    "event_simpleName": "ProcessRollup2",
-                }), rule_conditions=[
+                transformation=AddConditionTransformation(
+                    {
+                        "event_simpleName": "ProcessRollup2",
+                    }
+                ),
+                rule_conditions=[
                     logsource_windows(),
-                ]
+                ],
             ),
             ProcessingItem(
-                transformation=AddConditionTransformation({
-                    "event_platform": "Windows",
-                }), rule_conditions=[
+                transformation=AddConditionTransformation(
+                    {
+                        "event_platform": "Windows",
+                    }
+                ),
+                rule_conditions=[
                     logsource_windows(),
-                ]
+                ],
             ),
-            ProcessingItem(transformation=AddConditionTransformation({
-                "event_platform": "Mac",
-            }), rule_conditions=[logsource_mac()]),
-            ProcessingItem(transformation=AddConditionTransformation({
-                "event_platform": "Linux",
-            }), rule_conditions=[logsource_linux()]),
             ProcessingItem(
-                transformation=AddConditionTransformation({
-                    "event_simpleName": "FileOpenInfo",
-                }), rule_conditions=[logsource_file_event()]
+                transformation=AddConditionTransformation(
+                    {
+                        "event_platform": "Mac",
+                    }
+                ),
+                rule_conditions=[logsource_mac()],
+            ),
+            ProcessingItem(
+                transformation=AddConditionTransformation(
+                    {
+                        "event_platform": "Linux",
+                    }
+                ),
+                rule_conditions=[logsource_linux()],
+            ),
+            ProcessingItem(
+                transformation=AddConditionTransformation(
+                    {
+                        "event_simpleName": "FileOpenInfo",
+                    }
+                ),
+                rule_conditions=[logsource_file_event()],
             ),
             ProcessingItem(
                 transformation=AddConditionTransformation(
                     {
                         "event_simpleName": [
-                            "NetworkConnectIP4", "NetworkConnectIP6", "NetworkReceiveAcceptIP4", "NetworkReceiveAcceptIP6"
+                            "NetworkConnectIP4",
+                            "NetworkConnectIP6",
+                            "NetworkReceiveAcceptIP4",
+                            "NetworkReceiveAcceptIP6",
                         ],
                     }
                 ),
-                rule_conditions=[logsource_network_connection()]
+                rule_conditions=[logsource_network_connection()],
             ),
             ProcessingItem(
                 transformation=FieldMappingTransformation(
@@ -114,14 +144,19 @@ def panther_sdyaml_pipeline():
                         "Image": "event.ImageFileName",
                         "CommandLine": "event.CommandLine",
                         "md5": "event.MD5HashData",
+                        "TargetFileName": "event.TargetFileName",
                     }
                 ),
                 rule_conditions=[
                     crowdstrike_pipeline_was_used(),
                 ],
             ),
+            ProcessingItem(
+                transformation=DropDetectionItemTransformation(),
+                field_name_conditions=[IncludeFieldCondition(fields=["ParentCommandLine"])],
+            ),
         ],
         postprocessing_items=[
             SdYamlTransformation(),
-        ]
+        ],
     )
