@@ -3,9 +3,9 @@ from typing import Optional
 
 import click
 from sigma.pipelines.common import logsource_windows_process_creation
-from sigma.processing.conditions import LogsourceCondition, RuleProcessingCondition
+from sigma.processing.conditions import LogsourceCondition, RuleProcessingCondition, IncludeFieldCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
-from sigma.processing.transformations import FieldMappingTransformation, AddConditionTransformation
+from sigma.processing.transformations import FieldMappingTransformation, AddConditionTransformation, DropDetectionItemTransformation
 from sigma.rule import SigmaRule
 
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
@@ -114,11 +114,16 @@ def panther_sdyaml_pipeline():
                         "Image": "event.ImageFileName",
                         "CommandLine": "event.CommandLine",
                         "md5": "event.MD5HashData",
+                        "TargetFileName": "event.TargetFileName",
                     }
                 ),
                 rule_conditions=[
                     crowdstrike_pipeline_was_used(),
                 ],
+            ),
+            ProcessingItem(
+                transformation=DropDetectionItemTransformation(),
+                field_name_conditions=[IncludeFieldCondition(fields=["ParentCommandLine"])]
             ),
         ],
         postprocessing_items=[
