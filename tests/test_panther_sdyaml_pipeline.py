@@ -5,11 +5,10 @@ from sigma.collection import SigmaCollection
 
 
 def test_basic(sigma_sdyaml_backend):
-    rule_id = uuid.uuid4()
     rule = SigmaCollection.from_yaml(
         f"""
         title: Test Title
-        id: {rule_id}
+        id: {uuid.uuid4()}
         logsource:
             category: process_creation
             product: windows
@@ -23,7 +22,6 @@ def test_basic(sigma_sdyaml_backend):
     expected = yaml.dump(
         {
             "AnalysisType": "rule",
-            "RuleID": str(rule_id),
             "DisplayName": "Test Title",
             "Description": None,
             "Tags": [],

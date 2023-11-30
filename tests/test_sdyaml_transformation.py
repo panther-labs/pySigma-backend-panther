@@ -1,5 +1,5 @@
 from unittest import mock
-from sigma.rule import SigmaRule, SigmaLogSource, SigmaLevel
+from sigma.rule import SigmaRule, SigmaLogSource, SigmaLevel, SigmaRuleTag
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -14,7 +14,7 @@ class TestSdYamlTransformation:
 
         rule.references = references
         res = transformation.apply(pipeline, rule, "query")
-        assert res[0]["Reference"] == references[0] + ", " + references[1] + ", " + references[2]
+        assert res[0]["Reference"] == references[0]  # only first reference should be used
 
     def test_apply_author(self, pipeline, sigma_detection):
         author = "Cool Person"
@@ -58,3 +58,22 @@ class TestSdYamlTransformation:
             mock_get_current_context.return_value.params = {"pipeline": ["crowdstrike_fdr"]}
             res = transformation.apply(pipeline, rule, "")
             assert res[0]["LogTypes"] == ["Crowdstrike.FDREvent"]
+
+    def test_apply_false_positives(self, pipeline, sigma_detection):
+        transformation = SdYamlTransformation()
+        rule = SigmaRule("title", SigmaLogSource(product="windows"), sigma_detection, falsepositives=[])
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["Description"] is None
+
+        rule.falsepositives = ["fp1", "fp2"]
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["Description"] == "False Positives: fp1, fp2"
+
+    def test_mittre_tags(self, pipeline, rule):
+        transformation = SdYamlTransformation()
+        res = transformation.apply(pipeline, rule, "")
+        assert "Reports" not in res[0]
+
+        rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("dunno", "t1001")]
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["Reports"] == {"MITRE ATT&CK": ["T1001"]}

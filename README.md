@@ -16,6 +16,17 @@ Further, it contains the following processing pipelines in `sigma.pipelines.pant
 
 * panther_sdyaml_pipeline: Convert known Sigma field names into their Panther schema equivalent
 
+### Local setup for development
+Clone this repo, cd into it and run:
+```poetry install```
+that is all you need to do. 
+
+Now you can run tests with:
+```poetry run pytest```
+
+To convert rules to panther sdyaml format run:
+```poetry run sigma convert -t panther_sdyaml -p panther_sdyaml path_to_sigma_rule.yml```
+
 This backend is currently maintained by:
 
 * [Oleh Melenevskyi](https://github.com/melenevskyi/)

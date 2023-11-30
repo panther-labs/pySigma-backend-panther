@@ -325,11 +325,15 @@ class PantherSdyamlBackend(Backend):
         for query in queries:
             file_path = path.join(self.output_dir, query["SigmaFile"])
             with open(file_path, 'w') as file:
+                query.pop("SigmaFile", None)
                 yaml.dump(query, file)
 
     def finalize_output_default(self, queries: List[Any]) -> Any:
         if self.output_dir:
             self.save_queries_into_individual_files(queries)
+        # cleanup of SigmaFile key
+        for query in queries:
+            query.pop("SigmaFile", None)
         if len(queries) == 1:
             return yaml.dump(queries[0])
         return yaml.dump(queries)
