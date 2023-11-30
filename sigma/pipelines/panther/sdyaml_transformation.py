@@ -29,9 +29,10 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             res["Description"] += f"\n\nAuthor: {rule.author}"
 
         if rule.falsepositives:
-            res["Description"] = (
-                (res["Description"] or "") + "False Positives: " + ", ".join(rule.falsepositives)
-            )
+            description = res["Description"] or ""
+            if description:
+                description += "\n"
+            res["Description"] = description + "False Positives: " + ", ".join(rule.falsepositives)
 
         if rule.source:
             res["RuleID"] = path.split(rule.source.path)[-1].replace(".yml", "")

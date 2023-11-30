@@ -20,7 +20,7 @@ def test_basic():
         id: {rule_id}
         logsource:
             category: process_creation
-            product: windows
+            product: macos
         detection:
             sel:
                 Field1: "banana"
@@ -42,7 +42,7 @@ def test_basic():
                         {
                             "Condition": "Equals",
                             "KeyPath": "device_os",
-                            "Value": "WINDOWS",
+                            "Value": "MAC",
                         },
                         {
                             "All": [

@@ -27,15 +27,11 @@ class TestReplaceConditionEndsWith:
         Detection:
         - All:
           - Condition: Equals
-            KeyPath: event_platform
-            Value: Windows
-          - All:
-            - Condition: Equals
-              KeyPath: event_simpleName
-              Value: ProcessRollup2
-            - Condition: EndsWith
-              KeyPath: UpdatedField
-              Value: banana
+            KeyPath: event_simpleName
+            Value: ProcessRollup2
+          - Condition: EndsWith
+            KeyPath: UpdatedField
+            Value: banana
         DisplayName: Test Title
         Enabled: true
         Tags: []
@@ -70,19 +66,15 @@ class TestReplaceConditionEndsWith:
         Detection:
         - All:
           - Condition: Equals
-            KeyPath: event_platform
-            Value: Windows
-          - All:
-            - Condition: Equals
-              KeyPath: event_simpleName
-              Value: ProcessRollup2
-            - Any:
-                - Condition: EndsWith
-                  KeyPath: UpdatedField
-                  Value: banana
-                - Condition: EndsWith
-                  KeyPath: UpdatedField
-                  Value: apple
+            KeyPath: event_simpleName
+            Value: ProcessRollup2
+          - Any:
+              - Condition: EndsWith
+                KeyPath: UpdatedField
+                Value: banana
+              - Condition: EndsWith
+                KeyPath: UpdatedField
+                Value: apple
         DisplayName: Test Title
         Enabled: true
         Tags: []
@@ -120,10 +112,6 @@ class TestReplaceConditionEndsWith:
         AnalysisType: rule
         Description: null
         Detection:
-        - All:
-          - Condition: Equals
-            KeyPath: event_platform
-            Value: Windows
           - All:
             - Condition: Equals
               KeyPath: event_simpleName
