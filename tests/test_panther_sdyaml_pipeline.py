@@ -28,18 +28,9 @@ def test_basic(sigma_sdyaml_backend):
             "Enabled": True,
             "Detection": [
                 {
-                    "All": [
-                        {
-                            "Condition": "Equals",
-                            "KeyPath": "event_simpleName",
-                            "Value": "ProcessRollup2",
-                        },
-                        {
-                            "Condition": "Equals",
-                            "KeyPath": "Field1",
-                            "Value": "banana",
-                        },
-                    ]
+                    "Condition": "Equals",
+                    "KeyPath": "Field1",
+                    "Value": "banana",
                 },
             ],
         }
