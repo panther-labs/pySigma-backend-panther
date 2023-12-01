@@ -496,6 +496,20 @@ pyyaml = ">=6.0,<7.0"
 requests = ">=2.28.1,<3.0.0"
 
 [[package]]
+name = "pysigma-pipeline-crowdstrike"
+version = "1.0.1"
+description = "pySigma CrowdStrike processing pipelines"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "pysigma_pipeline_crowdstrike-1.0.1-py3-none-any.whl", hash = "sha256:f19522bf144d9a4cad11fd08458414eeed8bd5843b0213a1c4bff66db6049dff"},
+    {file = "pysigma_pipeline_crowdstrike-1.0.1.tar.gz", hash = "sha256:8c38420a4a7fc252bf890a6b777bcd651cd63f2636bc9591014df4db1bbf159f"},
+]
+
+[package.dependencies]
+pysigma = ">=0.10.2,<0.11.0"
+
+[[package]]
 name = "pytest"
 version = "7.4.3"
 description = "pytest: simple powerful testing with Python"
@@ -684,4 +698,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "c87548fc50379141e1461c71c81b4e27e3e89be2b8efaac06d260fb20fe86266"
+content-hash = "3a58012a8578feac25f49fb266b1646e02f183540269430b5a05c29c0633b367"

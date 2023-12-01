@@ -10,7 +10,6 @@ from sigma.processing.conditions import (
 )
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
 from sigma.processing.transformations import (
-    AddConditionTransformation,
     DropDetectionItemTransformation,
     FieldMappingTransformation,
 )
@@ -52,10 +51,6 @@ class PipelineWasUsed(RuleProcessingCondition):
         return cli_context and self.pipeline in cli_context.params["pipeline"]
 
 
-def crowdstrike_pipeline_was_used():
-    return PipelineWasUsed("crowdstrike_fdr")
-
-
 def panther_sdyaml_pipeline():
     return ProcessingPipeline(
         name="Generic Log Sources to Panther Transformation",
@@ -76,81 +71,6 @@ def panther_sdyaml_pipeline():
                 ),
                 rule_conditions=[
                     logsource_windows_process_creation(),
-                ],
-            ),
-            ProcessingItem(
-                transformation=AddConditionTransformation(
-                    {
-                        "event_simpleName": "ProcessRollup2",
-                    }
-                ),
-                rule_conditions=[
-                    logsource_windows(),
-                    crowdstrike_pipeline_was_used(),
-                ],
-            ),
-            ProcessingItem(
-                transformation=AddConditionTransformation(
-                    {
-                        "event_platform": "Windows",
-                    }
-                ),
-                rule_conditions=[
-                    logsource_windows(),
-                    crowdstrike_pipeline_was_used(),
-                ],
-            ),
-            ProcessingItem(
-                transformation=AddConditionTransformation(
-                    {
-                        "event_platform": "Mac",
-                    }
-                ),
-                rule_conditions=[logsource_mac(), crowdstrike_pipeline_was_used()],
-            ),
-            ProcessingItem(
-                transformation=AddConditionTransformation(
-                    {
-                        "event_platform": "Linux",
-                    }
-                ),
-                rule_conditions=[logsource_linux(), crowdstrike_pipeline_was_used()],
-            ),
-            ProcessingItem(
-                transformation=AddConditionTransformation(
-                    {
-                        "event_simpleName": "FileOpenInfo",
-                    }
-                ),
-                rule_conditions=[logsource_file_event(), crowdstrike_pipeline_was_used()],
-            ),
-            ProcessingItem(
-                transformation=AddConditionTransformation(
-                    {
-                        "event_simpleName": [
-                            "NetworkConnectIP4",
-                            "NetworkConnectIP6",
-                            "NetworkReceiveAcceptIP4",
-                            "NetworkReceiveAcceptIP6",
-                        ],
-                    }
-                ),
-                rule_conditions=[logsource_network_connection(), crowdstrike_pipeline_was_used()],
-            ),
-            ProcessingItem(
-                transformation=FieldMappingTransformation(
-                    {
-                        "sha256": "event.SHA256HashData",
-                        "sha1": "event.SHA1HashData",
-                        "ParentImage": "event.ParentBaseFileName",
-                        "Image": "event.ImageFileName",
-                        "CommandLine": "event.CommandLine",
-                        "md5": "event.MD5HashData",
-                        "TargetFileName": "event.TargetFileName",
-                    }
-                ),
-                rule_conditions=[
-                    crowdstrike_pipeline_was_used(),
                 ],
             ),
             ProcessingItem(
