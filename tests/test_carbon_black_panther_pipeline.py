@@ -37,7 +37,7 @@ def test_basic():
             "AnalysisType": "rule",
             "DisplayName": "Test Title",
             "Enabled": True,
-            "Tags": [],
+            "Tags": ["Sigma"],
             "Detection": [
                 {
                     "All": [

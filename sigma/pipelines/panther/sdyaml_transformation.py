@@ -24,7 +24,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             "AnalysisType": "rule",
             "DisplayName": rule.title,
             "Description": rule.description,
-            "Tags": [tag.name for tag in rule.tags],
+            "Tags": ["Sigma"] + [tag.name for tag in rule.tags],
             "Enabled": True,
             "Detection": [query],
         }
