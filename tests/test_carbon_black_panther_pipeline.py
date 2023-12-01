@@ -18,6 +18,7 @@ def test_basic():
         f"""
         title: Test Title
         id: {rule_id}
+        description: description
         logsource:
             category: process_creation
             product: macos
@@ -31,36 +32,45 @@ def test_basic():
 
     expected = yaml.dump(
         {
-            "All": [
-                {
-                    "Condition": "Equals",
-                    "KeyPath": "type",
-                    "Value": "endpoint.event.procstart",
-                },
+            "Description": "description",
+            "AnalysisType": "rule",
+            "DisplayName": "Test Title",
+            "Enabled": True,
+            "Tags": [],
+            "Detection": [
                 {
                     "All": [
                         {
                             "Condition": "Equals",
-                            "KeyPath": "device_os",
-                            "Value": "MAC",
+                            "KeyPath": "type",
+                            "Value": "endpoint.event.procstart",
                         },
                         {
                             "All": [
                                 {
                                     "Condition": "Equals",
-                                    "KeyPath": "Field1",
-                                    "Value": "banana",
+                                    "KeyPath": "device_os",
+                                    "Value": "MAC",
                                 },
                                 {
-                                    "Condition": "Equals",
-                                    "KeyPath": "remote_ip",
-                                    "Value": "127.0.0.1",
+                                    "All": [
+                                        {
+                                            "Condition": "Equals",
+                                            "KeyPath": "Field1",
+                                            "Value": "banana",
+                                        },
+                                        {
+                                            "Condition": "Equals",
+                                            "KeyPath": "remote_ip",
+                                            "Value": "127.0.0.1",
+                                        },
+                                    ]
                                 },
                             ]
                         },
                     ]
-                },
-            ]
+                }
+            ],
         }
     )
 

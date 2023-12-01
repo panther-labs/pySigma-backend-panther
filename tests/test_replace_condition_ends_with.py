@@ -25,10 +25,6 @@ class TestReplaceConditionEndsWith:
         AnalysisType: rule
         Description: null
         Detection:
-        - All:
-          - Condition: Equals
-            KeyPath: event_simpleName
-            Value: ProcessRollup2
           - Condition: EndsWith
             KeyPath: UpdatedField
             Value: banana
@@ -64,10 +60,6 @@ class TestReplaceConditionEndsWith:
         AnalysisType: rule
         Description: null
         Detection:
-        - All:
-          - Condition: Equals
-            KeyPath: event_simpleName
-            Value: ProcessRollup2
           - Any:
               - Condition: EndsWith
                 KeyPath: UpdatedField
@@ -112,10 +104,6 @@ class TestReplaceConditionEndsWith:
         AnalysisType: rule
         Description: null
         Detection:
-          - All:
-            - Condition: Equals
-              KeyPath: event_simpleName
-              Value: ProcessRollup2
             - All:
               - Condition: EndsWith
                 KeyPath: ReplacedFileName

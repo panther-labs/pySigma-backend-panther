@@ -14,6 +14,7 @@ from sigma.pipelines.panther.panther_sdyaml_pipeline import (
     logsource_process_creation,
     logsource_windows,
 )
+from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
 def carbon_black_panther_pipeline():
@@ -63,5 +64,8 @@ def carbon_black_panther_pipeline():
                 transformation=DropDetectionItemTransformation(),
                 field_name_conditions=[IncludeFieldCondition(fields=["OriginalFileName"])],
             ),
+        ],
+        postprocessing_items=[
+            SdYamlTransformation(),
         ],
     )
