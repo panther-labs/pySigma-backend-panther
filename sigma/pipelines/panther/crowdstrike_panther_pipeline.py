@@ -1,6 +1,6 @@
 from sigma.pipelines.crowdstrike import crowdstrike_fdr_pipeline
 from sigma.processing.conditions import IncludeFieldCondition
-from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
+from sigma.processing.pipeline import ProcessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
     DropDetectionItemTransformation,
@@ -81,6 +81,10 @@ def crowdstrike_panther_pipeline():
                     "TargetFileName": "event.TargetFileName",
                 }
             ),
+        ),
+        ProcessingItem(
+            transformation=DropDetectionItemTransformation(),
+            field_name_conditions=[IncludeFieldCondition(fields=["DestinationHostname"])],
         ),
     ]
     return crowdstrike_pipeline

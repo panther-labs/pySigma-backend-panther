@@ -1,4 +1,4 @@
-from sigma.processing.conditions import IncludeFieldCondition
+from sigma.processing.conditions import IncludeFieldCondition, RuleContainsDetectionItemCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
 from sigma.processing.transformations import (
     AddConditionTransformation,
@@ -63,6 +63,23 @@ def carbon_black_panther_pipeline():
             ProcessingItem(
                 transformation=DropDetectionItemTransformation(),
                 field_name_conditions=[IncludeFieldCondition(fields=["OriginalFileName"])],
+            ),
+            ProcessingItem(
+                transformation=AddConditionTransformation({"netconn_inbound": "false"}),
+                rule_conditions=[
+                    RuleContainsDetectionItemCondition(
+                        field="Initiated",
+                        value="true",
+                    ),
+                ],
+            ),
+            ProcessingItem(
+                transformation=DropDetectionItemTransformation(),
+                field_name_conditions=[
+                    IncludeFieldCondition(
+                        fields=["Initiated"],
+                    )
+                ],
             ),
         ],
         postprocessing_items=[
