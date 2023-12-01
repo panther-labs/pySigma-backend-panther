@@ -1,12 +1,19 @@
 import logging
-import uuid
 from os import path
 from typing import Any
 
 import click
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
-from sigma.rule import SigmaRule
+from sigma.rule import SigmaLevel, SigmaRule
+
+SEVERITY_MAPPING = {
+    SigmaLevel.INFORMATIONAL: "Info",
+    SigmaLevel.LOW: "Low",
+    SigmaLevel.MEDIUM: "Medium",
+    SigmaLevel.HIGH: "High",
+    SigmaLevel.CRITICAL: "Critical",
+}
 
 
 class SdYamlTransformation(QueryPostprocessingTransformation):
@@ -42,7 +49,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             res["SigmaFile"] = path.split(rule.source.path)[-1]
 
         if rule.level:
-            res["Severity"] = rule.level.name
+            res["Severity"] = SEVERITY_MAPPING[rule.level]
 
         log_types = self._detect_log_types(rule)
         if len(log_types) == 0:
