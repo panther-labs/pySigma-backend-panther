@@ -86,6 +86,7 @@ def panther_sdyaml_pipeline():
                 ),
                 rule_conditions=[
                     logsource_windows(),
+                    crowdstrike_pipeline_was_used(),
                 ],
             ),
             ProcessingItem(
@@ -121,7 +122,7 @@ def panther_sdyaml_pipeline():
                         "event_simpleName": "FileOpenInfo",
                     }
                 ),
-                rule_conditions=[logsource_file_event()],
+                rule_conditions=[logsource_file_event(), crowdstrike_pipeline_was_used()],
             ),
             ProcessingItem(
                 transformation=AddConditionTransformation(
@@ -134,7 +135,7 @@ def panther_sdyaml_pipeline():
                         ],
                     }
                 ),
-                rule_conditions=[logsource_network_connection()],
+                rule_conditions=[logsource_network_connection(), crowdstrike_pipeline_was_used()],
             ),
             ProcessingItem(
                 transformation=FieldMappingTransformation(
