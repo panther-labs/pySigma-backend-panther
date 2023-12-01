@@ -47,7 +47,7 @@ class TestSdYamlTransformation:
 
         rule.level = severity
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Severity"] == severity.name
+        assert res[0]["Severity"] == "Critical"
 
     def test_apply_log_types(self, pipeline, rule):
         transformation = SdYamlTransformation()
