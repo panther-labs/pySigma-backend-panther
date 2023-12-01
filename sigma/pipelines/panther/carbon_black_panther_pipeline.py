@@ -14,7 +14,6 @@ from sigma.pipelines.panther.panther_sdyaml_pipeline import (
     logsource_process_creation,
     logsource_windows,
 )
-
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
