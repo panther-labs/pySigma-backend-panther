@@ -378,6 +378,7 @@ class PantherSdyamlBackend(Backend):
         except (
             Exception
         ) as e:  # enrich all other exceptions with Sigma-specific context information
+            error_state = e
             msg = f" (while {error_state} rule {str(rule.source)})"
             if len(e.args) > 1:
                 e.args = (e.args[0] + msg,) + e.args[1:]

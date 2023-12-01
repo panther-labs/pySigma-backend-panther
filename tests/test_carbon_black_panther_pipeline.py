@@ -26,6 +26,7 @@ def test_basic():
             sel:
                 Field1: "banana"
                 DestinationIp: 127.0.0.1
+                Initiated: "true"
             condition: sel
     """
     )
@@ -36,33 +37,42 @@ def test_basic():
             "AnalysisType": "rule",
             "DisplayName": "Test Title",
             "Enabled": True,
-            "Tags": [],
+            "Tags": ["Sigma"],
             "Detection": [
                 {
                     "All": [
                         {
                             "Condition": "Equals",
-                            "KeyPath": "type",
-                            "Value": "endpoint.event.procstart",
+                            "KeyPath": "netconn_inbound",
+                            "Value": "false",
                         },
                         {
                             "All": [
                                 {
                                     "Condition": "Equals",
-                                    "KeyPath": "device_os",
-                                    "Value": "MAC",
+                                    "KeyPath": "type",
+                                    "Value": "endpoint.event.procstart",
                                 },
                                 {
                                     "All": [
                                         {
                                             "Condition": "Equals",
-                                            "KeyPath": "Field1",
-                                            "Value": "banana",
+                                            "KeyPath": "device_os",
+                                            "Value": "MAC",
                                         },
                                         {
-                                            "Condition": "Equals",
-                                            "KeyPath": "remote_ip",
-                                            "Value": "127.0.0.1",
+                                            "All": [
+                                                {
+                                                    "Condition": "Equals",
+                                                    "KeyPath": "Field1",
+                                                    "Value": "banana",
+                                                },
+                                                {
+                                                    "Condition": "Equals",
+                                                    "KeyPath": "remote_ip",
+                                                    "Value": "127.0.0.1",
+                                                },
+                                            ]
                                         },
                                     ]
                                 },

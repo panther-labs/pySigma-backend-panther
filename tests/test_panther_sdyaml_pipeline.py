@@ -24,7 +24,7 @@ def test_basic(sigma_sdyaml_backend):
             "AnalysisType": "rule",
             "DisplayName": "Test Title",
             "Description": None,
-            "Tags": [],
+            "Tags": ["Sigma"],
             "Enabled": True,
             "Detection": [
                 {

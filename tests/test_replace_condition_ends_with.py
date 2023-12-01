@@ -30,7 +30,8 @@ class TestReplaceConditionEndsWith:
             Value: banana
         DisplayName: Test Title
         Enabled: true
-        Tags: []
+        Tags:
+          - Sigma
         """
         transformation = ReplaceConditionEndsWith(
             source_field_name="Field", target_field_name="UpdatedField"
@@ -69,7 +70,8 @@ class TestReplaceConditionEndsWith:
                 Value: apple
         DisplayName: Test Title
         Enabled: true
-        Tags: []
+        Tags:
+          - Sigma
         """
         transformation = ReplaceConditionEndsWith(
             source_field_name="Field", target_field_name="UpdatedField"
@@ -126,7 +128,8 @@ class TestReplaceConditionEndsWith:
                     Value: '/node:localhost '   
         DisplayName: Test Title
         Enabled: true
-        Tags: []
+        Tags:
+         - Sigma
         """
         transformation = ReplaceConditionEndsWith(
             source_field_name="OriginalFileName", target_field_name="ReplacedFileName"
