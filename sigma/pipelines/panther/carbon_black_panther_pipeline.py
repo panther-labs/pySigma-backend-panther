@@ -14,6 +14,7 @@ from sigma.pipelines.panther.panther_sdyaml_pipeline import (
     logsource_process_creation,
     logsource_windows,
 )
+from sigma.pipelines.panther.processing import RuleIContainsDetectionItemCondition
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -56,7 +57,6 @@ def carbon_black_panther_pipeline():
                         "DestinationIp": "remote_ip",
                         "DestinationPort": "remote_port",
                         "DestinationHostname": "netconn_domain",
-                        "Protocol": "netconn_protocol",
                     }
                 ),
             ),
@@ -78,6 +78,32 @@ def carbon_black_panther_pipeline():
                 field_name_conditions=[
                     IncludeFieldCondition(
                         fields=["Initiated"],
+                    )
+                ],
+            ),
+            ProcessingItem(
+                transformation=AddConditionTransformation({"netconn_protocol": "PROTO_TCP"}),
+                rule_conditions=[
+                    RuleIContainsDetectionItemCondition(
+                        field="Protocol",
+                        value="tcp",
+                    ),
+                ],
+            ),
+            ProcessingItem(
+                transformation=AddConditionTransformation({"netconn_protocol": "PROTO_UDP"}),
+                rule_conditions=[
+                    RuleIContainsDetectionItemCondition(
+                        field="Protocol",
+                        value="udp",
+                    ),
+                ],
+            ),
+            ProcessingItem(
+                transformation=DropDetectionItemTransformation(),
+                field_name_conditions=[
+                    IncludeFieldCondition(
+                        fields=["Protocol"],
                     )
                 ],
             ),
