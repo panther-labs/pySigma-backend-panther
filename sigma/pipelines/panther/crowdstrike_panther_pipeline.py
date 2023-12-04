@@ -1,5 +1,5 @@
 from sigma.pipelines.crowdstrike import crowdstrike_fdr_pipeline
-from sigma.processing.conditions import IncludeFieldCondition
+from sigma.processing.conditions import IncludeFieldCondition, RuleContainsDetectionItemCondition
 from sigma.processing.pipeline import ProcessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
@@ -14,6 +14,7 @@ from sigma.pipelines.panther.panther_sdyaml_pipeline import (
     logsource_network_connection,
     logsource_windows,
 )
+from sigma.pipelines.panther.processing import RuleIContainsDetectionItemCondition
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -85,6 +86,50 @@ def crowdstrike_panther_pipeline():
         ProcessingItem(
             transformation=DropDetectionItemTransformation(),
             field_name_conditions=[IncludeFieldCondition(fields=["DestinationHostname"])],
+        ),
+        ProcessingItem(
+            transformation=AddConditionTransformation({"event.Protocol": "ICMP"}),
+            rule_conditions=[
+                RuleIContainsDetectionItemCondition(
+                    field="Protocol",
+                    value=1,
+                ),
+            ],
+        ),
+        ProcessingItem(
+            transformation=AddConditionTransformation({"event.Protocol": "TCP"}),
+            rule_conditions=[
+                RuleIContainsDetectionItemCondition(
+                    field="Protocol",
+                    value=6,
+                ),
+            ],
+        ),
+        ProcessingItem(
+            transformation=AddConditionTransformation({"event.Protocol": "UDP"}),
+            rule_conditions=[
+                RuleIContainsDetectionItemCondition(
+                    field="Protocol",
+                    value=17,
+                ),
+            ],
+        ),
+        ProcessingItem(
+            transformation=AddConditionTransformation({"event.Protocol": "IPv6-ICMP"}),
+            rule_conditions=[
+                RuleIContainsDetectionItemCondition(
+                    field="Protocol",
+                    value=58,
+                ),
+            ],
+        ),
+        ProcessingItem(
+            transformation=DropDetectionItemTransformation(),
+            field_name_conditions=[
+                IncludeFieldCondition(
+                    fields=["Protocol"],
+                )
+            ],
         ),
     ]
     return crowdstrike_pipeline
