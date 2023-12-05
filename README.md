@@ -3,6 +3,8 @@
 [![Test](https://github.com/panther-labs/pySigma-backend-panther-sdyaml/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/panther-labs/pySigma-backend-panther-sdyaml/actions/workflows/test.yml)
 ![Status](https://img.shields.io/badge/Status-pre--release-orange)
 
+[Docs](https://docs.panther.com/panther-developer-workflows/converting-sigma-rules)
+
 This is the `panther_python` backend for pySigma. It provides the package `sigma.backends.panther` with the `PantherSdYamlBackend` class.
 
 It supports the following output formats:
