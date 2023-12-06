@@ -12,13 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: 1.2
+        run: |
+          pipx install poetry
       - name: Verify versioning
         run: |
           [ "$(poetry version -s)" == "${GITHUB_REF#refs/tags/v}" ]
@@ -30,12 +29,7 @@ jobs:
         run: poetry build
       - name: Configure Poetry
         run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry config pypi-token.testpypi ${{ secrets.TEST_PYPI_API_TOKEN }}
           poetry config pypi-token.pypi "${{ secrets.PYPI_API_TOKEN }}"
-      - name: Publish to test PyPI
-        if: ${{ github.event_name == 'push' }}
-        run: poetry publish -r testpypi
       - name: Publish to PyPI
         if: ${{ github.event_name == 'release' }}
         run: poetry publish
