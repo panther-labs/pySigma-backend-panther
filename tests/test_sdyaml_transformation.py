@@ -49,7 +49,6 @@ class TestSdYamlTransformation:
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["Description"] == "Some description\n\nStatus: experimental"
 
-
     def test_apply_severity(self, pipeline, rule):
         severity = SigmaLevel.CRITICAL
         transformation = SdYamlTransformation()
