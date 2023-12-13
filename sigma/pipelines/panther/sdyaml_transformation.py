@@ -32,6 +32,9 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         if rule.references:
             res["Reference"] = rule.references[0]
 
+        if rule.status:
+            res["Description"] += f"\n\nStatus: {rule.status}"
+
         if rule.author:
             res["Description"] += f"\n\nAuthor: {rule.author}"
 
