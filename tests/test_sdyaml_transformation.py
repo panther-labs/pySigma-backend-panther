@@ -1,6 +1,6 @@
 from unittest import mock
 
-from sigma.rule import SigmaLevel, SigmaLogSource, SigmaRule, SigmaRuleTag
+from sigma.rule import SigmaLevel, SigmaLogSource, SigmaRule, SigmaRuleTag, SigmaStatus
 
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
@@ -38,6 +38,17 @@ class TestSdYamlTransformation:
         rule.author = author
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["Description"] == f"{description}\n\nAuthor: {author}"
+
+    def test_apply_status(self, pipeline, rule):
+        rule.description = "Some description"
+        transformation = SdYamlTransformation()
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["Description"] == "Some description"
+
+        rule.status = SigmaStatus.EXPERIMENTAL
+        res = transformation.apply(pipeline, rule, "")
+        assert res[0]["Description"] == "Some description\n\nStatus: experimental"
+
 
     def test_apply_severity(self, pipeline, rule):
         severity = SigmaLevel.CRITICAL
