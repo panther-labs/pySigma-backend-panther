@@ -19,6 +19,12 @@ SEVERITY_MAPPING = {
 class SdYamlTransformation(QueryPostprocessingTransformation):
     identifier = "SDYaml"
 
+    _logsources_map: dict[tuple[str, str], str] = {
+        ("okta", "okta"): "Okta.SystemLog",
+        ("aws", "cloudtrail"): "AWS.CloudTrail",
+        ("github", "audit"): "GitHub.Audit",
+    }
+
     def apply(self, pipeline: ProcessingPipeline, rule: SigmaRule, query: Any) -> Any:
         res = {
             "AnalysisType": "rule",
@@ -71,11 +77,10 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
     def _detect_log_types(self, rule: SigmaRule) -> [str]:
         log_types = []
-        if rule.logsource.product == "okta" and rule.logsource.service == "okta":
-            log_types.append("Okta.SystemLog")
 
-        if rule.logsource.product == "aws" and rule.logsource.service == "cloudtrail":
-            log_types.append("AWS.CloudTrail")
+        mapped_log_type = self._logsources_map.get((rule.logsource.product, rule.logsource.service))
+        if mapped_log_type:
+            log_types.append(mapped_log_type)
 
         cli_context = click.get_current_context(silent=True)
         if cli_context:
