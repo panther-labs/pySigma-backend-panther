@@ -66,7 +66,6 @@ def test_basic():
                             "KeyPath": "remote_ip",
                             "Value": "127.0.0.1",
                         },
-
                     ]
                 }
             ],
