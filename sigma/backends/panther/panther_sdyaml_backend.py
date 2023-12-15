@@ -71,8 +71,18 @@ class PantherSdyamlBackend(Backend):
 
         return list(rv)
 
-    def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
+    def simplify_convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
+        simplified = []
+        for key_cond_value in key_cond_values:
+            if key_cond_value.get(self.SDYAML_ALL):
+                simplified.extend(key_cond_value[self.SDYAML_ALL])
+            else:
+                simplified.append(key_cond_value)
+        return simplified
+
+    def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
+        key_cond_values = self.simplify_convert_condition_and(cond, state)
 
         return {self.SDYAML_ALL: key_cond_values}
 
