@@ -1,5 +1,6 @@
 from unittest import mock
 
+import pytest
 from sigma.rule import SigmaLevel, SigmaLogSource, SigmaRule, SigmaRuleTag, SigmaStatus
 
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
@@ -59,19 +60,23 @@ class TestSdYamlTransformation:
         res = transformation.apply(pipeline, rule, "")
         assert res[0]["Severity"] == "Critical"
 
-    def test_apply_log_types(self, pipeline, rule):
+    @pytest.mark.parametrize(
+        "sigma_log_source, expected_result",
+        (
+            (SigmaLogSource(product="unknown"), None),
+            (SigmaLogSource(product="okta", service="okta"), ["Okta.SystemLog"]),
+            (SigmaLogSource(product="aws", service="cloudtrail"), ["AWS.CloudTrail"]),
+            (SigmaLogSource(product="github", service="audit"), ["GitHub.Audit"]),
+        ),
+    )
+    def test_apply_log_types(self, expected_result, sigma_log_source, pipeline, rule):
         transformation = SdYamlTransformation()
-        rule.logsource = SigmaLogSource(product="unknown")
+        rule.logsource = sigma_log_source
         res = transformation.apply(pipeline, rule, "")
-        assert "LogTypes" not in res[0]
+        assert res[0].get("LogTypes") == expected_result
 
-        rule.logsource = SigmaLogSource(product="okta", service="okta")
-        res = transformation.apply(pipeline, rule, "")
-        assert res[0]["LogTypes"] == ["Okta.SystemLog"]
-
-        rule.logsource = SigmaLogSource(product="aws", service="cloudtrail")
-        res = transformation.apply(pipeline, rule, "")
-        assert res[0]["LogTypes"] == ["AWS.CloudTrail"]
+    def test_apply_log_types_crowdstrike(self, pipeline, rule):
+        transformation = SdYamlTransformation()
 
         with mock.patch("click.get_current_context") as mock_get_current_context:
             rule.logsource = SigmaLogSource(product="product", service="service")
