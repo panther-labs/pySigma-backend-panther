@@ -47,36 +47,24 @@ def test_basic():
                             "Value": "false",
                         },
                         {
-                            "All": [
-                                {
-                                    "Condition": "Equals",
-                                    "KeyPath": "type",
-                                    "Value": "endpoint.event.procstart",
-                                },
-                                {
-                                    "All": [
-                                        {
-                                            "Condition": "Equals",
-                                            "KeyPath": "device_os",
-                                            "Value": "MAC",
-                                        },
-                                        {
-                                            "All": [
-                                                {
-                                                    "Condition": "Equals",
-                                                    "KeyPath": "Field1",
-                                                    "Value": "banana",
-                                                },
-                                                {
-                                                    "Condition": "Equals",
-                                                    "KeyPath": "remote_ip",
-                                                    "Value": "127.0.0.1",
-                                                },
-                                            ]
-                                        },
-                                    ]
-                                },
-                            ]
+                            "Condition": "Equals",
+                            "KeyPath": "type",
+                            "Value": "endpoint.event.procstart",
+                        },
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "device_os",
+                            "Value": "MAC",
+                        },
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "Field1",
+                            "Value": "banana",
+                        },
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "remote_ip",
+                            "Value": "127.0.0.1",
                         },
                     ]
                 }

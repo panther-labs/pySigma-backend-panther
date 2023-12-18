@@ -136,13 +136,12 @@ def test_condition_and__with_implicit_and(backend):
 
     expected_result = """
     All:
-        - All:
-            - Condition: Equals
-              KeyPath: fieldA1
-              Value: valueA1
-            - Condition: Equals
-              KeyPath: fieldA2
-              Value: valueA2
+        - Condition: Equals
+          KeyPath: fieldA1
+          Value: valueA1
+        - Condition: Equals
+          KeyPath: fieldA2
+          Value: valueA2
         - Condition: Equals
           KeyPath: fieldB
           Value: valueB
@@ -385,24 +384,23 @@ def test_aws_ec2_vm_export_failure(backend):
 
     expected_result = """
     All: # [selection] and [not 1 of filter*]
-        - All: # selection implicit AND
-            - KeyPath: eventName
-              Condition: Equals
-              Value: 'CreateInstanceExportTask'
-            - KeyPath: eventSource
-              Condition: Equals
-              Value: 'ec2.amazonaws.com'
-        - All:
-            # not filter1
-            - KeyPath: errorMessage
-              Condition: DoesNotExist
-            # not filter2
-            - KeyPath: errorCode
-              Condition: DoesNotExist
-            # not filter3
-            - KeyPath: responseElements
-              Condition: DoesNotContain
-              Value: 'Failure'
+        # selection implicit AND
+        - KeyPath: eventName
+          Condition: Equals
+          Value: 'CreateInstanceExportTask'
+        - KeyPath: eventSource
+          Condition: Equals
+          Value: 'ec2.amazonaws.com'
+        # not filter1
+        - KeyPath: errorMessage
+          Condition: DoesNotExist
+        # not filter2
+        - KeyPath: errorCode
+          Condition: DoesNotExist
+        # not filter3
+        - KeyPath: responseElements
+          Condition: DoesNotContain
+          Value: 'Failure'
     """
 
     result = convert_rule(rule)
@@ -423,13 +421,13 @@ def test_potential_bucket_enumeration_on_aws(backend):
 
     expected_result = """
     All: # [selection] and [not filter]
-        - All: # selection implicit AND
-            - KeyPath: eventSource
-              Condition: Equals
-              Value: 's3.amazonaws.com'
-            - KeyPath: eventName
-              Condition: Equals
-              Value: 'ListBuckets'
+        # selection implicit AND
+        - KeyPath: eventSource
+          Condition: Equals
+          Value: 's3.amazonaws.com'
+        - KeyPath: eventName
+          Condition: Equals
+          Value: 'ListBuckets'
         # not filter
         - KeyPath: type
           Condition: DoesNotEqual
@@ -493,16 +491,16 @@ def test_pst_export_alert_using_new_compliancesearchaction(backend):
         - KeyPath: eventSource
           Condition: Equals
           Value: 'SecurityComplianceCenter'
-        - All: # Payload|contains|all
-            - KeyPath: Payload
-              Condition: Contains
-              Value: 'New-ComplianceSearchAction'
-            - KeyPath: Payload
-              Condition: Contains
-              Value: 'Export'
-            - KeyPath: Payload
-              Condition: Contains
-              Value: 'pst'
+        # Payload|contains|all
+        - KeyPath: Payload
+          Condition: Contains
+          Value: 'New-ComplianceSearchAction'
+        - KeyPath: Payload
+          Condition: Contains
+          Value: 'Export'
+        - KeyPath: Payload
+          Condition: Contains
+          Value: 'pst'
     """
 
     result = convert_rule(rule)
@@ -610,27 +608,27 @@ def test_user_added_to_admin_group_macos(backend):
             - KeyPath: Image
               Condition: EndsWith
               Value: '/sysadminctl'
-            - All: # CommandLine|contains|all
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: ' -addUser '
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: ' -admin '
+            # CommandLine|contains|all
+            - KeyPath: CommandLine
+              Condition: Contains
+              Value: ' -addUser '
+            - KeyPath: CommandLine
+              Condition: Contains
+              Value: ' -admin '
         - All: # selection_dscl implicit AND
             - KeyPath: Image
               Condition: EndsWith
               Value: '/dscl'
-            - All: # CommandLine|contains|all
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: ' -append '
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: ' /Groups/admin '
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: ' GroupMembership '
+            # CommandLine|contains|all
+            - KeyPath: CommandLine
+              Condition: Contains
+              Value: ' -append '
+            - KeyPath: CommandLine
+              Condition: Contains
+              Value: ' /Groups/admin '
+            - KeyPath: CommandLine
+              Condition: Contains
+              Value: ' GroupMembership '
     """
 
     result = convert_rule(rule)
@@ -659,19 +657,19 @@ def test_jxa_in_memory_execution_via_osascript(backend):
 
     expected_result = """
     All: # all of selection_*
-        - All: # CommandLine|contains|all
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: 'osascript'
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: ' -e '
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: 'eval'
-                - KeyPath: CommandLine
-                  Condition: Contains
-                  Value: 'NSData.dataWithContentsOfURL'
+        # CommandLine|contains|all
+        - KeyPath: CommandLine
+          Condition: Contains
+          Value: 'osascript'
+        - KeyPath: CommandLine
+          Condition: Contains
+          Value: ' -e '
+        - KeyPath: CommandLine
+          Condition: Contains
+          Value: 'eval'
+        - KeyPath: CommandLine
+          Condition: Contains
+          Value: 'NSData.dataWithContentsOfURL'
         - Any: # selection_js implicit OR
                 - All: # CommandLine|contains|all
                     - KeyPath: CommandLine

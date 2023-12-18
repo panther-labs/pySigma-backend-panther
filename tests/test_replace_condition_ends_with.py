@@ -110,22 +110,19 @@ class TestReplaceConditionEndsWith:
               - Condition: EndsWith
                 KeyPath: ReplacedFileName
                 Value: wmic.exe
-              - All:
-                - All:
-                  - Any:
-                    - Condition: EndsWith
-                      KeyPath: image
-                      Value: \\WMIC.exe
-                  - Condition: Contains
-                    KeyPath: command_line
-                    Value: '/node:'
-                - All:
-                  - Condition: DoesNotContain
-                    KeyPath: command_line
-                    Value: '/node:127.0.0.1 '    
-                  - Condition: DoesNotContain
-                    KeyPath: command_line
-                    Value: '/node:localhost '   
+              - Any:
+                - Condition: EndsWith
+                  KeyPath: image
+                  Value: \\WMIC.exe
+              - Condition: Contains
+                KeyPath: command_line
+                Value: '/node:'
+              - Condition: DoesNotContain
+                KeyPath: command_line
+                Value: '/node:127.0.0.1 '    
+              - Condition: DoesNotContain
+                KeyPath: command_line
+                Value: '/node:localhost '   
         DisplayName: Test Title
         Enabled: true
         Tags:
