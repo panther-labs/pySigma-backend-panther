@@ -1,6 +1,7 @@
 from os import path
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Tuple, Union
 
+import click
 import yaml
 from sigma.conditions import (
     ConditionAND,
@@ -399,10 +400,28 @@ class PantherSdyamlBackend(Backend):
             raise
 
     def save_queries_into_individual_files(self, queries: List[Any]):
+        cli_context = click.get_current_context(silent=True)
+        enabled_pipelines = cli_context.params["pipeline"]
         for query in queries:
-            file_path = path.join(self.output_dir, query["SigmaFile"])
+            file_name = query["SigmaFile"]
+
+            # SigmaFile should not be put into rule content
+            query.pop("SigmaFile", None)
+
+            prefix = ""
+            if "carbon_black_panther" in enabled_pipelines:
+                prefix = "cb_"
+            if "crowdstrike_panther" in enabled_pipelines:
+                prefix = "cs_"
+            if "sentinel_one_panther" in enabled_pipelines:
+                prefix = "s1_"
+
+            if prefix:
+                file_name = prefix + file_name
+                query["RuleID"] = prefix + query["RuleID"]
+
+            file_path = path.join(self.output_dir, file_name)
             with open(file_path, "w") as file:
-                query.pop("SigmaFile", None)
                 yaml.dump(query, file)
 
     def finalize_output_default(self, queries: List[Any]) -> Any:

@@ -5,7 +5,7 @@ from sigma.rule import SigmaDetection, SigmaDetectionItem
 
 
 class RuleIContainsDetectionItemCondition(RuleContainsDetectionItemCondition):
-    # same as RuleContainsDetectionItemCondition, but case insensitive
+    # same as RuleContainsDetectionItemCondition, but case-insensitive
     def find_detection_item(self, detection: Union[SigmaDetectionItem, SigmaDetection]) -> bool:
         if isinstance(detection, SigmaDetection):
             for detection_item in detection.detection_items:
