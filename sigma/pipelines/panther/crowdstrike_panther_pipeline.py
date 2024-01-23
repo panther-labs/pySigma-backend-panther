@@ -1,5 +1,5 @@
 from sigma.pipelines.crowdstrike import crowdstrike_fdr_pipeline
-from sigma.processing.conditions import IncludeFieldCondition, RuleContainsDetectionItemCondition
+from sigma.processing.conditions import IncludeFieldCondition
 from sigma.processing.pipeline import ProcessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
