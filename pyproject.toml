@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pySigma-backend-panther-sdyaml"
-version = "0.1.3"
+version = "0.1.4"
 description = "pySigma backend for Panther"
 authors = ["Josh Esbrook <jehockey@umich.edu>", "Oleh Melenevskyi <olehmelenevskyi@gmail.com>"]
 maintainers = ["Panther Labs Inc <pypi@runpanther.io>"]
@@ -12,8 +12,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pysigma = "^0.10"
-pysigma-pipeline-crowdstrike = "^1.0"
+pysigma = "^0.11"
+pysigma-pipeline-crowdstrike = "^1.0.3"
 
 [tool.poetry.dev-dependencies]
 
@@ -21,8 +21,8 @@ pysigma-pipeline-crowdstrike = "^1.0"
 pytest = "^7.2"
 pytest-cov = "^4.0"
 coverage = "^7.1.0"
-sigma-cli = "^0.7"
-black = "^23.11"
+sigma-cli = "^1.0"
+black = "^23.12"
 isort = "^5.12"
 
 [build-system]
