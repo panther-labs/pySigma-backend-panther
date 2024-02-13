@@ -14,6 +14,7 @@ from sigma.conditions import (
 )
 from sigma.conversion.base import Backend
 from sigma.conversion.state import ConversionState
+from sigma.correlations import SigmaCorrelationRule
 from sigma.exceptions import (
     SigmaConfigurationError,
     SigmaError,
@@ -269,6 +270,26 @@ class PantherSdyamlBackend(Backend):
     def convert_condition_field_eq_query_expr(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError()
+
+    def convert_correlation_event_count_rule(
+        rule: "SigmaCorrelationRule", output_format: str | None = None, method: str | None = None
+    ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError()
+
+    def convert_correlation_temporal_rule(
+        rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError()
+
+    def convert_correlation_value_count_rule(
+        rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError()
+
+    def convert_correlation_temporal_ordered_rule(
+        rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
+    ) -> List[Any]:
         raise SigmaFeatureNotSupportedByBackendError()
 
     def convert_condition_val_str(

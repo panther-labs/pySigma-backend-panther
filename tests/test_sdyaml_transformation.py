@@ -29,8 +29,8 @@ class TestSdYamlTransformation:
         transformation = SdYamlTransformation()
         rule = SigmaRule(
             "title",
-            SigmaLogSource(product="windows"),
-            sigma_detection,
+            logsource=SigmaLogSource(product="windows"),
+            detection=sigma_detection,
             description=description,
         )
         res = transformation.apply(pipeline, rule, "")
@@ -88,8 +88,8 @@ class TestSdYamlTransformation:
         transformation = SdYamlTransformation()
         rule = SigmaRule(
             "title",
-            SigmaLogSource(product="windows"),
-            sigma_detection,
+            logsource=SigmaLogSource(product="windows"),
+            detection=sigma_detection,
             falsepositives=[],
         )
         res = transformation.apply(pipeline, rule, "")
