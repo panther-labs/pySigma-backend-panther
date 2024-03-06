@@ -6,7 +6,7 @@ import yaml
 from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
-from sigma.backends.panther import PantherSdyamlBackend
+from sigma.backends.panther import PantherBackend
 
 
 def assert_yaml_equal(actual, expected):
@@ -14,12 +14,12 @@ def assert_yaml_equal(actual, expected):
 
 
 def convert_rule(rule):
-    return PantherSdyamlBackend().convert(SigmaCollection.from_yaml(sigma_query(rule)))
+    return PantherBackend().convert(SigmaCollection.from_yaml(sigma_query(rule)))
 
 
 @pytest.fixture
 def backend():
-    return PantherSdyamlBackend()
+    return PantherBackend()
 
 
 def sigma_query(detection):

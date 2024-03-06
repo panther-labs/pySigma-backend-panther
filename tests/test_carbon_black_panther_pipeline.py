@@ -4,14 +4,14 @@ import yaml
 from sigma.collection import SigmaCollection
 from sigma.processing.resolver import ProcessingPipelineResolver
 
-from sigma.backends.panther import PantherSdyamlBackend
+from sigma.backends.panther import PantherBackend
 from sigma.pipelines.panther import carbon_black_panther_pipeline
 
 
 def test_basic():
     resolver = ProcessingPipelineResolver({"carbon_black_panther": carbon_black_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("carbon_black_panther")
-    backend = PantherSdyamlBackend(pipeline)
+    backend = PantherBackend(pipeline)
 
     rule_id = uuid.uuid4()
     rule = SigmaCollection.from_yaml(

@@ -25,12 +25,22 @@ from sigma.rule import SigmaRule
 from sigma.types import SigmaString, SpecialChars
 
 
-class PantherSdyamlBackend(Backend):
+class PantherBackend(Backend):
     # `output_dir` param should be used for saving each rule into separate file
     # `sigma convert -t panther_sdyaml -O output_dir=/tmp/directory`
     output_dir: Optional[str] = None
 
     name: ClassVar[str] = "panther sdyaml backend"
+
+    default_format: ClassVar[str] = "sdyaml"
+    formats = {
+        "default": "sdyaml",
+        "sdyaml": "sdyaml",
+    }
+    output_format_processing_pipeline = {
+        "default": ProcessingPipeline(),
+        "sdyaml": ProcessingPipeline(),
+    }
 
     convert_or_as_in: ClassVar[bool] = True
     convert_and_as_in: ClassVar[bool] = True
@@ -446,6 +456,9 @@ class PantherSdyamlBackend(Backend):
                 yaml.dump(query, file)
 
     def finalize_output_default(self, queries: List[Any]) -> Any:
+        return self.finalize_output_sdyaml(queries)
+
+    def finalize_output_sdyaml(self, queries):
         if self.output_dir:
             self.save_queries_into_individual_files(queries)
         # cleanup of SigmaFile key
@@ -454,3 +467,8 @@ class PantherSdyamlBackend(Backend):
         if len(queries) == 1:
             return yaml.dump(queries[0])
         return yaml.dump(queries)
+
+    def finalize_query_sdyaml(
+        self, rule: SigmaRule, query: Any, index: int, state: ConversionState
+    ):
+        return query
