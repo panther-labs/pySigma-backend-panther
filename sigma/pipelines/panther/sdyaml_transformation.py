@@ -23,6 +23,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         ("okta", "okta"): "Okta.SystemLog",
         ("aws", "cloudtrail"): "AWS.CloudTrail",
         ("github", "audit"): "GitHub.Audit",
+        ("gcp", "gcp.audit"): "GCP.AuditLog",
     }
 
     def apply(self, pipeline: ProcessingPipeline, rule: SigmaRule, query: Any) -> Any:
