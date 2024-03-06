@@ -8,9 +8,9 @@ from sigma.rule import (
     SigmaLogSource,
     SigmaRule,
 )
-from sigma.types import SigmaNull, SigmaType
+from sigma.types import SigmaNull
 
-from sigma.backends.panther import PantherSdyamlBackend
+from sigma.backends.panther import PantherBackend
 from sigma.pipelines.panther.panther_sdyaml_pipeline import panther_sdyaml_pipeline
 
 
@@ -18,7 +18,7 @@ from sigma.pipelines.panther.panther_sdyaml_pipeline import panther_sdyaml_pipel
 def sigma_sdyaml_backend():
     resolver = ProcessingPipelineResolver({"panther_sdyaml": panther_sdyaml_pipeline})
     pipeline = resolver.resolve_pipeline("panther_sdyaml")
-    backend = PantherSdyamlBackend(pipeline)
+    backend = PantherBackend(pipeline)
     return backend
 
 

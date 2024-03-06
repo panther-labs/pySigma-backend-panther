@@ -4,14 +4,14 @@ import yaml
 from sigma.collection import SigmaCollection
 from sigma.processing.resolver import ProcessingPipelineResolver
 
-from sigma.backends.panther import PantherSdyamlBackend
+from sigma.backends.panther import PantherBackend
 from sigma.pipelines.panther import crowdstrike_panther_pipeline
 
 
 def test_basic():
     resolver = ProcessingPipelineResolver({"crowdstrike_panther": crowdstrike_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("crowdstrike_panther")
-    backend = PantherSdyamlBackend(pipeline)
+    backend = PantherBackend(pipeline)
 
     rule_id = uuid.uuid4()
     rule = SigmaCollection.from_yaml(
