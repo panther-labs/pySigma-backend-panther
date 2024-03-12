@@ -1,5 +1,6 @@
-import json
-import logging
+import os
+import tempfile
+from unittest import mock
 
 import pytest
 import yaml
@@ -30,28 +31,6 @@ logsource:
 detection:
     {detection}
 """
-
-
-def execute_test(backend, sigma_detection_input, expected_obj_or_str):
-    sigma_input = sigma_query(sigma_detection_input.strip())
-    logging.debug("> Sigma Input:")
-    logging.debug(sigma_input.strip())
-    actual = backend.convert(SigmaCollection.from_yaml(sigma_input))
-
-    logging.debug("> Actual (JSON):")
-    logging.debug(json.dumps(actual))
-
-    logging.debug("> Actual (YAML):")
-    logging.debug(yaml.dump(actual))
-
-    expected = expected_obj_or_str
-    if isinstance(expected_obj_or_str, str):
-        expected = [yaml.safe_load(expected_obj_or_str)]
-
-    logging.debug("> Expected (YAML):")
-    logging.debug(yaml.dump(expected))
-
-    assert actual == yaml.dump(expected)
 
 
 def test_implicit_and(backend):
@@ -734,3 +713,24 @@ def test_convert_condition_field_eq_val_re(backend):
 
     with pytest.raises(SigmaFeatureNotSupportedByBackendError):
         convert_rule(rule)
+
+
+@mock.patch("sigma.backends.panther.panther_backend.click")
+def test_save_queries_into_individual_files(mock_click, backend):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "carbon_black_panther"}
+    )
+    queries = [
+        {
+            "SigmaFile": "some_file.yml",
+            "Query": "some_query",
+            "RuleID": "some_rule_id",
+        }
+    ]
+    expected_file_name = queries[0]["SigmaFile"]
+
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
+        backend.output_dir = tmp_dir_name
+        backend.save_queries_into_individual_files(queries)
+        files = os.listdir(tmp_dir_name)
+        assert files == [f"cb_{expected_file_name}"]
