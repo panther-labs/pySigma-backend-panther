@@ -1,5 +1,5 @@
 from os import path
-from typing import Any, ClassVar, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
 
 import click
 import yaml
@@ -22,7 +22,9 @@ from sigma.exceptions import (
 )
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
-from sigma.types import SigmaString, SpecialChars
+
+from sigma.backends.panther.helper_functions.python_helper import PythonHelper
+from sigma.backends.panther.helper_functions.sdyaml_helper import SDYAMLHelper
 
 
 class PantherBackend(Backend):
@@ -36,32 +38,22 @@ class PantherBackend(Backend):
     formats = {
         "default": "sdyaml",
         "sdyaml": "sdyaml",
+        "python": "python",
     }
     output_format_processing_pipeline = {
         "default": ProcessingPipeline(),
         "sdyaml": ProcessingPipeline(),
+        "python": ProcessingPipeline(),
+    }
+
+    format_helpers = {
+        "default": SDYAMLHelper(),
+        "sdyaml": SDYAMLHelper(),
+        "python": PythonHelper(),
     }
 
     convert_or_as_in: ClassVar[bool] = True
     convert_and_as_in: ClassVar[bool] = True
-
-    SDYAML_CONDITION_EXISTS = "Exists"
-    SDYAML_CONDITION_EQUALS = "Equals"
-    SDYAML_CONDITION_STARTS_WITH = "StartsWith"
-    SDYAML_CONDITION_ENDS_WITH = "EndsWith"
-    SDYAML_CONDITION_CONTAINS = "Contains"
-    SDYAML_ALL = "All"
-    SDYAML_ANY = "Any"
-    SDYAML_IS_NULL = "IsNull"
-    SDYAML_IS_IN = "IsIn"
-
-    Inverted_Conditions = {
-        SDYAML_CONDITION_EXISTS: "DoesNotExist",
-        SDYAML_CONDITION_EQUALS: "DoesNotEqual",
-        SDYAML_CONDITION_STARTS_WITH: "DoesNotStartWith",
-        SDYAML_CONDITION_ENDS_WITH: "DoesNotEndWith",
-        SDYAML_CONDITION_CONTAINS: "DoesNotContain",
-    }
 
     def __init__(
         self,
@@ -83,25 +75,15 @@ class PantherBackend(Backend):
 
         return list(rv)
 
-    def simplify_convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
-        key_cond_values = self.get_key_condition_values(cond, state)
-        simplified = []
-        for key_cond_value in key_cond_values:
-            if key_cond_value.get(self.SDYAML_ALL):
-                simplified.extend(key_cond_value[self.SDYAML_ALL])
-            else:
-                simplified.append(key_cond_value)
-        return simplified
-
     def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
-        key_cond_values = self.simplify_convert_condition_and(cond, state)
+        key_cond_values = self.get_key_condition_values(cond, state)
 
-        return {self.SDYAML_ALL: key_cond_values}
+        return self.format_helper.convert_condition_and(key_cond_values)
 
     def convert_condition_or(self, cond: ConditionOR, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
 
-        return {self.SDYAML_ANY: key_cond_values}
+        return self.format_helper.convert_condition_or(key_cond_values)
 
     def invert_kcv(self, key_cond_value):
         rv = key_cond_value.copy()
@@ -124,113 +106,17 @@ class PantherBackend(Backend):
     def convert_condition_as_in_expression(
         self, cond: Union[ConditionOR, ConditionAND], state: ConversionState
     ) -> Any:
-        keys = [x.field for x in cond.args]
-
-        assert len(keys) and len(set(keys)) == 1
-        return {
-            "KeyPath": keys[0],
-            "Condition": self.SDYAML_IS_IN,
-            "Values": [x.value.to_plain() for x in cond.args],
-        }
+        return self.format_helper.convert_condition_as_in_expression(cond, state)
 
     def convert_condition_field_eq_val_str(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Dict:
-        """Conversion of field = string value expressions"""
-
-        # cond.value.startswith / endswith: Wants SigmaString, but is typed as base SigmaType
-        conditions_and_rv_values = self.handle_wildcards(cond.value)
-
-        rv = []
-
-        for condition, rv_value in conditions_and_rv_values:
-            key_cond_val = self.generate_sdyaml_key_cond_value(cond, state, condition, rv_value)
-            rv.append(key_cond_val)
-        if len(rv) > 1:
-            return {self.SDYAML_ALL: rv}
-        return rv[0]
-
-    def generate_sdyaml_key_cond_value(self, sigma_cond, state, sdyaml_condition, rv_value):
-        # Todo: Official "not preprocessing" flag will be supported later and invert the conditions
-        #   https://github.com/SigmaHQ/pySigma/discussions/80
-        negated = getattr(
-            sigma_cond, "negated", False
-        )  # We kind of hackily added 'negated' onto the object in update_parsed_conditions, so need to do this
-        if negated:
-            if sdyaml_condition not in self.Inverted_Conditions:
-                raise SigmaFeatureNotSupportedByBackendError(
-                    f"Inverted condition not implemented: '{sdyaml_condition}'"
-                )
-
-            sdyaml_condition = self.Inverted_Conditions[sdyaml_condition]
-
-        rv = {"KeyPath": sigma_cond.field, "Condition": sdyaml_condition}
-
-        if rv_value is not None:  # 'Exists' etc. have no value
-            rv["Value"] = self.convert_value_str(rv_value, state)
-
-        return rv
-
-    def handle_wildcards(self, cond_value: SigmaString) -> Iterable[Tuple[str, SigmaString]]:
-        condition = self.SDYAML_CONDITION_EQUALS
-        rv_value = cond_value
-
-        is_exists = len(cond_value) == 1 and cond_value.s[0] == SpecialChars.WILDCARD_MULTI  # ['*']
-        is_starts_with = cond_value.endswith(SpecialChars.WILDCARD_MULTI)  # ['*', 'banana']
-        is_ends_with = cond_value.startswith(SpecialChars.WILDCARD_MULTI)  # ['banana', '*']
-        is_contains = is_starts_with and is_ends_with  # ['*', 'banana', '*']
-
-        too_many_wildcards__not_contains = (
-            cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1 and not is_contains
-        )
-        too_many_wildcards__is_contains = (
-            cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 2 and is_contains
-        )
-        if too_many_wildcards__not_contains or too_many_wildcards__is_contains:
-            raise SigmaFeatureNotSupportedByBackendError(
-                f'This configuration of wildcards currently not supported: "[{cond_value}]" in sdyaml'
-            )
-
-        # rv_value: remove the SpecialChars.WILDCARD_MULTI
-        if is_exists:
-            condition = self.SDYAML_CONDITION_EXISTS
-            rv_value = None
-        elif is_contains:
-            condition = self.SDYAML_CONDITION_CONTAINS
-            rv_value = cond_value[1:-1]
-        elif is_starts_with:
-            condition = self.SDYAML_CONDITION_STARTS_WITH
-            rv_value = cond_value[:-1]
-        elif is_ends_with:
-            condition = self.SDYAML_CONDITION_ENDS_WITH
-            rv_value = cond_value[1:]
-        elif cond_value.contains_special():  # string like 'blah*banana'
-            # we want to be really sure there's just 1 wildcard
-            if cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1:
-                raise SigmaFeatureNotSupportedByBackendError(
-                    f"This configuration of wildcards currently not supported: [{cond_value}]"
-                )
-
-            # todo: Can this be handled more natively within SigmaString? I didn't find a way at a quick glance
-            parts = cond_value.original.split("*")
-            rv_value_starts_with = parts[0]
-            rv_value_ends_with = parts[1]
-
-            return [
-                (self.SDYAML_CONDITION_STARTS_WITH, SigmaString(rv_value_starts_with)),
-                (self.SDYAML_CONDITION_ENDS_WITH, SigmaString(rv_value_ends_with)),
-            ]
-
-        return [(condition, rv_value)]
+        return self.format_helper.convert_condition_field_eq_val_str(cond, state)
 
     def convert_condition_field_eq_val_num(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        return {
-            "KeyPath": cond.field,
-            "Condition": self.SDYAML_CONDITION_EQUALS,
-            "Value": cond.value.to_plain(),
-        }
+        return self.format_helper.convert_condition_field_eq_val_num(cond, state)
 
     def convert_condition_field_eq_field(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -275,7 +161,7 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_val_null(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        return {"KeyPath": cond.field, "Condition": self.SDYAML_IS_NULL}
+        return self.format_helper.convert_condition_field_eq_val_null(cond, state)
 
     def convert_condition_field_eq_query_expr(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -323,11 +209,6 @@ class PantherBackend(Backend):
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
         raise SigmaFeatureNotSupportedByBackendError()
-
-    @staticmethod
-    def convert_value_str(s: SigmaString, state: ConversionState) -> str:
-        """Convert a SigmaString into a plain string which can be used in query."""
-        return s.convert()
 
     def update_parsed_conditions(
         self, condition: ParentChainMixin, negated: bool = False
@@ -384,6 +265,7 @@ class PantherBackend(Backend):
                 + self.processing_pipeline
                 + self.output_format_processing_pipeline[output_format or self.default_format]
             )
+            self.format_helper = self.format_helpers[output_format or self.default_format]
 
             error_state = "applying processing pipeline on"
             self.last_processing_pipeline.apply(rule)  # 1. Apply transformations
@@ -468,9 +350,8 @@ class PantherBackend(Backend):
             file_name = self._add_rule_prefix(query, file_name)
             file_name = self._add_rule_suffix(query, file_name)
 
-            file_path = path.join(self.output_dir, file_name)
-            with open(file_path, "w") as file:
-                yaml.dump(query, file)
+            file_path_yml = path.join(self.output_dir, file_name)
+            self.format_helper.save_queries_into_files(file_path_yml, query)
 
     def finalize_output_default(self, queries: List[Any]) -> Any:
         return self.finalize_output_sdyaml(queries)
@@ -485,7 +366,30 @@ class PantherBackend(Backend):
             return yaml.dump(queries[0])
         return yaml.dump(queries)
 
+    def finalize_output_python(self, queries):
+        if self.output_dir:
+            self.save_queries_into_individual_files(queries)
+        # cleanup of SigmaFile key
+        for query in queries:
+            query.pop("SigmaFile", None)
+        if len(queries) == 1:
+            return yaml.dump(queries[0])
+        return yaml.dump(queries)
+
     def finalize_query_sdyaml(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
         return query
+
+    def finalize_query_python(
+        self, rule: SigmaRule, query: Any, index: int, state: ConversionState
+    ):
+        finalized_query = f'''from panther_base_helpers import deep_walk
+
+
+def rule(event):
+    if not {query}:
+        return False
+    return True
+        '''
+        return finalized_query
