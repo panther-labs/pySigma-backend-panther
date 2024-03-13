@@ -4,12 +4,11 @@ from sigma.pipelines.common import (
     logsource_windows_network_connection_initiated,
     logsource_windows_process_creation,
 )
-from sigma.processing.conditions import IncludeFieldCondition, MatchStringCondition
+from sigma.processing.conditions import IncludeFieldCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
 from sigma.processing.transformations import (
     AddConditionTransformation,
     ChangeLogsourceTransformation,
-    DetectionItemFailureTransformation,
     DropDetectionItemTransformation,
     FieldMappingTransformation,
     ReplaceStringTransformation,
@@ -159,27 +158,10 @@ def crowdstrike_panther_pipeline():
                     logsource_windows_dns_query(),
                 ],
             ),
-            # ParentBaseFileName handling
-            ProcessingItem(
-                identifier="cs_parentbasefilename_fail_completepath",
-                transformation=DetectionItemFailureTransformation(
-                    "Only file name of parent image is available in CrowdStrike events."
-                ),
-                field_name_conditions=[
-                    IncludeFieldCondition(fields=["ParentBaseFileName"]),
-                ],
-                detection_item_conditions=[
-                    MatchStringCondition(
-                        cond="any",
-                        pattern="^\\*\\\\?[^\\\\]+$",
-                        negate=True,
-                    )
-                ],
-            ),
             ProcessingItem(
                 identifier="cs_parentbasefilename_executable_only",
                 transformation=ReplaceStringTransformation(
-                    regex="^\\*\\\\([^\\\\]+)$",
+                    regex=".*\\\\(.+)$",
                     replacement="\\1",
                 ),
                 field_name_conditions=[
