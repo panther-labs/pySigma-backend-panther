@@ -15,7 +15,9 @@ def assert_yaml_equal(actual, expected):
 
 
 def convert_rule(rule):
-    return PantherBackend().convert(SigmaCollection.from_yaml(sigma_query(rule)))
+    return PantherBackend().convert(
+        rule_collection=SigmaCollection.from_yaml(sigma_query(rule)), output_format="sdyaml"
+    )
 
 
 @pytest.fixture

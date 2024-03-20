@@ -1,6 +1,7 @@
 from os import path
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
+import black
 import click
 import yaml
 from sigma.conditions import (
@@ -23,8 +24,8 @@ from sigma.exceptions import (
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
 
-from sigma.backends.panther.helper_functions.python_helper import PythonHelper
-from sigma.backends.panther.helper_functions.sdyaml_helper import SDYAMLHelper
+from sigma.backends.panther.helpers.python_helper import PythonHelper
+from sigma.backends.panther.helpers.sdyaml_helper import SDYAMLHelper
 
 
 class PantherBackend(Backend):
@@ -75,28 +76,18 @@ class PantherBackend(Backend):
 
         return list(rv)
 
-    def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
+    def simplify_convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
+        return self.format_helper.simplify_convert_condition_and(key_cond_values)
 
-        return self.format_helper.convert_condition_and(key_cond_values)
+    def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
+        simplified_key_cond_values = self.simplify_convert_condition_and(cond, state)
+        return self.format_helper.convert_condition_and(simplified_key_cond_values)
 
     def convert_condition_or(self, cond: ConditionOR, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
 
         return self.format_helper.convert_condition_or(key_cond_values)
-
-    def invert_kcv(self, key_cond_value):
-        rv = key_cond_value.copy()
-        if "Condition" not in rv:
-            raise SigmaFeatureNotSupportedByBackendError("Cannot invert this condition yet")
-
-        if rv["Condition"] not in self.Inverted_Conditions:
-            raise SigmaFeatureNotSupportedByBackendError(
-                f"Inverted condition not implemented: '{rv['Condition']}'"
-            )
-
-        rv["Condition"] = self.Inverted_Conditions[rv["Condition"]]
-        return rv
 
     def convert_condition_not(self, cond: ConditionNOT, state: ConversionState) -> Any:
         raise SigmaFeatureNotSupportedByBackendError(
@@ -146,7 +137,7 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_val_re(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("Regexp is not suppoerted in sdyaml")
+        return self.format_helper.convert_condition_field_eq_val_re(cond, state)
 
     def convert_condition_field_eq_val_cidr(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -369,12 +360,9 @@ class PantherBackend(Backend):
     def finalize_output_python(self, queries):
         if self.output_dir:
             self.save_queries_into_individual_files(queries)
-        # cleanup of SigmaFile key
-        for query in queries:
-            query.pop("SigmaFile", None)
         if len(queries) == 1:
-            return yaml.dump(queries[0])
-        return yaml.dump(queries)
+            return queries[0]
+        return queries
 
     def finalize_query_sdyaml(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
@@ -384,12 +372,21 @@ class PantherBackend(Backend):
     def finalize_query_python(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
-        finalized_query = f'''from panther_base_helpers import deep_walk
-
+        import_re = "import re\n" if "re." in query else ""
+        query = f"""from panther_base_helpers import deep_get
+{import_re}
 
 def rule(event):
-    if not {query}:
-        return False
-    return True
-        '''
-        return finalized_query
+    if {query}:
+        return True
+    return False
+        """
+        try:
+            formatted_query = black.format_file_contents(
+                src_contents=query, fast=True, mode=black.FileMode(line_length=100)
+            )
+            return formatted_query
+        except black.parsing.InvalidInput:
+            raise SigmaFeatureNotSupportedByBackendError(
+                f"Invalid input for formatting python code: {query}"
+            )

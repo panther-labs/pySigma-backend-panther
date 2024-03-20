@@ -1,13 +1,20 @@
-from typing import Union, Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple, Union
 
 import yaml
-from sigma.conditions import ConditionOR, ConditionAND, ConditionFieldEqualsValueExpression
+from sigma.conditions import (
+    ConditionAND,
+    ConditionFieldEqualsValueExpression,
+    ConditionNOT,
+    ConditionOR,
+)
 from sigma.conversion.state import ConversionState
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
-from sigma.types import SpecialChars, SigmaString
+from sigma.types import SigmaString, SpecialChars
+
+from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
 
-class SDYAMLHelper:
+class SDYAMLHelper(BasePantherBackendHelper):
     SDYAML_CONDITION_EXISTS = "Exists"
     SDYAML_CONDITION_EQUALS = "Equals"
     SDYAML_CONDITION_STARTS_WITH = "StartsWith"
@@ -25,6 +32,11 @@ class SDYAMLHelper:
         SDYAML_CONDITION_ENDS_WITH: "DoesNotEndWith",
         SDYAML_CONDITION_CONTAINS: "DoesNotContain",
     }
+
+    @staticmethod
+    def convert_value_str(s: SigmaString, state: ConversionState) -> str:
+        """Convert a SigmaString into a plain string which can be used in query."""
+        return s.convert()
 
     def convert_condition_as_in_expression(
         self, cond: Union[ConditionOR, ConditionAND], state: ConversionState
@@ -69,14 +81,15 @@ class SDYAMLHelper:
     ) -> Any:
         return {"KeyPath": cond.field, "Condition": self.SDYAML_IS_NULL}
 
-    def save_queries_into_files(self, file_path_yml: str, query: Any):
-        with open(file_path_yml, "w") as file:
-            yaml.dump(query, file)
+    def convert_condition_field_eq_val_re(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError("Regexp is not supported in sdyaml")
 
     def convert_condition_or(self, key_cond_values: list) -> Any:
         return {self.SDYAML_ANY: key_cond_values}
 
-    def simplify_convert_condition_and(self, key_cond_values) -> Any:
+    def simplify_convert_condition_and(self, key_cond_values: list) -> Any:
         simplified = []
         for key_cond_value in key_cond_values:
             if key_cond_value.get(self.SDYAML_ALL):
@@ -86,9 +99,7 @@ class SDYAMLHelper:
         return simplified
 
     def convert_condition_and(self, key_cond_values: list) -> Any:
-        simplified_key_cond_values = self.simplify_convert_condition_and(key_cond_values)
-
-        return {self.SDYAML_ALL: simplified_key_cond_values}
+        return {self.SDYAML_ALL: key_cond_values}
 
     def handle_wildcards(self, cond_value: SigmaString) -> Iterable[Tuple[str, SigmaString]]:
         condition = self.SDYAML_CONDITION_EQUALS
@@ -123,7 +134,7 @@ class SDYAMLHelper:
         elif is_ends_with:
             condition = self.SDYAML_CONDITION_ENDS_WITH
             rv_value = cond_value[1:]
-        elif cond_value.contains_special():  # string like 'blah*banana'
+        elif "*" in str(cond_value):  # string like 'blah*banana'
             # we want to be really sure there's just 1 wildcard
             if cond_value.s.count(SpecialChars.WILDCARD_MULTI) > 1:
                 raise SigmaFeatureNotSupportedByBackendError(
@@ -163,7 +174,6 @@ class SDYAMLHelper:
 
         return rv
 
-    @staticmethod
-    def convert_value_str(s: SigmaString, state: ConversionState) -> str:
-        """Convert a SigmaString into a plain string which can be used in query."""
-        return s.convert()
+    def save_queries_into_files(self, file_path_yml: str, query: Any):
+        with open(file_path_yml, "w") as file:
+            yaml.dump(query, file)
