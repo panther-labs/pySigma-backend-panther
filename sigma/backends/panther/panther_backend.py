@@ -373,11 +373,14 @@ class PantherBackend(Backend):
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
         import_re = "import re\n\n\n" if "re." in query else ""
-        query = import_re + f"""def rule(event):
+        query = (
+            import_re
+            + f"""def rule(event):
     if {query}:
         return True
     return False
         """
+        )
         try:
             formatted_query = black.format_file_contents(
                 src_contents=query, fast=True, mode=black.FileMode(line_length=100)

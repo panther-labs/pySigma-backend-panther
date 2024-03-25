@@ -333,7 +333,7 @@ def test_condition_contains(backend):
     assert result == expected_result
 
 
-def test_test(backend):
+def test_selection_and_not_filter(backend):
     rule = """
     selection:
         fieldA|contains: valueA
@@ -349,6 +349,40 @@ def test_test(backend):
 
     expected_result = """def rule(event):
     if all(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            not any(
+                [
+                    event.deep_get("Image", default="") in ["qrs", "xyz"],
+                    event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
+                ]
+            ),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_selection_or_not_filter(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    filter:
+        Image:
+            - 'qrs'
+            - 'xyz'
+        OriginalFileName:
+            - 'abc'
+            - 'efg'
+    condition: selection or not filter
+    """
+
+    expected_result = """def rule(event):
+    if any(
         [
             "valueA" in event.deep_get("fieldA", default=""),
             not any(

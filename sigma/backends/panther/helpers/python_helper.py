@@ -10,6 +10,7 @@ from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
 class PythonHelper(BasePantherBackendHelper):
     WILDCARD_SYMBOL = "*"
+
     @staticmethod
     def invert_if_needed(func):
         def inner(helper, cond, state):
