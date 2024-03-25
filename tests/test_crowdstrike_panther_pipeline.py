@@ -21,12 +21,13 @@ def test_basic():
         description: description
         logsource:
             category: process_creation
-            product: macos
+            product: windows
         detection:
             sel:
                 Field1: "banana"
                 DestinationIp: 127.0.0.1
                 Initiated: "true"
+                ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
             condition: sel
     """
     )
@@ -44,7 +45,12 @@ def test_basic():
                         {
                             "Condition": "Equals",
                             "KeyPath": "event_platform",
-                            "Value": "Mac",
+                            "Value": "Windows",
+                        },
+                        {
+                            "Condition": "IsIn",
+                            "KeyPath": "event_simpleName",
+                            "Values": ["ProcessRollup2", "SyntheticProcessRollup2"],
                         },
                         {
                             "Condition": "Equals",
@@ -60,6 +66,11 @@ def test_basic():
                             "Condition": "Equals",
                             "KeyPath": "Initiated",
                             "Value": "true",
+                        },
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "ParentBaseFileName",
+                            "Value": "MonitoringHost.exe",
                         },
                     ]
                 }
