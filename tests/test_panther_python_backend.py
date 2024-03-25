@@ -38,15 +38,12 @@ def test_implicit_and(backend):
         fieldC: valueC
     condition: selection
     """
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
+    expected_result = """def rule(event):
     if all(
         [
-            deep_get(event, "fieldA") == "valueA",
-            deep_get(event, "fieldB") == "valueB",
-            deep_get(event, "fieldC") == "valueC",
+            event.deep_get("fieldA", default="") == "valueA",
+            event.deep_get("fieldB", default="") == "valueB",
+            event.deep_get("fieldC", default="") == "valueC",
         ]
     ):
         return True
@@ -66,11 +63,8 @@ def test_implicit_or(backend):
             - valueC
     condition: selection
     """
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
-    if deep_get(event, "fieldA") in ["valueA", "valueB", "valueC"]:
+    expected_result = """def rule(event):
+    if event.deep_get("fieldA", default="") in ["valueA", "valueB", "valueC"]:
         return True
     return False
 """
@@ -88,11 +82,13 @@ def test_condition_and(backend):
     condition: selection and filter
     """
 
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
-    if all([deep_get(event, "fieldA") == "valueA", deep_get(event, "fieldB") == "valueB"]):
+    expected_result = """def rule(event):
+    if all(
+        [
+            event.deep_get("fieldA", default="") == "valueA",
+            event.deep_get("fieldB", default="") == "valueB",
+        ]
+    ):
         return True
     return False
 """
@@ -111,15 +107,12 @@ def test_condition_and__with_implicit_and(backend):
     condition: selection and filter
     """
 
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
+    expected_result = """def rule(event):
     if all(
         [
-            deep_get(event, "fieldA1") == "valueA1",
-            deep_get(event, "fieldA2") == "valueA2",
-            deep_get(event, "fieldB") == "valueB",
+            event.deep_get("fieldA1", default="") == "valueA1",
+            event.deep_get("fieldA2", default="") == "valueA2",
+            event.deep_get("fieldB", default="") == "valueB",
         ]
     ):
         return True
@@ -140,14 +133,11 @@ def test_condition_and__with_implicit_or(backend):
         fieldB: valueB
     condition: selection and filter
     """
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
+    expected_result = """def rule(event):
     if all(
         [
-            deep_get(event, "fieldA1") in ["valueA1", "valueA2"],
-            deep_get(event, "fieldB") == "valueB",
+            event.deep_get("fieldA1", default="") in ["valueA1", "valueA2"],
+            event.deep_get("fieldB", default="") == "valueB",
         ]
     ):
         return True
@@ -166,11 +156,13 @@ def test_condition_and__with_condition_not(backend):
         fieldB: valueB
     condition: selection and not filter
     """
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
-    if all([deep_get(event, "fieldA") == "valueA", not deep_get(event, "fieldB") == "valueB"]):
+    expected_result = """def rule(event):
+    if all(
+        [
+            event.deep_get("fieldA", default="") == "valueA",
+            not event.deep_get("fieldB", default="") == "valueB",
+        ]
+    ):
         return True
     return False
 """
@@ -187,11 +179,13 @@ def test_condition_not_one_of(backend):
         fieldB: valueB
     condition: not 1 of filter*
     """
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
-    if all([not deep_get(event, "fieldA") == "valueA", not deep_get(event, "fieldB") == "valueB"]):
+    expected_result = """def rule(event):
+    if all(
+        [
+            not event.deep_get("fieldA", default="") == "valueA",
+            not event.deep_get("fieldB", default="") == "valueB",
+        ]
+    ):
         return True
     return False
 """
@@ -209,12 +203,8 @@ def test_string_contains_asterisk(backend):
     condition: selection
     """
 
-    expected_result = """from panther_base_helpers import deep_get
-import re
-
-
-def rule(event):
-    if re.match(".*", deep_get(event, "fieldA")):
+    expected_result = """def rule(event):
+    if event.deep_get("fieldA", default="") != "":
         return True
     return False
 """
@@ -230,18 +220,10 @@ def test_one_wildcard_in_middle(backend):
     condition: selection
     """
 
-    expected_result = """from panther_base_helpers import deep_get
-import re
+    with pytest.raises(SigmaFeatureNotSupportedByBackendError) as err:
+        convert_rule(rule)
 
-
-def rule(event):
-    if re.match("abc.*123", deep_get(event, "fieldA")):
-        return True
-    return False
-"""
-
-    result = convert_rule(rule)
-    assert result == expected_result
+    assert str(err.value) == "This configuration of wildcards currently not supported: [abc*123]"
 
 
 def test_convert_condition_field_eq_val_null():
@@ -251,11 +233,8 @@ def test_convert_condition_field_eq_val_null():
     condition: selection
     """
 
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
-    if deep_get(event, "CommandLine") is None:
+    expected_result = """def rule(event):
+    if event.deep_get("CommandLine", default="") == "":
         return True
     return False
 """
@@ -273,11 +252,8 @@ def test_convert_convert_condition_field_eq_val_num():
             - 21
     condition: selection
     """
-    expected_result = """from panther_base_helpers import deep_get
-
-
-def rule(event):
-    if deep_get(event, "dst_port") in [80, 8080, 21]:
+    expected_result = """def rule(event):
+    if event.deep_get("dst_port", default="") in [80, 8080, 21]:
         return True
     return False
 """
@@ -293,12 +269,96 @@ def test_convert_condition_field_eq_val_re(backend):
     condition: selection
     """
 
-    expected_result = """from panther_base_helpers import deep_get
-import re
+    expected_result = """import re
 
 
 def rule(event):
-    if re.match("^[Cc]:\\[Pp]rogram[Dd]ata\\.{1,9}\\.exe", deep_get(event, "ImagePath")):
+    if re.match("^[Cc]:\\[Pp]rogram[Dd]ata\\.{1,9}\\.exe", event.deep_get("ImagePath", default="")):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_condition_endswith(backend):
+    rule = """
+    selection:
+        fieldA|endswith: valueA
+    condition: selection
+    """
+
+    expected_result = """def rule(event):
+    if event.deep_get("fieldA", default="").endswith("valueA"):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_condition_startswith(backend):
+    rule = """
+    selection:
+        fieldA|startswith: valueA
+    condition: selection
+    """
+
+    expected_result = """def rule(event):
+    if event.deep_get("fieldA", default="").startswith("valueA"):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_condition_contains(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    condition: selection
+    """
+
+    expected_result = """def rule(event):
+    if "valueA" in event.deep_get("fieldA", default=""):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_test(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    filter:
+        Image:
+            - 'qrs'
+            - 'xyz'
+        OriginalFileName:
+            - 'abc'
+            - 'efg'
+    condition: selection and not filter
+    """
+
+    expected_result = """def rule(event):
+    if all(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            not any(
+                [
+                    event.deep_get("Image", default="") in ["qrs", "xyz"],
+                    event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
+                ]
+            ),
+        ]
+    ):
         return True
     return False
 """

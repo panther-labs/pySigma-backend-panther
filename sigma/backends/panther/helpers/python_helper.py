@@ -3,11 +3,13 @@ from typing import Any, Union
 import yaml
 from sigma.conditions import ConditionAND, ConditionFieldEqualsValueExpression, ConditionOR
 from sigma.conversion.state import ConversionState
+from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
 from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
 
 class PythonHelper(BasePantherBackendHelper):
+    WILDCARD_SYMBOL = "*"
     @staticmethod
     def invert_if_needed(func):
         def inner(helper, cond, state):
@@ -23,7 +25,7 @@ class PythonHelper(BasePantherBackendHelper):
     @staticmethod
     def get_key_path_value(path: str):
         key_path = '"' + '", "'.join(path.split(".")) + '"'
-        key_path_value = f"deep_get(event, {key_path})"
+        key_path_value = f"event.deep_get({key_path}, default='')"
         return key_path_value
 
     @invert_if_needed
@@ -41,19 +43,22 @@ class PythonHelper(BasePantherBackendHelper):
     ) -> Any:
         key_path = self.get_key_path_value(cond.field)
         value = str(cond.value)
-        regexp_special_chars = ".+*?^$()[]{}|\\"
-        if "*" in value:
-            regex_value = ""
-            for i in value:
-                if i == "*":
-                    regex_value += ".*"
-                elif i in regexp_special_chars:
-                    regex_value += f"\\{i}"
-                else:
-                    regex_value += i
-            return f're.match("{regex_value}", {key_path})'
-
-        return f'{key_path} == "{value}"'
+        if value == self.WILDCARD_SYMBOL:
+            return f"{key_path} != ''"
+        wildcards_count = value.count(self.WILDCARD_SYMBOL)
+        if wildcards_count == 0:
+            return f'{key_path} == "{value}"'
+        if wildcards_count == 1:
+            if value.startswith(self.WILDCARD_SYMBOL):
+                return f'{key_path}.endswith("{value[1:]}")'
+            if value.endswith(self.WILDCARD_SYMBOL):
+                return f'{key_path}.startswith("{value[:-1]}")'
+        if wildcards_count == 2:
+            if value.startswith(self.WILDCARD_SYMBOL) and value.endswith(self.WILDCARD_SYMBOL):
+                return f'"{value[1:-1]}" in {key_path}'
+        raise SigmaFeatureNotSupportedByBackendError(
+            f"This configuration of wildcards currently not supported: [{value}]"
+        )
 
     @invert_if_needed
     def convert_condition_field_eq_val_num(
@@ -65,7 +70,7 @@ class PythonHelper(BasePantherBackendHelper):
     def convert_condition_field_eq_val_null(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        return f"{self.get_key_path_value(cond.field)} is None"
+        return f"{self.get_key_path_value(cond.field)} == ''"
 
     @invert_if_needed
     def convert_condition_field_eq_val_re(
@@ -77,6 +82,9 @@ class PythonHelper(BasePantherBackendHelper):
         return f're.match("{value}", {key_path})'
 
     def convert_condition_or(self, key_cond_values: list) -> Any:
+        if all("not" in value for value in key_cond_values):
+            key_cond_values = [value[4:] for value in key_cond_values]
+            return f"not any([{', '.join(key_cond_values)}])"
         return f"any([{', '.join(key_cond_values)}])"
 
     def simplify_convert_condition_and(self, key_cond_values: list) -> Any:

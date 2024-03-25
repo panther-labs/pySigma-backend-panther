@@ -372,11 +372,8 @@ class PantherBackend(Backend):
     def finalize_query_python(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
-        import_re = "import re\n" if "re." in query else ""
-        query = f"""from panther_base_helpers import deep_get
-{import_re}
-
-def rule(event):
+        import_re = "import re\n\n\n" if "re." in query else ""
+        query = import_re + f"""def rule(event):
     if {query}:
         return True
     return False
