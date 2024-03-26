@@ -724,10 +724,10 @@ def test_save_queries_into_individual_files(mock_click, backend):
         {
             "SigmaFile": "some_file.yml",
             "Query": "some_query",
-            "RuleID": "some_rule_id",
+            "RuleID": "some_rule_id_simple",
         }
     ]
-    expected_file_name = queries[0]["SigmaFile"]
+    expected_file_name = "some_file_simple.yml"
 
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         backend.output_dir = tmp_dir_name

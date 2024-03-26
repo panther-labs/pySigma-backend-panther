@@ -430,26 +430,43 @@ class PantherBackend(Backend):
                 e.args = (e.args[0] + msg,)
             raise
 
-    def save_queries_into_individual_files(self, queries: List[Any]):
+    def _add_rule_suffix(self, query, file_name):
+        suffix = "_simple"
+
+        query["RuleID"] += suffix
+
+        file_name_pieces = file_name.split(".")
+        file_extension = file_name_pieces[-1]
+        file_name = "".join(file_name_pieces[:-1])
+        return f"{file_name}{suffix}.{file_extension}"
+
+    def _add_rule_prefix(self, query, file_name):
         cli_context = click.get_current_context(silent=True)
         enabled_pipelines = cli_context.params["pipeline"]
+
+        prefix = ""
+        if "carbon_black_panther" in enabled_pipelines:
+            prefix = "cb_"
+        if "crowdstrike_panther" in enabled_pipelines:
+            prefix = "cs_"
+        if "sentinel_one_panther" in enabled_pipelines:
+            prefix = "s1_"
+
+        if prefix:
+            file_name = prefix + file_name
+            query["RuleID"] = prefix + query["RuleID"]
+
+        return file_name
+
+    def save_queries_into_individual_files(self, queries: List[Any]):
         for query in queries:
             file_name = query["SigmaFile"]
 
             # SigmaFile should not be put into rule content
             query.pop("SigmaFile", None)
 
-            prefix = ""
-            if "carbon_black_panther" in enabled_pipelines:
-                prefix = "cb_"
-            if "crowdstrike_panther" in enabled_pipelines:
-                prefix = "cs_"
-            if "sentinel_one_panther" in enabled_pipelines:
-                prefix = "s1_"
-
-            if prefix:
-                file_name = prefix + file_name
-                query["RuleID"] = prefix + query["RuleID"]
+            file_name = self._add_rule_prefix(query, file_name)
+            file_name = self._add_rule_suffix(query, file_name)
 
             file_path = path.join(self.output_dir, file_name)
             with open(file_path, "w") as file:
