@@ -333,6 +333,23 @@ def test_condition_contains(backend):
     assert result == expected_result
 
 
+def test_condition_contains_with_backslash(backend):
+    rule = """
+    selection:
+        fieldA|contains: \\valueA\\valueB
+    condition: selection
+    """
+
+    expected_result = """def rule(event):
+    if "\\\\valueA\\\\valueB" in event.deep_get("fieldA", default=""):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
 def test_selection_and_not_filter(backend):
     rule = """
     selection:

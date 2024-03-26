@@ -46,6 +46,8 @@ class PythonHelper(BasePantherBackendHelper):
         value = str(cond.value)
         if value == self.WILDCARD_SYMBOL:
             return f"{key_path} != ''"
+        if "\\" in value:
+            value = value.replace("\\", "\\\\")
         wildcards_count = value.count(self.WILDCARD_SYMBOL)
         if wildcards_count == 0:
             return f'{key_path} == "{value}"'
