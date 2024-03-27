@@ -3,7 +3,6 @@ from typing import Any, Union
 import yaml
 from sigma.conditions import ConditionAND, ConditionFieldEqualsValueExpression, ConditionOR
 from sigma.conversion.state import ConversionState
-from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
 from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
@@ -109,7 +108,10 @@ class PythonHelper(BasePantherBackendHelper):
     def convert_condition_and(self, key_cond_values: list) -> Any:
         return f"all([{', '.join(key_cond_values)}])"
 
-    def save_queries_into_files(self, file_path_yml: str, query: Any):
+    def _add_rule_suffix(self, query, file_name):
+        return file_name
+
+    def write_queries_into_files(self, file_path_yml: str, query: Any):
         detection = query.pop("Detection", "pass")[0]
         file_path_python = file_path_yml[:-3] + "py"
         query["Filename"] = file_path_python.split("/")[-1]

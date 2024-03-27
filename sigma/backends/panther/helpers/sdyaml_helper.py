@@ -174,6 +174,16 @@ class SDYAMLHelper(BasePantherBackendHelper):
 
         return rv
 
-    def save_queries_into_files(self, file_path_yml: str, query: Any):
+    def _add_rule_suffix(self, query, file_name):
+        suffix = "_simple"
+
+        query["RuleID"] += suffix
+
+        file_name_pieces = file_name.split(".")
+        file_extension = file_name_pieces[-1]
+        file_name = "".join(file_name_pieces[:-1])
+        return f"{file_name}{suffix}.{file_extension}"
+
+    def write_queries_into_files(self, file_path_yml: str, query: Any):
         with open(file_path_yml, "w") as file:
             yaml.dump(query, file)

@@ -8,6 +8,8 @@ from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
 from sigma.backends.panther import PantherBackend
+from sigma.backends.panther.helpers.python_helper import PythonHelper
+from sigma.backends.panther.helpers.sdyaml_helper import SDYAMLHelper
 
 
 def assert_yaml_equal(actual, expected):
@@ -717,8 +719,8 @@ def test_convert_condition_field_eq_val_re(backend):
         convert_rule(rule)
 
 
-@mock.patch("sigma.backends.panther.panther_backend.click")
-def test_save_queries_into_individual_files(mock_click, backend):
+@mock.patch("sigma.backends.panther.helpers.base.click")
+def test_save_sdyaml_queries_into_individual_files(mock_click, backend):
     mock_click.get_current_context.return_value = mock.MagicMock(
         params={"pipeline": "carbon_black_panther"}
     )
@@ -729,10 +731,33 @@ def test_save_queries_into_individual_files(mock_click, backend):
             "RuleID": "some_rule_id_simple",
         }
     ]
-    expected_file_name = "some_file_simple.yml"
+    expected_file_name = ["cb_some_file_simple.yml"]
 
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         backend.output_dir = tmp_dir_name
+        backend.format_helper = SDYAMLHelper()
         backend.save_queries_into_individual_files(queries)
         files = os.listdir(tmp_dir_name)
-        assert files == [f"cb_{expected_file_name}"]
+        assert files == expected_file_name
+
+
+@mock.patch("sigma.backends.panther.helpers.base.click")
+def test_save_python_queries_into_individual_files(mock_click, backend):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "carbon_black_panther"}
+    )
+    queries = [
+        {
+            "SigmaFile": "some_file.yml",
+            "Query": "some_query",
+            "RuleID": "some_rule_id",
+        }
+    ]
+    expected_file_names = ["cb_some_file.yml", "cb_some_file.py"]
+
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
+        backend.output_dir = tmp_dir_name
+        backend.format_helper = PythonHelper()
+        backend.save_queries_into_individual_files(queries)
+        files = os.listdir(tmp_dir_name)
+        assert files == expected_file_names
