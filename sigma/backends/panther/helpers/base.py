@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from os import path
-from typing import Any, Union, List
+from typing import Any, List, Union
 
 import click
 from sigma.conditions import ConditionAND, ConditionFieldEqualsValueExpression, ConditionOR
