@@ -220,10 +220,17 @@ def test_one_wildcard_in_middle(backend):
     condition: selection
     """
 
-    with pytest.raises(SigmaFeatureNotSupportedByBackendError) as err:
-        convert_rule(rule)
+    expected_result = """import re
 
-    assert str(err.value) == "This configuration of wildcards currently not supported: [abc*123]"
+
+def rule(event):
+    if re.match(r"^abc.*123$", event.deep_get("fieldA", default="")):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
 
 
 def test_convert_condition_field_eq_val_null():
@@ -273,7 +280,7 @@ def test_convert_condition_field_eq_val_re(backend):
 
 
 def rule(event):
-    if re.match("^[Cc]:\\[Pp]rogram[Dd]ata\\.{1,9}\\.exe", event.deep_get("ImagePath", default="")):
+    if re.match(r"^[Cc]:\\[Pp]rogram[Dd]ata\\.{1,9}\\.exe", event.deep_get("ImagePath", default="")):
         return True
     return False
 """
@@ -368,7 +375,7 @@ def test_selection_and_not_filter(backend):
     if all(
         [
             "valueA" in event.deep_get("fieldA", default=""),
-            not any(
+            not all(
                 [
                     event.deep_get("Image", default="") in ["qrs", "xyz"],
                     event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
@@ -402,7 +409,7 @@ def test_selection_or_not_filter(backend):
     if any(
         [
             "valueA" in event.deep_get("fieldA", default=""),
-            not any(
+            not all(
                 [
                     event.deep_get("Image", default="") in ["qrs", "xyz"],
                     event.deep_get("OriginalFileName", default="") in ["abc", "efg"],

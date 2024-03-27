@@ -38,6 +38,15 @@ class PythonHelper(BasePantherBackendHelper):
         assert len(keys) and len(set(keys)) == 1
         return f"{self.get_key_path_value(keys[0])} in {[x.value.to_plain() for x in cond.args]}"
 
+    @staticmethod
+    def prepare_cond_value(initial_value: str) -> str:
+        value = initial_value
+        if "\\" in value:
+            value = value.replace("\\", "\\\\")
+        if '"' in value:
+            value = value.replace('"', '\\"')
+        return value
+
     @invert_if_needed
     def convert_condition_field_eq_val_str(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -46,8 +55,7 @@ class PythonHelper(BasePantherBackendHelper):
         value = str(cond.value)
         if value == self.WILDCARD_SYMBOL:
             return f"{key_path} != ''"
-        if "\\" in value:
-            value = value.replace("\\", "\\\\")
+        value = self.prepare_cond_value(value)
         wildcards_count = value.count(self.WILDCARD_SYMBOL)
         if wildcards_count == 0:
             return f'{key_path} == "{value}"'
@@ -59,9 +67,8 @@ class PythonHelper(BasePantherBackendHelper):
         if wildcards_count == 2:
             if value.startswith(self.WILDCARD_SYMBOL) and value.endswith(self.WILDCARD_SYMBOL):
                 return f'"{value[1:-1]}" in {key_path}'
-        raise SigmaFeatureNotSupportedByBackendError(
-            f"This configuration of wildcards currently not supported: [{value}]"
-        )
+        value = value.replace("*", ".*")
+        return f're.match(r"^{value}$", {key_path})'
 
     @invert_if_needed
     def convert_condition_field_eq_val_num(
@@ -81,13 +88,13 @@ class PythonHelper(BasePantherBackendHelper):
     ) -> Any:
         key_path = self.get_key_path_value(cond.field)
         value = str(cond.value.regexp)
-        value = value.replace('"', '"')
-        return f're.match("{value}", {key_path})'
+        value = value.replace('"', '\\"')
+        return f're.match(r"{value}", {key_path})'
 
     def convert_condition_or(self, key_cond_values: list) -> Any:
         if all("not" in value for value in key_cond_values):
-            key_cond_values = [value[4:] for value in key_cond_values]
-            return f"not any([{', '.join(key_cond_values)}])"
+            key_cond_values = [value.replace("not ", "") for value in key_cond_values]
+            return f"not all([{', '.join(key_cond_values)}])"
         return f"any([{', '.join(key_cond_values)}])"
 
     def simplify_convert_condition_and(self, key_cond_values: list) -> Any:
