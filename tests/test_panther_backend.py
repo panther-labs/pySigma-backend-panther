@@ -760,4 +760,4 @@ def test_save_python_queries_into_individual_files(mock_click, backend):
         backend.format_helper = PythonHelper()
         backend.save_queries_into_individual_files(queries)
         files = os.listdir(tmp_dir_name)
-        assert files == expected_file_names
+        assert set(files) == set(expected_file_names)
