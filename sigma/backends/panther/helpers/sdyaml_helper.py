@@ -4,8 +4,10 @@ import yaml
 from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
+    ConditionItem,
     ConditionNOT,
     ConditionOR,
+    ParentChainMixin,
 )
 from sigma.conversion.state import ConversionState
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
@@ -32,6 +34,50 @@ class SDYAMLHelper(BasePantherBackendHelper):
         SDYAML_CONDITION_ENDS_WITH: "DoesNotEndWith",
         SDYAML_CONDITION_CONTAINS: "DoesNotContain",
     }
+
+    def update_parsed_conditions(
+        self, condition: ParentChainMixin, negated: bool = False
+    ) -> ParentChainMixin:
+        """
+        https://github.com/grafana/pySigma-backend-loki/blob/0b65eddf89aa40a20163ca94e8ff6717bed62610/sigma/backends/loki/loki.py#L573
+        Do a depth-first recursive search of the parsed items and update conditions
+        to meet SDYAML's structural requirements:
+
+        - SDYAML does not support NOT operators, so we use De Morgan's law to push the
+          negation down the tree (flipping ANDs and ORs and swapping operators, i.e.,
+          = becomes !=, etc.)
+        """
+        if isinstance(condition, ConditionItem):
+            if isinstance(condition, ConditionNOT):
+                negated = not negated
+                # Remove the ConditionNOT as the parent
+                condition.args[0].parent = condition.parent
+                return self.update_parsed_conditions(condition.args[0], negated)
+            elif isinstance(condition, (ConditionAND, ConditionOR)):
+                if negated:
+                    if isinstance(condition, ConditionAND):
+                        newcond = ConditionOR(condition.args, condition.source)
+                    elif isinstance(condition, ConditionOR):
+                        newcond = ConditionAND(condition.args, condition.source)
+                    # Update the parent references to reflect the new structure
+                    newcond.parent = condition.parent
+                    for i in range(len(condition.args)):
+                        condition.args[i].parent = newcond
+                        condition.args[i] = self.update_parsed_conditions(
+                            condition.args[i], negated
+                        )
+                    setattr(newcond, "negated", negated)
+                    return newcond
+                else:
+                    for i in range(len(condition.args)):
+                        condition.args[i] = self.update_parsed_conditions(
+                            condition.args[i], negated
+                        )
+        # Record negation appropriately
+        # NOTE: the negated property does not exist on the above classes,
+        # so using setattr to set it dynamically
+        setattr(condition, "negated", negated)
+        return condition
 
     @staticmethod
     def convert_value_str(s: SigmaString, state: ConversionState) -> str:
@@ -100,6 +146,11 @@ class SDYAMLHelper(BasePantherBackendHelper):
 
     def convert_condition_and(self, key_cond_values: list) -> Any:
         return {self.SDYAML_ALL: key_cond_values}
+
+    def convert_condition_not(self, key_cond_values: list) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "NOT is handled within convert_condition_field_eq_val_str - If you see this message, please report the bug and how to reproduce it"
+        )
 
     def handle_wildcards(self, cond_value: SigmaString) -> Iterable[Tuple[str, SigmaString]]:
         condition = self.SDYAML_CONDITION_EQUALS

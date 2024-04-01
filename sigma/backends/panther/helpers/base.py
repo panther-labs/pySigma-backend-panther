@@ -3,11 +3,23 @@ from os import path
 from typing import Any, List, Union
 
 import click
-from sigma.conditions import ConditionAND, ConditionFieldEqualsValueExpression, ConditionOR
+from sigma.conditions import (
+    ConditionAND,
+    ConditionFieldEqualsValueExpression,
+    ConditionNOT,
+    ConditionOR,
+    ParentChainMixin,
+)
 from sigma.conversion.state import ConversionState
 
 
 class BasePantherBackendHelper(ABC):
+    @abstractmethod
+    def update_parsed_conditions(
+        self, condition: ParentChainMixin, negated: bool = False
+    ) -> ParentChainMixin:
+        ...
+
     @abstractmethod
     def convert_condition_as_in_expression(
         self, cond: Union[ConditionOR, ConditionAND], state: ConversionState
@@ -48,6 +60,10 @@ class BasePantherBackendHelper(ABC):
 
     @abstractmethod
     def convert_condition_and(self, key_cond_values: list) -> Any:
+        ...
+
+    @abstractmethod
+    def convert_condition_not(self, key_cond_values: list) -> Any:
         ...
 
     @abstractmethod

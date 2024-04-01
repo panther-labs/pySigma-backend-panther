@@ -1,7 +1,13 @@
 from typing import Any, Union
 
 import yaml
-from sigma.conditions import ConditionAND, ConditionFieldEqualsValueExpression, ConditionOR
+from sigma.conditions import (
+    ConditionAND,
+    ConditionFieldEqualsValueExpression,
+    ConditionNOT,
+    ConditionOR,
+    ParentChainMixin,
+)
 from sigma.conversion.state import ConversionState
 
 from sigma.backends.panther.helpers.base import BasePantherBackendHelper
@@ -13,11 +19,11 @@ class PythonHelper(BasePantherBackendHelper):
     @staticmethod
     def invert_if_needed(func):
         def inner(helper, cond, state):
-            negated = getattr(cond, "negated", False)
-            if negated:
-                result = "not " + func(helper, cond, state)
-            else:
-                result = func(helper, cond, state)
+            # negated = getattr(cond, "negated", False)
+            # if negated:
+            #     result = "not " + func(helper, cond, state)
+            # else:
+            result = func(helper, cond, state)
             return result
 
         return inner
@@ -27,6 +33,11 @@ class PythonHelper(BasePantherBackendHelper):
         key_path = '"' + '", "'.join(path.split(".")) + '"'
         key_path_value = f"event.deep_get({key_path}, default='')"
         return key_path_value
+
+    def update_parsed_conditions(
+        self, condition: ParentChainMixin, negated: bool = False
+    ) -> ParentChainMixin:
+        return condition
 
     @invert_if_needed
     def convert_condition_as_in_expression(
@@ -91,9 +102,9 @@ class PythonHelper(BasePantherBackendHelper):
         return f're.match(r"{value}", {key_path})'
 
     def convert_condition_or(self, key_cond_values: list) -> Any:
-        if all("not" in value for value in key_cond_values):
-            key_cond_values = [value.replace("not ", "") for value in key_cond_values]
-            return f"not all([{', '.join(key_cond_values)}])"
+        # if all("not" in value for value in key_cond_values):
+        #     key_cond_values = [value.replace("not ", "") for value in key_cond_values]
+        #     return f"not all([{', '.join(key_cond_values)}])"
         return f"any([{', '.join(key_cond_values)}])"
 
     def simplify_convert_condition_and(self, key_cond_values: list) -> Any:
@@ -107,6 +118,9 @@ class PythonHelper(BasePantherBackendHelper):
 
     def convert_condition_and(self, key_cond_values: list) -> Any:
         return f"all([{', '.join(key_cond_values)}])"
+
+    def convert_condition_not(self, key_cond_values: list) -> Any:
+        return "not " + ", ".join(key_cond_values)
 
     def _add_rule_suffix(self, query, file_name):
         return file_name

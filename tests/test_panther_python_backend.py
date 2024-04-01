@@ -180,10 +180,10 @@ def test_condition_not_one_of(backend):
     condition: not 1 of filter*
     """
     expected_result = """def rule(event):
-    if all(
+    if not any(
         [
-            not event.deep_get("fieldA", default="") == "valueA",
-            not event.deep_get("fieldB", default="") == "valueB",
+            event.deep_get("fieldA", default="") == "valueA",
+            event.deep_get("fieldB", default="") == "valueB",
         ]
     ):
         return True
@@ -391,6 +391,159 @@ def test_selection_and_not_filter(backend):
     assert result == expected_result
 
 
+def test_selection_and_1_of_filter(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    filter_1:
+        Image:
+            - 'qrs'
+            - 'xyz'
+    filter_2:
+        OriginalFileName:
+            - 'abc'
+            - 'efg'
+    condition: selection and 1 of filter
+    """
+
+    expected_result = """def rule(event):
+    if all(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            any(
+                [
+                    event.deep_get("Image", default="") in ["qrs", "xyz"],
+                    event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
+                ]
+            ),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_selection_and_not_1_of_filter(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    filter_1:
+        Image:
+            - 'qrs'
+            - 'xyz'
+    filter_2:
+        OriginalFileName:
+            - 'abc'
+            - 'efg'
+    condition: selection and not 1 of filter
+    """
+
+    expected_result = """def rule(event):
+    if all(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            not any(
+                [
+                    event.deep_get("Image", default="") in ["qrs", "xyz"],
+                    event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
+                ]
+            ),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_selection_and_not_all_of_filter(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    filter_1:
+        Image:
+            - 'qrs'
+            - 'xyz'
+    filter_2:
+        OriginalFileName:
+            - 'abc'
+            - 'efg'
+    condition: selection and not all of filter
+    """
+
+    expected_result = """def rule(event):
+    if all(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            not all(
+                [
+                    event.deep_get("Image", default="") in ["qrs", "xyz"],
+                    event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
+                ]
+            ),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_selection_and_not_1_of_filter_main(backend):
+    rule = """
+    selection:
+        fieldA|contains: valueA
+    filter_main_1:
+        Image_1:
+            - 'qrs'
+            - 'xyz'
+    filter_main_2:
+        Image_2:
+            - 'qrst'
+            - 'xyza'
+    filter_not_main:
+        OriginalFileName_1:
+            - 'abc'
+            - 'efg'
+        OriginalFileName_2:
+            - 'abcd'
+            - 'efgh'
+    condition: selection and not 1 of filter_main_* and not filter_not_main
+    """
+
+    expected_result = """def rule(event):
+    if all(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            not any(
+                [
+                    event.deep_get("Image_1", default="") in ["qrs", "xyz"],
+                    event.deep_get("Image_2", default="") in ["qrst", "xyza"],
+                ]
+            ),
+            not all(
+                [
+                    event.deep_get("OriginalFileName_1", default="") in ["abc", "efg"],
+                    event.deep_get("OriginalFileName_2", default="") in ["abcd", "efgh"],
+                ]
+            ),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
 def test_selection_or_not_filter(backend):
     rule = """
     selection:
@@ -415,6 +568,30 @@ def test_selection_or_not_filter(backend):
                     event.deep_get("OriginalFileName", default="") in ["abc", "efg"],
                 ]
             ),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
+def test_1_of_selection(backend):
+    rule = """
+    selection_1:
+        fieldA|contains: valueA
+    selection_2:
+        fieldB|contains: valueB
+    condition: 1 of selection_*
+    """
+
+    expected_result = """def rule(event):
+    if any(
+        [
+            "valueA" in event.deep_get("fieldA", default=""),
+            "valueB" in event.deep_get("fieldB", default=""),
         ]
     ):
         return True

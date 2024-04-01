@@ -89,9 +89,8 @@ class PantherBackend(Backend):
         return self.format_helper.convert_condition_or(key_cond_values)
 
     def convert_condition_not(self, cond: ConditionNOT, state: ConversionState) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError(
-            "NOT is handled within convert_condition_field_eq_val_str - If you see this message, please report the bug and how to reproduce it"
-        )
+        key_cond_values = self.get_key_condition_values(cond, state)
+        return self.format_helper.convert_condition_not(key_cond_values)
 
     def convert_condition_as_in_expression(
         self, cond: Union[ConditionOR, ConditionAND], state: ConversionState
@@ -200,50 +199,6 @@ class PantherBackend(Backend):
     ) -> Any:
         raise SigmaFeatureNotSupportedByBackendError()
 
-    def update_parsed_conditions(
-        self, condition: ParentChainMixin, negated: bool = False
-    ) -> ParentChainMixin:
-        """
-        https://github.com/grafana/pySigma-backend-loki/blob/0b65eddf89aa40a20163ca94e8ff6717bed62610/sigma/backends/loki/loki.py#L573
-        Do a depth-first recursive search of the parsed items and update conditions
-        to meet SDYAML's structural requirements:
-
-        - SDYAML does not support NOT operators, so we use De Morgan's law to push the
-          negation down the tree (flipping ANDs and ORs and swapping operators, i.e.,
-          = becomes !=, etc.)
-        """
-        if isinstance(condition, ConditionItem):
-            if isinstance(condition, ConditionNOT):
-                negated = not negated
-                # Remove the ConditionNOT as the parent
-                condition.args[0].parent = condition.parent
-                return self.update_parsed_conditions(condition.args[0], negated)
-            elif isinstance(condition, (ConditionAND, ConditionOR)):
-                if negated:
-                    if isinstance(condition, ConditionAND):
-                        newcond = ConditionOR(condition.args, condition.source)
-                    elif isinstance(condition, ConditionOR):
-                        newcond = ConditionAND(condition.args, condition.source)
-                    # Update the parent references to reflect the new structure
-                    newcond.parent = condition.parent
-                    for i in range(len(condition.args)):
-                        condition.args[i].parent = newcond
-                        condition.args[i] = self.update_parsed_conditions(
-                            condition.args[i], negated
-                        )
-                    setattr(newcond, "negated", negated)
-                    return newcond
-                else:
-                    for i in range(len(condition.args)):
-                        condition.args[i] = self.update_parsed_conditions(
-                            condition.args[i], negated
-                        )
-        # Record negation appropriately
-        # NOTE: the negated property does not exist on the above classes,
-        # so using setattr to set it dynamically
-        setattr(condition, "negated", negated)
-        return condition
-
     def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None) -> List[Any]:
         """
         Copy-pasted base class convert_rule, with the addition of update_parsed_conditions
@@ -268,7 +223,7 @@ class PantherBackend(Backend):
             # conditions, we explicitly associate them together here so the
             # relationship can be maintained throughout.
             conditions = [
-                (index, self.update_parsed_conditions(cond.parsed))
+                (index, self.format_helper.update_parsed_conditions(cond.parsed))
                 for index, cond in enumerate(rule.detection.parsed_condition)
             ]
 
