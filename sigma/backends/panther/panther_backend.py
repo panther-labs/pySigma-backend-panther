@@ -257,16 +257,6 @@ class PantherBackend(Backend):
                 e.args = (e.args[0] + msg,)
             raise
 
-    def _add_rule_suffix(self, query, file_name):
-        suffix = "_simple"
-
-        query["RuleID"] += suffix
-
-        file_name_pieces = file_name.split(".")
-        file_extension = file_name_pieces[-1]
-        file_name = "".join(file_name_pieces[:-1])
-        return f"{file_name}{suffix}.{file_extension}"
-
     def save_queries_into_individual_files(self, queries: List[Any]):
         self.format_helper.save_queries_into_individual_files(
             output_dir=self.output_dir, queries=queries
