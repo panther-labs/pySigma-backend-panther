@@ -33,6 +33,8 @@ class SDYAMLHelper(BasePantherBackendHelper):
         SDYAML_CONDITION_STARTS_WITH: "DoesNotStartWith",
         SDYAML_CONDITION_ENDS_WITH: "DoesNotEndWith",
         SDYAML_CONDITION_CONTAINS: "DoesNotContain",
+        SDYAML_IS_NULL: "IsNotNull",
+        SDYAML_IS_IN: "IsNotIn",
     }
 
     def update_parsed_conditions(
