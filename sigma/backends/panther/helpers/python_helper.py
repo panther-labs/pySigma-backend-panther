@@ -4,7 +4,6 @@ import yaml
 from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
-    ConditionNOT,
     ConditionOR,
     ParentChainMixin,
 )
@@ -17,13 +16,12 @@ class PythonHelper(BasePantherBackendHelper):
     WILDCARD_SYMBOL = "*"
 
     @staticmethod
-    def invert_if_needed(func):
-        def inner(helper, cond, state):
-            # negated = getattr(cond, "negated", False)
-            # if negated:
-            #     result = "not " + func(helper, cond, state)
-            # else:
-            result = func(helper, cond, state)
+    def simplify(func):
+        def inner(helper, key_cond_values) -> str:
+            if len(key_cond_values) == 1:
+                result = key_cond_values[0]
+            else:
+                result = func(helper, key_cond_values)
             return result
 
         return inner
@@ -39,7 +37,6 @@ class PythonHelper(BasePantherBackendHelper):
     ) -> ParentChainMixin:
         return condition
 
-    @invert_if_needed
     def convert_condition_as_in_expression(
         self, cond: Union[ConditionOR, ConditionAND], state: ConversionState
     ) -> Any:
@@ -57,7 +54,6 @@ class PythonHelper(BasePantherBackendHelper):
             value = value.replace('"', '\\"')
         return value
 
-    @invert_if_needed
     def convert_condition_field_eq_val_str(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
@@ -80,19 +76,16 @@ class PythonHelper(BasePantherBackendHelper):
         value = value.replace("*", ".*")
         return f're.match(r"^{value}$", {key_path})'
 
-    @invert_if_needed
     def convert_condition_field_eq_val_num(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
         return f'{self.get_key_path_value(cond.field)} == "{cond.value.to_plain()}"'
 
-    @invert_if_needed
     def convert_condition_field_eq_val_null(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
         return f"{self.get_key_path_value(cond.field)} == ''"
 
-    @invert_if_needed
     def convert_condition_field_eq_val_re(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
@@ -101,10 +94,8 @@ class PythonHelper(BasePantherBackendHelper):
         value = value.replace('"', '\\"')
         return f're.match(r"{value}", {key_path})'
 
+    @simplify
     def convert_condition_or(self, key_cond_values: list) -> Any:
-        # if all("not" in value for value in key_cond_values):
-        #     key_cond_values = [value.replace("not ", "") for value in key_cond_values]
-        #     return f"not all([{', '.join(key_cond_values)}])"
         return f"any([{', '.join(key_cond_values)}])"
 
     def simplify_convert_condition_and(self, key_cond_values: list) -> Any:
@@ -116,6 +107,7 @@ class PythonHelper(BasePantherBackendHelper):
                 simplified.append(key_cond_value)
         return simplified
 
+    @simplify
     def convert_condition_and(self, key_cond_values: list) -> Any:
         return f"all([{', '.join(key_cond_values)}])"
 

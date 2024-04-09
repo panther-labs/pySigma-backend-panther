@@ -6,11 +6,9 @@ import yaml
 from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
-    ConditionItem,
     ConditionNOT,
     ConditionOR,
     ConditionValueExpression,
-    ParentChainMixin,
 )
 from sigma.conversion.base import Backend
 from sigma.conversion.state import ConversionState
