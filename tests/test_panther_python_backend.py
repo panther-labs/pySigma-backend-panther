@@ -1,16 +1,12 @@
-import json
-import logging
-
 import pytest
-import yaml
 from sigma.collection import SigmaCollection
-from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
 from sigma.backends.panther import PantherBackend
+from sigma.pipelines.panther import carbon_black_panther_pipeline
 
 
-def convert_rule(rule):
-    return PantherBackend().convert(
+def convert_rule(rule, pipeline=None):
+    return PantherBackend(pipeline).convert(
         rule_collection=SigmaCollection.from_yaml(sigma_query(rule)), output_format="python"
     )
 
@@ -600,3 +596,28 @@ def test_1_of_selection(backend):
 
     result = convert_rule(rule)
     assert result == expected_result
+
+
+def test_pipeline_simplification(backend):
+    rule = """
+    selection_img:
+        - Image|endswith: '\\bcdedit.exe'
+        - OriginalFileName: 'bcdedit.exe'
+    selection_set:
+        CommandLine|contains: 'set'
+    condition: all of selection_*
+        """
+
+    expected_result = """def rule(event):
+    if all(
+        [
+            event.deep_get("process_path", default="").endswith("\\\\bcdedit.exe"),
+            "set" in event.deep_get("target_cmdline", default=""),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule, pipeline=carbon_black_panther_pipeline())
+    assert result["Detection"][0] == expected_result

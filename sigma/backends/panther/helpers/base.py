@@ -6,7 +6,6 @@ import click
 from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
-    ConditionNOT,
     ConditionOR,
     ParentChainMixin,
 )
