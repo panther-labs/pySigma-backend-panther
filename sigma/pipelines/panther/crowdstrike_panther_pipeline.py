@@ -14,7 +14,7 @@ from sigma.processing.transformations import (
     ReplaceStringTransformation,
 )
 
-from sigma.pipelines.panther.panther_sdyaml_pipeline import (
+from sigma.pipelines.panther.panther_pipeline import (
     logsource_file_event,
     logsource_linux,
     logsource_mac,

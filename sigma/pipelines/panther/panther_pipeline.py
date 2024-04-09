@@ -51,7 +51,7 @@ class PipelineWasUsed(RuleProcessingCondition):
         return cli_context and self.pipeline in cli_context.params["pipeline"]
 
 
-def panther_sdyaml_pipeline():
+def panther_pipeline():
     return ProcessingPipeline(
         name="Generic Log Sources to Panther Transformation",
         # Set of identifiers of backends (from the backends mapping) that are allowed to use this processing pipeline.

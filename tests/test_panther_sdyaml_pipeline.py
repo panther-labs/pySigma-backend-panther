@@ -4,7 +4,7 @@ import yaml
 from sigma.collection import SigmaCollection
 
 
-def test_basic(sigma_sdyaml_backend):
+def test_basic(sigma_backend):
     rule = SigmaCollection.from_yaml(
         f"""
         title: Test Title
@@ -36,4 +36,4 @@ def test_basic(sigma_sdyaml_backend):
         }
     )
 
-    assert sigma_sdyaml_backend.convert(rule) == expected
+    assert sigma_backend.convert(rule) == expected
