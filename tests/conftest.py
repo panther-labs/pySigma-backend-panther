@@ -11,13 +11,13 @@ from sigma.rule import (
 from sigma.types import SigmaNull
 
 from sigma.backends.panther import PantherBackend
-from sigma.pipelines.panther.panther_sdyaml_pipeline import panther_sdyaml_pipeline
+from sigma.pipelines.panther.panther_pipeline import panther_pipeline
 
 
 @pytest.fixture
-def sigma_sdyaml_backend():
-    resolver = ProcessingPipelineResolver({"panther_sdyaml": panther_sdyaml_pipeline})
-    pipeline = resolver.resolve_pipeline("panther_sdyaml")
+def sigma_backend():
+    resolver = ProcessingPipelineResolver({"panther": panther_pipeline})
+    pipeline = resolver.resolve_pipeline("panther")
     backend = PantherBackend(pipeline)
     return backend
 

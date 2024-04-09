@@ -8,7 +8,7 @@ from sigma.pipelines.panther.replace_condition_ends_with import ReplaceCondition
 
 
 class TestReplaceConditionEndsWith:
-    def test_with_one_value(self, pipeline, sigma_sdyaml_backend):
+    def test_with_one_value(self, pipeline, sigma_backend):
         raw_rule = f"""
         title: Test Title
         id: {uuid.uuid4()}
@@ -39,10 +39,10 @@ class TestReplaceConditionEndsWith:
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
-        res = sigma_sdyaml_backend.convert(SigmaCollection(rules=[rule]))
+        res = sigma_backend.convert(SigmaCollection(rules=[rule]))
         assert yaml.safe_load(res) == yaml.safe_load(expected)
 
-    def test_with_multiple_values(self, pipeline, sigma_sdyaml_backend):
+    def test_with_multiple_values(self, pipeline, sigma_backend):
         raw_rule = f"""
         title: Test Title
         id: {uuid.uuid4()}
@@ -79,10 +79,10 @@ class TestReplaceConditionEndsWith:
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
-        res = sigma_sdyaml_backend.convert(SigmaCollection(rules=[rule]))
+        res = sigma_backend.convert(SigmaCollection(rules=[rule]))
         assert yaml.safe_load(res) == yaml.safe_load(expected)
 
-    def test_with_nested_detections(self, pipeline, sigma_sdyaml_backend):
+    def test_with_nested_detections(self, pipeline, sigma_backend):
         raw_rule = f"""
         title: Test Title
         id: {uuid.uuid4()}
@@ -134,5 +134,5 @@ class TestReplaceConditionEndsWith:
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
-        res = sigma_sdyaml_backend.convert(SigmaCollection(rules=[rule]))
+        res = sigma_backend.convert(SigmaCollection(rules=[rule]))
         assert yaml.safe_load(res) == yaml.safe_load(expected)

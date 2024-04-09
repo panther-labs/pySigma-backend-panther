@@ -6,7 +6,7 @@ from sigma.processing.transformations import (
     FieldMappingTransformation,
 )
 
-from sigma.pipelines.panther.panther_sdyaml_pipeline import (
+from sigma.pipelines.panther.panther_pipeline import (
     logsource_file_event,
     logsource_linux,
     logsource_mac,
