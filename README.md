@@ -1,6 +1,6 @@
 # pySigma panther Backend
 
-[![Test](https://github.com/panther-labs/pySigma-backend-panther/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/panther-labs/pySigma-backend-panther/actions/workflows/test.yml)
+[![Test](https://github.com/panther-labs/pySigma-backend-panther/actions/workflows/test.yml/badge.svg)](https://github.com/panther-labs/pySigma-backend-panther/actions/workflows/test.yml)
 ![Status](https://img.shields.io/badge/Status-pre--release-orange)
 
 [Docs](https://docs.panther.com/panther-developer-workflows/converting-sigma-rules)
