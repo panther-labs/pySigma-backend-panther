@@ -12,8 +12,9 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pysigma = "^0.11"
+pysigma = "^0.11 <=0.11.4"
 defusedxml = "^0.7.1"
+black = "^23.12"
 
 [tool.poetry.dev-dependencies]
 
@@ -22,7 +23,6 @@ pytest = "^7.2"
 pytest-cov = "^4.0"
 coverage = "^7.1.0"
 sigma-cli = "^1.0"
-black = "^23.12"
 isort = "^5.12"
 
 [build-system]
