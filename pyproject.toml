@@ -6,15 +6,13 @@ authors = ["Josh Esbrook <jehockey@umich.edu>"]
 maintainers = ["Panther Labs Inc <pypi@runpanther.io>"]
 license = "LGPL-3.0-only"
 repository = "https://github.com/panther-labs/pySigma-backend-panther"
-packages = [
-    { include = "sigma" }
-]
+packages = [{ include = "sigma" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 pysigma = "^0.11 <=0.11.4"
 defusedxml = "^0.7.1"
-black = "^23.12"
+black = "^24.3.0"
 
 [tool.poetry.dev-dependencies]
 
