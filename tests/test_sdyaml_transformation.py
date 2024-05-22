@@ -16,11 +16,11 @@ class TestSdYamlTransformation:
         ]
 
         res = transformation.apply(pipeline, rule, "query")
-        assert "Reference" not in res[0]
+        assert "Reference" not in res
 
         rule.references = references
         res = transformation.apply(pipeline, rule, "query")
-        assert res[0]["Reference"] == references[0]  # only first reference should be used
+        assert res["Reference"] == references[0]  # only first reference should be used
 
     def test_apply_author(self, pipeline, sigma_detection):
         author = "Cool Person"
@@ -34,31 +34,31 @@ class TestSdYamlTransformation:
             description=description,
         )
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Description"] == description
+        assert res["Description"] == description
 
         rule.author = author
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Description"] == f"{description}\n\nAuthor: {author}"
+        assert res["Description"] == f"{description}\n\nAuthor: {author}"
 
     def test_apply_status(self, pipeline, rule):
         rule.description = "Some description"
         transformation = SdYamlTransformation()
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Description"] == "Some description"
+        assert res["Description"] == "Some description"
 
         rule.status = SigmaStatus.EXPERIMENTAL
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Description"] == "Some description\n\nStatus: experimental"
+        assert res["Description"] == "Some description\n\nStatus: experimental"
 
     def test_apply_severity(self, pipeline, rule):
         severity = SigmaLevel.CRITICAL
         transformation = SdYamlTransformation()
         res = transformation.apply(pipeline, rule, "")
-        assert "Severity" not in res[0]
+        assert "Severity" not in res
 
         rule.level = severity
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Severity"] == "Critical"
+        assert res["Severity"] == "Critical"
 
     @pytest.mark.parametrize(
         "sigma_log_source, expected_result",
@@ -73,7 +73,7 @@ class TestSdYamlTransformation:
         transformation = SdYamlTransformation()
         rule.logsource = sigma_log_source
         res = transformation.apply(pipeline, rule, "")
-        assert res[0].get("LogTypes") == expected_result
+        assert res.get("LogTypes") == expected_result
 
     def test_apply_log_types_crowdstrike(self, pipeline, rule):
         transformation = SdYamlTransformation()
@@ -82,7 +82,7 @@ class TestSdYamlTransformation:
             rule.logsource = SigmaLogSource(product="product", service="service")
             mock_get_current_context.return_value.params = {"pipeline": ["crowdstrike_panther"]}
             res = transformation.apply(pipeline, rule, "")
-            assert res[0]["LogTypes"] == ["Crowdstrike.FDREvent"]
+            assert res["LogTypes"] == ["Crowdstrike.FDREvent"]
 
     def test_apply_false_positives(self, pipeline, sigma_detection):
         transformation = SdYamlTransformation()
@@ -93,17 +93,17 @@ class TestSdYamlTransformation:
             falsepositives=[],
         )
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Description"] is None
+        assert res["Description"] is None
 
         rule.falsepositives = ["fp1", "fp2"]
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Description"] == "False Positives: fp1, fp2"
+        assert res["Description"] == "False Positives: fp1, fp2"
 
     def test_mittre_tags(self, pipeline, rule):
         transformation = SdYamlTransformation()
         res = transformation.apply(pipeline, rule, "")
-        assert "Reports" not in res[0]
+        assert "Reports" not in res
 
         rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("dunno", "t1001")]
         res = transformation.apply(pipeline, rule, "")
-        assert res[0]["Reports"] == {"MITRE ATT&CK": ["T1001"]}
+        assert res["Reports"] == {"MITRE ATT&CK": ["T1001"]}

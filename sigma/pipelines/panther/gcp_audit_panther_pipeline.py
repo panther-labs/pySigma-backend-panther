@@ -1,4 +1,4 @@
-from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
+from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     FieldMappingTransformation,
     FieldPrefixMappingTransformation,
@@ -26,7 +26,5 @@ def gcp_audit_panther_pipeline():
                 ),
             ),
         ],
-        postprocessing_items=[
-            SdYamlTransformation(),
-        ],
+        postprocessing_items=[QueryPostprocessingItem(transformation=SdYamlTransformation())],
     )
