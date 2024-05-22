@@ -10,7 +10,7 @@ packages = [{ include = "sigma" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pysigma = "^0.11 <=0.11.4"
+pysigma = "^0.11"
 defusedxml = "^0.7.1"
 black = "^24.3.0"
 
