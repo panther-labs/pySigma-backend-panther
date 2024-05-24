@@ -5,7 +5,7 @@ from sigma.pipelines.common import (
     logsource_windows_process_creation,
 )
 from sigma.processing.conditions import IncludeFieldCondition
-from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
+from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
     ChangeLogsourceTransformation,
@@ -29,7 +29,7 @@ def crowdstrike_panther_pipeline():
     crowdstrike_pipeline = ProcessingPipeline(
         name="Generic Log Sources to CrowdStrike Falcon Data Replicator (FDR) Transformation",
         priority=10,
-        postprocessing_items=[SdYamlTransformation()],
+        postprocessing_items=[QueryPostprocessingItem(transformation=SdYamlTransformation())],
         items=[
             ProcessingItem(
                 identifier="cs_process_creation_eventtype",

@@ -1,5 +1,5 @@
 from sigma.processing.conditions import IncludeFieldCondition, RuleContainsDetectionItemCondition
-from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
+from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
     DropDetectionItemTransformation,
@@ -108,7 +108,5 @@ def carbon_black_panther_pipeline():
                 ],
             ),
         ],
-        postprocessing_items=[
-            SdYamlTransformation(),
-        ],
+        postprocessing_items=[QueryPostprocessingItem(transformation=SdYamlTransformation())],
     )

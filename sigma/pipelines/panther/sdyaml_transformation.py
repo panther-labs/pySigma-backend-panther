@@ -74,7 +74,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
                     mittre_tags.append(tag.name.upper())
             res["Reports"] = {"MITRE ATT&CK": mittre_tags}
 
-        return res, True
+        return res
 
     def _detect_log_types(self, rule: SigmaRule) -> [str]:
         log_types = []

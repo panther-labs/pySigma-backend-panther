@@ -8,7 +8,7 @@ from sigma.processing.conditions import (
     LogsourceCondition,
     RuleProcessingCondition,
 )
-from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline
+from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     DropDetectionItemTransformation,
     FieldMappingTransformation,
@@ -78,7 +78,5 @@ def panther_pipeline():
                 field_name_conditions=[IncludeFieldCondition(fields=["ParentCommandLine"])],
             ),
         ],
-        postprocessing_items=[
-            SdYamlTransformation(),
-        ],
+        postprocessing_items=[QueryPostprocessingItem(transformation=SdYamlTransformation())],
     )
