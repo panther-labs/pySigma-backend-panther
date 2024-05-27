@@ -7,8 +7,8 @@ from sigma.conditions import (
     ConditionItem,
     ConditionNOT,
     ConditionOR,
-    ParentChainMixin,
     ConditionValueExpression,
+    ParentChainMixin,
 )
 from sigma.conversion.state import ConversionState
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError

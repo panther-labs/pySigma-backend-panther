@@ -7,8 +7,8 @@ from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
     ConditionOR,
-    ParentChainMixin,
     ConditionValueExpression,
+    ParentChainMixin,
 )
 from sigma.conversion.state import ConversionState
 

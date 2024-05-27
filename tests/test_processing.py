@@ -2,8 +2,8 @@ from sigma.rule import SigmaDetection, SigmaDetectionItem
 from sigma.types import SigmaString
 
 from sigma.pipelines.panther.processing import (
-    RuleIContainsDetectionItemCondition,
     DetectionContainsFieldName,
+    RuleIContainsDetectionItemCondition,
 )
 
 

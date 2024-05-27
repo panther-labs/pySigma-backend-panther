@@ -1,8 +1,8 @@
 from typing import Union
 
 from sigma.processing.conditions import (
-    RuleContainsDetectionItemCondition,
     DetectionItemProcessingCondition,
+    RuleContainsDetectionItemCondition,
 )
 from sigma.rule import SigmaDetection, SigmaDetectionItem
 
