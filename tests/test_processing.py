@@ -1,7 +1,10 @@
 from sigma.rule import SigmaDetection, SigmaDetectionItem
 from sigma.types import SigmaString
 
-from sigma.pipelines.panther.processing import RuleIContainsDetectionItemCondition
+from sigma.pipelines.panther.processing import (
+    RuleIContainsDetectionItemCondition,
+    DetectionContainsFieldName,
+)
 
 
 class TestRuleIContainsDetectionItemCondition:
@@ -29,3 +32,12 @@ class TestRuleIContainsDetectionItemCondition:
 
         condition = RuleIContainsDetectionItemCondition(field="Protocol", value="tcp")
         assert condition.find_detection_item(detection)
+
+
+class TestDetectionContainsFieldName:
+    def test_match(self, pipeline):
+        detection_item = SigmaDetectionItem(
+            field=None, value=[("SuspiciousOperation",), ("DisallowedHost",)], modifiers=[]
+        )
+        condition = DetectionContainsFieldName()
+        assert not condition.match(pipeline, detection_item)

@@ -4,6 +4,7 @@ from sigma.processing.transformations import (
     FieldPrefixMappingTransformation,
 )
 
+from sigma.pipelines.panther.processing import DetectionContainsFieldName
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -17,6 +18,7 @@ def gcp_audit_panther_pipeline():
                         "gcp.audit.method_name": "protoPayload.methodName",
                     }
                 ),
+                detection_item_conditions=[DetectionContainsFieldName()],
             ),
             ProcessingItem(
                 transformation=FieldPrefixMappingTransformation(
@@ -24,6 +26,7 @@ def gcp_audit_panther_pipeline():
                         "data.protoPayload": "protoPayload",
                     }
                 ),
+                detection_item_conditions=[DetectionContainsFieldName()],
             ),
         ],
         postprocessing_items=[QueryPostprocessingItem(transformation=SdYamlTransformation())],

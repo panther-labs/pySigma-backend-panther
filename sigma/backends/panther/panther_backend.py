@@ -178,9 +178,7 @@ class PantherBackend(Backend):
     def convert_condition_val_str(
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError(
-            f'Search without specifying a Key is not supported: "{cond.value.to_plain()}".'
-        )
+        return self.format_helper.convert_condition_val_str(cond, state)
 
     def convert_condition_val_num(
         self, cond: ConditionValueExpression, state: ConversionState
@@ -288,9 +286,13 @@ class PantherBackend(Backend):
     def finalize_query_python(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
-        import_re = "import re\n\n\n" if "re." in query else ""
+        import_json = "import json\n" if "json." in query else ""
+        import_re = "import re\n" if "re." in query else ""
+        empty_strings = "\n\n" if import_json or import_re else ""
         query = (
-            import_re
+            import_json
+            + import_re
+            + empty_strings
             + f"""def rule(event):
     if {query}:
         return True
