@@ -7,6 +7,7 @@ from sigma.conditions import (
     ConditionItem,
     ConditionNOT,
     ConditionOR,
+    ConditionValueExpression,
     ParentChainMixin,
 )
 from sigma.conversion.state import ConversionState
@@ -152,6 +153,13 @@ class SDYAMLHelper(BasePantherBackendHelper):
     def convert_condition_not(self, key_cond_values: list) -> Any:
         raise SigmaFeatureNotSupportedByBackendError(
             "NOT is handled within convert_condition_field_eq_val_str - If you see this message, please report the bug and how to reproduce it"
+        )
+
+    def convert_condition_val_str(
+        self, cond: ConditionValueExpression, state: ConversionState
+    ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError(
+            f'Search without specifying a Key is not supported. First such key is "{cond.value.to_plain()}".'
         )
 
     def handle_wildcards(self, cond_value: SigmaString) -> Iterable[Tuple[str, SigmaString]]:

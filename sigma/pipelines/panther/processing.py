@@ -1,6 +1,9 @@
 from typing import Union
 
-from sigma.processing.conditions import RuleContainsDetectionItemCondition
+from sigma.processing.conditions import (
+    DetectionItemProcessingCondition,
+    RuleContainsDetectionItemCondition,
+)
 from sigma.rule import SigmaDetection, SigmaDetectionItem
 
 
@@ -21,4 +24,15 @@ class RuleIContainsDetectionItemCondition(RuleContainsDetectionItemCondition):
         else:
             raise TypeError("Parameter of type SigmaDetection or SigmaDetectionItem expected.")
 
+        return False
+
+
+class DetectionContainsFieldName(DetectionItemProcessingCondition):
+    def match(
+        self,
+        pipeline: "sigma.processing.pipeline.ProcessingPipeline",
+        detection_item: SigmaDetectionItem,
+    ) -> bool:
+        if detection_item.field is not None:
+            return True
         return False

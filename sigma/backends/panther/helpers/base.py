@@ -7,6 +7,7 @@ from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
     ConditionOR,
+    ConditionValueExpression,
     ParentChainMixin,
 )
 from sigma.conversion.state import ConversionState
@@ -54,6 +55,11 @@ class BasePantherBackendHelper(ABC):
 
     @abstractmethod
     def convert_condition_not(self, key_cond_values: list) -> Any: ...
+
+    @abstractmethod
+    def convert_condition_val_str(
+        self, cond: ConditionValueExpression, state: ConversionState
+    ) -> Any: ...
 
     @abstractmethod
     def _add_rule_suffix(self, query, file_name): ...
