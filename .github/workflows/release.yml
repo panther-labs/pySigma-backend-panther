@@ -16,9 +16,9 @@ jobs:
       - uses: step-security/harden-runner@f086349bfa2bd1361f7909c78558e816508cdc10 # v2.8.0
         with:
           egress-policy: audit
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
         with:
           python-version: 3.11
       - name: Install Poetry
