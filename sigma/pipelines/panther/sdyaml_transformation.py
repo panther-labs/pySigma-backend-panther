@@ -3,6 +3,7 @@ from os import path
 from typing import Any
 
 import click
+from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
 from sigma.rule import SigmaLevel, SigmaRule
@@ -63,7 +64,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
         log_types = self._detect_log_types(rule)
         if len(log_types) == 0:
-            logging.error(f"Can't find any LogTypes")
+            raise SigmaFeatureNotSupportedByBackendError(f"Can't map any LogTypes")
         else:
             res["LogTypes"] = log_types
 

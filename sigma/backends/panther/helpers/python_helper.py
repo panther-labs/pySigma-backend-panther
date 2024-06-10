@@ -118,7 +118,8 @@ class PythonHelper(BasePantherBackendHelper):
     def convert_condition_val_str(
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
-        return f'"{cond.value.to_plain()}" in json.dumps(event.to_dict())'
+        value = self.prepare_cond_value(cond.value.to_plain())
+        return f'"{value}" in json.dumps(event.to_dict())'
 
     def _add_rule_suffix(self, query, file_name):
         return file_name
