@@ -13,8 +13,8 @@ class TestReplaceConditionEndsWith:
         title: Test Title
         id: {uuid.uuid4()}
         logsource:
-            category: process_creation
-            product: windows
+            service: okta
+            product: okta
         detection:
             sel:
                 Field: "banana"
@@ -30,6 +30,8 @@ class TestReplaceConditionEndsWith:
             Value: banana
         DisplayName: Test Title
         Enabled: true
+        LogTypes:
+          - Okta.SystemLog
         Tags:
           - Sigma
         """
@@ -47,8 +49,8 @@ class TestReplaceConditionEndsWith:
         title: Test Title
         id: {uuid.uuid4()}
         logsource:
-            category: process_creation
-            product: windows
+            service: okta
+            product: okta
         detection:
             sel:
                 Field:
@@ -70,6 +72,8 @@ class TestReplaceConditionEndsWith:
                 Value: apple
         DisplayName: Test Title
         Enabled: true
+        LogTypes:
+          - Okta.SystemLog
         Tags:
           - Sigma
         """
@@ -87,8 +91,8 @@ class TestReplaceConditionEndsWith:
         title: Test Title
         id: {uuid.uuid4()}
         logsource:
-            category: process_creation
-            product: windows
+            service: okta
+            product: okta
         detection:
             selection_img:
                 - Image|endswith: '\WMIC.exe'
@@ -112,19 +116,21 @@ class TestReplaceConditionEndsWith:
                 Value: wmic.exe
               - Any:
                 - Condition: EndsWith
-                  KeyPath: image
+                  KeyPath: Image
                   Value: \\WMIC.exe
               - Condition: Contains
-                KeyPath: command_line
+                KeyPath: CommandLine
                 Value: '/node:'
               - Condition: DoesNotContain
-                KeyPath: command_line
+                KeyPath: CommandLine
                 Value: '/node:127.0.0.1 '    
               - Condition: DoesNotContain
-                KeyPath: command_line
+                KeyPath: CommandLine
                 Value: '/node:localhost '   
         DisplayName: Test Title
         Enabled: true
+        LogTypes:
+          - Okta.SystemLog
         Tags:
          - Sigma
         """

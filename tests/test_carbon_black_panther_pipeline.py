@@ -1,4 +1,5 @@
 import uuid
+from unittest import mock
 
 import yaml
 from sigma.collection import SigmaCollection
@@ -8,7 +9,11 @@ from sigma.backends.panther import PantherBackend
 from sigma.pipelines.panther import carbon_black_panther_pipeline
 
 
-def test_basic():
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_basic(mock_click):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "carbon_black_panther"}
+    )
     resolver = ProcessingPipelineResolver({"carbon_black_panther": carbon_black_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("carbon_black_panther")
     backend = PantherBackend(pipeline)
@@ -37,6 +42,7 @@ def test_basic():
             "AnalysisType": "rule",
             "DisplayName": "Test Title",
             "Enabled": True,
+            "LogTypes": ["CarbonBlack.EndpointEvent"],
             "Tags": ["Sigma"],
             "Detection": [
                 {
