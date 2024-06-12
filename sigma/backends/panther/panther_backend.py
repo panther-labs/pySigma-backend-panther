@@ -23,6 +23,7 @@ from sigma.rule import SigmaRule
 
 from sigma.backends.panther.helpers.python_helper import PythonHelper
 from sigma.backends.panther.helpers.sdyaml_helper import SDYAMLHelper
+from sigma.pipelines.panther import panther_pipeline
 
 
 class PantherBackend(Backend):
@@ -59,6 +60,9 @@ class PantherBackend(Backend):
         collect_errors: bool = False,
         output_dir: Optional[str] = "",
     ):
+        if processing_pipeline == ProcessingPipeline():
+            processing_pipeline = panther_pipeline()
+
         super().__init__(processing_pipeline, collect_errors)
 
         if output_dir:
