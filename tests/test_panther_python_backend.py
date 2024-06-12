@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from sigma.collection import SigmaCollection
 
@@ -598,7 +600,11 @@ def test_1_of_selection(backend):
     assert result == expected_result
 
 
-def test_pipeline_simplification(backend):
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_pipeline_simplification(mock_click, backend):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "carbon_black_panther"}
+    )
     rule = """
     selection_img:
         - Image|endswith: '\\bcdedit.exe'

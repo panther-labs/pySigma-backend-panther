@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 from sigma.rule import SigmaLevel, SigmaLogSource, SigmaRule, SigmaRuleTag, SigmaStatus
 
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
@@ -29,7 +30,7 @@ class TestSdYamlTransformation:
         transformation = SdYamlTransformation()
         rule = SigmaRule(
             "title",
-            logsource=SigmaLogSource(product="windows"),
+            logsource=SigmaLogSource(product="okta", service="okta"),
             detection=sigma_detection,
             description=description,
         )
@@ -63,7 +64,6 @@ class TestSdYamlTransformation:
     @pytest.mark.parametrize(
         "sigma_log_source, expected_result",
         (
-            (SigmaLogSource(product="unknown"), None),
             (SigmaLogSource(product="okta", service="okta"), ["Okta.SystemLog"]),
             (SigmaLogSource(product="aws", service="cloudtrail"), ["AWS.CloudTrail"]),
             (SigmaLogSource(product="github", service="audit"), ["GitHub.Audit"]),
@@ -74,6 +74,13 @@ class TestSdYamlTransformation:
         rule.logsource = sigma_log_source
         res = transformation.apply(pipeline, rule, "")
         assert res.get("LogTypes") == expected_result
+
+    def test_apply_log_types_no_logtype(self, pipeline, rule):
+        transformation = SdYamlTransformation()
+        rule.logsource = SigmaLogSource(product="unknown")
+        with pytest.raises(SigmaFeatureNotSupportedByBackendError) as err:
+            transformation.apply(pipeline, rule, "")
+        assert err.value.args[0] == "Can't map any LogTypes"
 
     def test_apply_log_types_crowdstrike(self, pipeline, rule):
         transformation = SdYamlTransformation()
@@ -88,7 +95,7 @@ class TestSdYamlTransformation:
         transformation = SdYamlTransformation()
         rule = SigmaRule(
             "title",
-            logsource=SigmaLogSource(product="windows"),
+            logsource=SigmaLogSource(product="okta", service="okta"),
             detection=sigma_detection,
             falsepositives=[],
         )

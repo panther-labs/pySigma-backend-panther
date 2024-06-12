@@ -10,8 +10,8 @@ def test_basic(sigma_backend):
         title: Test Title
         id: {uuid.uuid4()}
         logsource:
-            category: process_creation
-            product: windows
+            service: okta
+            product: okta
         detection:
             sel:
                 Field1: "banana"
@@ -26,6 +26,7 @@ def test_basic(sigma_backend):
             "Description": None,
             "Tags": ["Sigma"],
             "Enabled": True,
+            "LogTypes": ["Okta.SystemLog"],
             "Detection": [
                 {
                     "Condition": "Equals",

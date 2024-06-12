@@ -41,6 +41,6 @@ def log_source():
 def rule(sigma_detection):
     return SigmaRule(
         "rule title",
-        logsource=SigmaLogSource(product="windows"),
+        logsource=SigmaLogSource(product="okta", service="okta"),
         detection=SigmaDetections({"query": sigma_detection}, condition=["query"]),
     )

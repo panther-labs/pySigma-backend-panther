@@ -1,4 +1,5 @@
 import uuid
+from unittest import mock
 
 import pytest
 import yaml
@@ -22,8 +23,8 @@ def test_basic_sdyaml():
         id: {rule_id}
         description: description
         logsource:
-            category: gcp
-            product: gcp.audit
+            product: gcp
+            service: gcp.audit
         detection:
             sel:
                 Field1: "banana"
@@ -39,6 +40,7 @@ def test_basic_sdyaml():
             "AnalysisType": "rule",
             "DisplayName": "Test Title",
             "Enabled": True,
+            "LogTypes": ["GCP.AuditLog"],
             "Tags": ["Sigma"],
             "Detection": [
                 {
@@ -67,7 +69,11 @@ def test_basic_sdyaml():
     assert backend.convert(rule, output_format="sdyaml") == expected
 
 
-def test_with_keywords_python():
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_with_keywords_python(mock_click):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "gcp_audit_panther"}
+    )
     resolver = ProcessingPipelineResolver({"gcp_audit_panther": gcp_audit_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("gcp_audit_panther")
     backend = PantherBackend(pipeline)
@@ -79,8 +85,8 @@ def test_with_keywords_python():
         id: {rule_id}
         description: description
         logsource:
-            category: gcp
-            product: gcp.audit
+            product: gcp
+            service: gcp.audit
         detection:
             sel:
                 Field1: "banana"
@@ -115,6 +121,7 @@ def rule(event):
         ],
         "DisplayName": "Test Title",
         "Enabled": True,
+        "LogTypes": ["GCP.AuditLog"],
         "Tags": ["Sigma"],
     }
 
