@@ -119,22 +119,30 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_val_str_case_sensitive(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("Cased string value expressions are not supported right now")
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Cased string value expressions are not supported right now"
+        )
 
     def convert_condition_field_exists(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("Checking field existence is not supported right now")
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Checking field existence is not supported right now"
+        )
 
     def convert_condition_field_not_exists(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("Checking field existence is not supported right now")
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Checking field existence is not supported right now"
+        )
 
     def convert_condition_field_eq_val_bool(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("Checking bool values is not supported right now")
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Checking bool values is not supported right now"
+        )
 
     def convert_condition_field_eq_val_re(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
