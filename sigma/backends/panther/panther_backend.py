@@ -112,27 +112,37 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_field(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of comparison of two fields is not supported right now"
+        )
 
     def convert_condition_field_eq_val_str_case_sensitive(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Cased string value expressions are not supported right now"
+        )
 
     def convert_condition_field_exists(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Checking field existence is not supported right now"
+        )
 
     def convert_condition_field_not_exists(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Checking field existence is not supported right now"
+        )
 
     def convert_condition_field_eq_val_bool(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Checking bool values is not supported right now"
+        )
 
     def convert_condition_field_eq_val_re(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -142,12 +152,14 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_val_cidr(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError("CIDR  values are not supported right now")
 
     def convert_condition_field_compare_op_val(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise (SigmaFeatureNotSupportedByBackendError())
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of numeric comparison operations into queries is not supported right now"
+        )
 
     def convert_condition_field_eq_val_null(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -157,27 +169,37 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_query_expr(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of query expressions bound to a field is not supported right now"
+        )
 
     def convert_correlation_event_count_rule(
         rule: "SigmaCorrelationRule", output_format: str | None = None, method: str | None = None
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of event count correlation rule into the target data structure is not supported right now"
+        )
 
     def convert_correlation_temporal_rule(
         rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
     ) -> List[Any]:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of temporal correlation rule into the target data structure is not supported right now"
+        )
 
     def convert_correlation_value_count_rule(
         rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
     ) -> List[Any]:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value count correlation rule into the target data structure is not supported right now"
+        )
 
     def convert_correlation_temporal_ordered_rule(
         rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
     ) -> List[Any]:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of ordered temporal correlation rule into the target data structure is not supported right now"
+        )
 
     def convert_condition_val_str(
         self, cond: ConditionValueExpression, state: ConversionState
@@ -192,12 +214,16 @@ class PantherBackend(Backend):
     def convert_condition_val_re(
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value-only regular expressions is not supported right now"
+        )
 
     def convert_condition_query_expr(
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError()
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value-only plain query expressions is not supported right now"
+        )
 
     def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None) -> List[Any]:
         """
