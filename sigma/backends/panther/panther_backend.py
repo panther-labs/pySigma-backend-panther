@@ -2,6 +2,7 @@ from os import path
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 import black
+import click
 import yaml
 from sigma.conditions import (
     ConditionAND,
@@ -297,6 +298,11 @@ class PantherBackend(Backend):
         # cleanup of SigmaFile key
         for query in queries:
             query.pop("SigmaFile", None)
+
+        cli_context = click.get_current_context(silent=True)
+        if cli_context:
+            return "Converted rules are successfully saved"
+
         if len(queries) == 1:
             return yaml.dump(queries[0])
         return yaml.dump(queries)
@@ -304,6 +310,11 @@ class PantherBackend(Backend):
     def finalize_output_python(self, queries):
         if self.output_dir:
             self.save_queries_into_individual_files(queries)
+
+        cli_context = click.get_current_context(silent=True)
+        if cli_context:
+            return "Converted rules are successfully saved"
+
         if len(queries) == 1:
             return queries[0]
         return queries
