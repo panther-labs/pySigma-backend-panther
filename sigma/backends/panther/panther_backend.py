@@ -2,7 +2,9 @@ from os import path
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 import black
+import click
 import yaml
+from click.utils import LazyFile
 from sigma.conditions import (
     ConditionAND,
     ConditionFieldEqualsValueExpression,
@@ -59,6 +61,7 @@ class PantherBackend(Backend):
         processing_pipeline: Optional[ProcessingPipeline] = None,
         collect_errors: bool = False,
         output_dir: Optional[str] = "",
+        **kwargs
     ):
         if processing_pipeline == ProcessingPipeline():
             processing_pipeline = panther_pipeline()
@@ -71,6 +74,8 @@ class PantherBackend(Backend):
             if not path.isdir(output_dir):
                 raise SigmaConfigurationError(f"{output_dir} is not a directory")
             self.output_dir = output_dir
+        # if not kwargs.get("output"):
+        #     self.output = False
 
     def get_key_condition_values(self, cond, state):
         rv = (self.convert_condition(arg, state) for arg in cond.args)  # generator object
@@ -297,16 +302,12 @@ class PantherBackend(Backend):
         # cleanup of SigmaFile key
         for query in queries:
             query.pop("SigmaFile", None)
-        if len(queries) == 1:
-            return yaml.dump(queries[0])
-        return yaml.dump(queries)
+        return "Converted rules are successfully saved"
 
     def finalize_output_python(self, queries):
         if self.output_dir:
             self.save_queries_into_individual_files(queries)
-        if len(queries) == 1:
-            return queries[0]
-        return queries
+        return "Converted rules are successfully saved"
 
     def finalize_query_sdyaml(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
