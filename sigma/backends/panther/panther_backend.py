@@ -61,7 +61,6 @@ class PantherBackend(Backend):
         processing_pipeline: Optional[ProcessingPipeline] = None,
         collect_errors: bool = False,
         output_dir: Optional[str] = "",
-        **kwargs
     ):
         if processing_pipeline == ProcessingPipeline():
             processing_pipeline = panther_pipeline()
@@ -74,8 +73,6 @@ class PantherBackend(Backend):
             if not path.isdir(output_dir):
                 raise SigmaConfigurationError(f"{output_dir} is not a directory")
             self.output_dir = output_dir
-        # if not kwargs.get("output"):
-        #     self.output = False
 
     def get_key_condition_values(self, cond, state):
         rv = (self.convert_condition(arg, state) for arg in cond.args)  # generator object
