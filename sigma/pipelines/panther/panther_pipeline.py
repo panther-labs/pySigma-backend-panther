@@ -12,9 +12,11 @@ from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryP
 from sigma.processing.transformations import (
     DropDetectionItemTransformation,
     FieldMappingTransformation,
+    FieldPrefixMappingTransformation,
 )
 from sigma.rule import SigmaRule
 
+from sigma.pipelines.panther.processing import DetectionContainsFieldName
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -40,6 +42,10 @@ def logsource_network_connection():
 
 def logsource_process_creation():
     return LogsourceCondition(category="process_creation")
+
+
+def logsource_gcp_audit() -> LogsourceCondition:
+    return LogsourceCondition(product="gcp", service="gcp.audit")
 
 
 @dataclass
@@ -76,6 +82,24 @@ def panther_pipeline():
             ProcessingItem(
                 transformation=DropDetectionItemTransformation(),
                 field_name_conditions=[IncludeFieldCondition(fields=["ParentCommandLine"])],
+            ),
+            ProcessingItem(
+                transformation=FieldMappingTransformation(
+                    {
+                        "gcp.audit.method_name": "protoPayload.methodName",
+                    }
+                ),
+                detection_item_conditions=[DetectionContainsFieldName()],
+                rule_conditions=[logsource_gcp_audit()],
+            ),
+            ProcessingItem(
+                transformation=FieldPrefixMappingTransformation(
+                    {
+                        "data.protoPayload": "protoPayload",
+                    }
+                ),
+                detection_item_conditions=[DetectionContainsFieldName()],
+                rule_conditions=[logsource_gcp_audit()],
             ),
         ],
         postprocessing_items=[QueryPostprocessingItem(transformation=SdYamlTransformation())],
