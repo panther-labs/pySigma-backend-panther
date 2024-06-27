@@ -8,12 +8,12 @@ from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 from sigma.processing.resolver import ProcessingPipelineResolver
 
 from sigma.backends.panther import PantherBackend
-from sigma.pipelines.panther import gcp_audit_panther_pipeline
+from sigma.pipelines.panther import panther_pipeline
 
 
 def test_basic_sdyaml():
-    resolver = ProcessingPipelineResolver({"gcp_audit_panther": gcp_audit_panther_pipeline()})
-    pipeline = resolver.resolve_pipeline("gcp_audit_panther")
+    resolver = ProcessingPipelineResolver({"panther": panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("panther")
     backend = PantherBackend(pipeline)
 
     rule_id = uuid.uuid4()
@@ -74,8 +74,8 @@ def test_with_keywords_python(mock_click):
     mock_click.get_current_context.return_value = mock.MagicMock(
         params={"pipeline": "gcp_audit_panther"}
     )
-    resolver = ProcessingPipelineResolver({"gcp_audit_panther": gcp_audit_panther_pipeline()})
-    pipeline = resolver.resolve_pipeline("gcp_audit_panther")
+    resolver = ProcessingPipelineResolver({"panther": panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("panther")
     backend = PantherBackend(pipeline)
 
     rule_id = uuid.uuid4()
@@ -129,8 +129,8 @@ def rule(event):
 
 
 def test_with_keywords_sdyaml():
-    resolver = ProcessingPipelineResolver({"gcp_audit_panther": gcp_audit_panther_pipeline()})
-    pipeline = resolver.resolve_pipeline("gcp_audit_panther")
+    resolver = ProcessingPipelineResolver({"panther": panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("panther")
     backend = PantherBackend(pipeline)
 
     rule_id = uuid.uuid4()
