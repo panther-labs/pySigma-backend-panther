@@ -74,7 +74,7 @@ class BasePantherBackendHelper(ABC):
             prefix = "cb_"
         if "crowdstrike_panther" in enabled_pipelines:
             prefix = "cs_"
-        if "sentinel_one_panther" in enabled_pipelines:
+        if "sentinelone_panther" in enabled_pipelines:
             prefix = "s1_"
 
         if prefix:
