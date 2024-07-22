@@ -111,13 +111,14 @@ def test_basic_python(mock_click):
     )
 
     expected = {
-            "Description": "description",
-            "AnalysisType": "rule",
-            "DisplayName": "Test Title",
-            "Enabled": True,
-            "LogTypes": ["SentinelOne.DeepVisibilityV2"],
-            "Tags": ["Sigma"],
-            "Detection": ['''def rule(event):
+        "Description": "description",
+        "AnalysisType": "rule",
+        "DisplayName": "Test Title",
+        "Enabled": True,
+        "LogTypes": ["SentinelOne.DeepVisibilityV2"],
+        "Tags": ["Sigma"],
+        "Detection": [
+            """def rule(event):
     if all(
         [
             event.deep_get("EventType", default="") == "Process Creation",
@@ -129,8 +130,8 @@ def test_basic_python(mock_click):
     ):
         return True
     return False
-'''
-                          ],
-        }
+"""
+        ],
+    }
 
     assert backend.convert(rule_collection=rule, output_format="python") == expected
