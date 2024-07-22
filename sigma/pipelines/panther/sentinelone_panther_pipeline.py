@@ -1,11 +1,11 @@
-from sigma.processing.transformations import (
-    AddConditionTransformation,
-    FieldMappingTransformation,
-    RuleFailureTransformation,
-    ChangeLogsourceTransformation,
-)
 from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
+from sigma.processing.transformations import (
+    AddConditionTransformation,
+    ChangeLogsourceTransformation,
+    FieldMappingTransformation,
+    RuleFailureTransformation,
+)
 
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
