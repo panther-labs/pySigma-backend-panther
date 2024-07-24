@@ -64,7 +64,7 @@ def test_basic_sdyaml(mock_click):
                         },
                         {
                             "Condition": "Equals",
-                            "KeyPath": "TgtProcCmdLine",
+                            "KeyPath": "tgt_process_cmdline",
                             "Value": "cmdline_test",
                         },
                         {
@@ -124,7 +124,7 @@ def test_basic_python(mock_click):
             event.deep_get("EventType", default="") == "Process Creation",
             event.deep_get("EndpointOS", default="") == "osx",
             event.deep_get("Field1", default="") == "banana",
-            event.deep_get("TgtProcCmdLine", default="") == "cmdline_test",
+            event.deep_get("tgt_process_cmdline", default="") == "cmdline_test",
             event.deep_get("Initiated", default="") == "true",
         ]
     ):
