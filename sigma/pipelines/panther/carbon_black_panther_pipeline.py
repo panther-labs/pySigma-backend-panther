@@ -4,6 +4,7 @@ from sigma.processing.transformations import (
     AddConditionTransformation,
     DropDetectionItemTransformation,
     FieldMappingTransformation,
+    RuleFailureTransformation,
 )
 
 from sigma.pipelines.panther.panther_pipeline import (
@@ -105,6 +106,32 @@ def carbon_black_panther_pipeline():
                     IncludeFieldCondition(
                         fields=["Protocol"],
                     )
+                ],
+            ),
+            ProcessingItem(
+                identifier="cb_fail_not_implemented_rule_type",
+                rule_condition_linking=any,
+                transformation=RuleFailureTransformation(
+                    "Rule type not currently supported by the CarbonBlack Sigma pipeline"
+                ),
+                rule_condition_negation=True,
+                rule_conditions=[
+                    logsource_windows(),
+                    logsource_mac(),
+                    logsource_linux(),
+                ],
+            ),
+            ProcessingItem(
+                identifier="cb_fail_not_implemented_rule_type",
+                rule_condition_linking=any,
+                transformation=RuleFailureTransformation(
+                    "Rule type not currently supported by the CarbonBlack Sigma pipeline"
+                ),
+                rule_condition_negation=True,
+                rule_conditions=[
+                    logsource_network_connection(),
+                    logsource_process_creation(),
+                    logsource_file_event(),
                 ],
             ),
         ],
