@@ -288,6 +288,35 @@ def rule(event):
     assert result == expected_result
 
 
+def test_convert_condition_field_eq_val_cidr(backend):
+    rule = """
+    selection:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '::1/128'
+    condition: selection
+    """
+
+    expected_result = """import ipaddress
+
+
+def rule(event):
+    if any(
+        [
+            ipaddress.ip_address(event.deep_get("DestinationIp", default=""))
+            in ipaddress.ip_network("127.0.0.0/8"),
+            ipaddress.ip_address(event.deep_get("DestinationIp", default=""))
+            in ipaddress.ip_network("::1/128"),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = convert_rule(rule)
+    assert result == expected_result
+
+
 def test_condition_endswith(backend):
     rule = """
     selection:

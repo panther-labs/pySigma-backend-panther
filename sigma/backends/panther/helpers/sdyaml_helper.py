@@ -135,6 +135,11 @@ class SDYAMLHelper(BasePantherBackendHelper):
     ) -> Any:
         raise SigmaFeatureNotSupportedByBackendError("Regexp is not supported in sdyaml")
 
+    def convert_condition_field_eq_val_cidr(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError("CIDR values are not supported in sdyaml")
+
     def convert_condition_or(self, key_cond_values: list) -> Any:
         return {self.SDYAML_ANY: key_cond_values}
 

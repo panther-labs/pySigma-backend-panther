@@ -95,6 +95,13 @@ class PythonHelper(BasePantherBackendHelper):
         value = value.replace('"', '\\"')
         return f're.match(r"{value}", {key_path})'
 
+    def convert_condition_field_eq_val_cidr(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Any:
+        key_path = self.get_key_path_value(cond.field)
+        value = cond.value.cidr
+        return f'ipaddress.ip_address({key_path}) in ipaddress.ip_network("{value}")'
+
     @simplify
     def convert_condition_or(self, key_cond_values: list) -> Any:
         return f"any([{', '.join(key_cond_values)}])"
