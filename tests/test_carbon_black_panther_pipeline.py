@@ -1,8 +1,10 @@
 import uuid
 from unittest import mock
 
+import pytest
 import yaml
 from sigma.collection import SigmaCollection
+from sigma.exceptions import SigmaTransformationError
 from sigma.processing.resolver import ProcessingPipelineResolver
 
 from sigma.backends.panther import PantherBackend
@@ -79,3 +81,37 @@ def test_basic(mock_click):
     )
 
     assert backend.convert(rule) == expected
+
+
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_not_supported_rule_type(mock_click):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "carbon_black_panther"}
+    )
+    resolver = ProcessingPipelineResolver({"carbon_black_panther": carbon_black_panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("carbon_black_panther")
+    backend = PantherBackend(pipeline)
+
+    rule_id = uuid.uuid4()
+    rule = SigmaCollection.from_yaml(
+        f"""
+        title: Test Title
+        id: {rule_id}
+        description: description
+        logsource:
+            category: registry_add
+            product: macos
+        detection:
+            sel:
+                Field1: "banana"
+                DestinationIp: 127.0.0.1
+                Initiated: "true"
+            condition: sel
+    """
+    )
+
+    with pytest.raises(SigmaTransformationError) as err:
+        backend.convert(rule)
+    assert (
+        err.value.args[0] == "Rule type not currently supported by the CarbonBlack Sigma pipeline"
+    )

@@ -12,6 +12,7 @@ from sigma.processing.transformations import (
     DropDetectionItemTransformation,
     FieldMappingTransformation,
     ReplaceStringTransformation,
+    RuleFailureTransformation,
 )
 
 from sigma.pipelines.panther.panther_pipeline import (
@@ -19,6 +20,7 @@ from sigma.pipelines.panther.panther_pipeline import (
     logsource_linux,
     logsource_mac,
     logsource_network_connection,
+    logsource_process_creation,
     logsource_windows,
 )
 from sigma.pipelines.panther.processing import RuleIContainsDetectionItemCondition
@@ -274,6 +276,32 @@ def crowdstrike_panther_pipeline():
                     IncludeFieldCondition(
                         fields=["Protocol"],
                     )
+                ],
+            ),
+            ProcessingItem(
+                identifier="cb_fail_not_implemented_rule_type",
+                rule_condition_linking=any,
+                transformation=RuleFailureTransformation(
+                    "Rule type not currently supported by the CrowdStrike Sigma pipeline"
+                ),
+                rule_condition_negation=True,
+                rule_conditions=[
+                    logsource_windows(),
+                    logsource_mac(),
+                    logsource_linux(),
+                ],
+            ),
+            ProcessingItem(
+                identifier="cb_fail_not_implemented_rule_type",
+                rule_condition_linking=any,
+                transformation=RuleFailureTransformation(
+                    "Rule type not currently supported by the CrowdStrike Sigma pipeline"
+                ),
+                rule_condition_negation=True,
+                rule_conditions=[
+                    logsource_network_connection(),
+                    logsource_process_creation(),
+                    logsource_file_event(),
                 ],
             ),
         ],

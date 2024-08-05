@@ -22,7 +22,8 @@ def sigma_query(detection):
     return f"""
 title: Test
 logsource:
-    product: test
+    category: process_creation
+    product: macos
 detection:
     {detection}
 """
@@ -646,6 +647,8 @@ def test_pipeline_simplification(mock_click, backend):
     expected_result = """def rule(event):
     if all(
         [
+            event.deep_get("type", default="") == "endpoint.event.procstart",
+            event.deep_get("device_os", default="") == "MAC",
             event.deep_get("process_path", default="").endswith("\\\\bcdedit.exe"),
             "set" in event.deep_get("target_cmdline", default=""),
         ]
