@@ -91,4 +91,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
             if "carbon_black_panther" in cli_context.params["pipeline"]:
                 log_types.append("CarbonBlack.EndpointEvent")
+
+            if "sentinelone_panther" in cli_context.params["pipeline"]:
+                log_types.append("SentinelOne.DeepVisibilityV2")
         return log_types

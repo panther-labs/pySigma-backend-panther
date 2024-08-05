@@ -44,6 +44,10 @@ class BasePantherBackendHelper(ABC):
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any: ...
 
+    def convert_condition_field_eq_val_cidr(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Any: ...
+
     @abstractmethod
     def convert_condition_or(self, key_cond_values: list) -> Any: ...
 
@@ -74,7 +78,7 @@ class BasePantherBackendHelper(ABC):
             prefix = "cb_"
         if "crowdstrike_panther" in enabled_pipelines:
             prefix = "cs_"
-        if "sentinel_one_panther" in enabled_pipelines:
+        if "sentinelone_panther" in enabled_pipelines:
             prefix = "s1_"
 
         if prefix:
