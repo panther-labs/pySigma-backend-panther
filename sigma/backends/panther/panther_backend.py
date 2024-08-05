@@ -153,7 +153,7 @@ class PantherBackend(Backend):
     def convert_condition_field_eq_val_cidr(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("CIDR  values are not supported right now")
+        return self.format_helper.convert_condition_field_eq_val_cidr(cond, state)
 
     def convert_condition_field_compare_op_val(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
@@ -210,7 +210,9 @@ class PantherBackend(Backend):
     def convert_condition_val_num(
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
-        raise SigmaFeatureNotSupportedByBackendError("Enums are not supported right now")
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Number only conditions are not supported right now"
+        )
 
     def convert_condition_val_re(
         self, cond: ConditionValueExpression, state: ConversionState
@@ -327,11 +329,13 @@ class PantherBackend(Backend):
     def finalize_query_python(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
+        import_ipaddress = "import ipaddress\n" if "ipaddress." in query else ""
         import_json = "import json\n" if "json." in query else ""
         import_re = "import re\n" if "re." in query else ""
-        empty_strings = "\n\n" if import_json or import_re else ""
+        empty_strings = "\n\n" if import_ipaddress or import_json or import_re else ""
         query = (
-            import_json
+            import_ipaddress
+            + import_json
             + import_re
             + empty_strings
             + f"""def rule(event):
