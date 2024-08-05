@@ -44,6 +44,10 @@ class BasePantherBackendHelper(ABC):
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any: ...
 
+    def convert_condition_field_eq_val_cidr(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Any: ...
+
     @abstractmethod
     def convert_condition_or(self, key_cond_values: list) -> Any: ...
 
