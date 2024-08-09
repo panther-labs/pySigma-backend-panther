@@ -8,6 +8,7 @@ from sigma.processing.conditions import IncludeFieldCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
+    AddFieldnamePrefixTransformation,
     ChangeLogsourceTransformation,
     DropDetectionItemTransformation,
     FieldMappingTransformation,
@@ -220,15 +221,34 @@ def crowdstrike_panther_pipeline():
             ProcessingItem(
                 transformation=FieldMappingTransformation(
                     {
-                        "sha256": "event.SHA256HashData",
-                        "sha1": "event.SHA1HashData",
-                        "ParentImage": "event.ParentBaseFileName",
-                        "Image": "event.ImageFileName",
-                        "CommandLine": "event.CommandLine",
-                        "md5": "event.MD5HashData",
-                        "TargetFileName": "event.TargetFileName",
+                        "sha256": "SHA256HashData",
+                        "sha1": "SHA1HashData",
+                        "ParentImage": "ParentBaseFileName",
+                        "Image": "ImageFileName",
+                        "md5": "MD5HashData",
                     }
                 ),
+            ),
+            ProcessingItem(
+                transformation=AddFieldnamePrefixTransformation(prefix="event."),
+                field_name_conditions=[
+                    IncludeFieldCondition(
+                        fields=[
+                            "CommandLine",
+                            "DomainName",
+                            "ImageFileName",
+                            "IP4Records",
+                            "MD5HashData",
+                            "ParentBaseFileName",
+                            "Protocol",
+                            "RemoteAddressIP4",
+                            "RemotePort",
+                            "SHA1HashData",
+                            "SHA256HashData",
+                            "TargetFilename",
+                        ]
+                    ),
+                ],
             ),
             ProcessingItem(
                 transformation=DropDetectionItemTransformation(),
