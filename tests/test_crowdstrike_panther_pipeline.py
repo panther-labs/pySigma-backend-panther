@@ -34,6 +34,7 @@ def test_basic(mock_click):
                 Initiated: "true"
                 ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
                 TargetFilename|endswith: '.plist'
+                Protocol: udp
             condition: sel
     """
     )
@@ -84,6 +85,11 @@ def test_basic(mock_click):
                             "KeyPath": "event.TargetFilename",
                             "Value": ".plist",
                         },
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "event.Protocol",
+                            "Value": 17,
+                        },
                     ]
                 }
             ],
@@ -116,6 +122,7 @@ def test_python_fields_mapping(mock_click):
                     ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
                     TargetFilename|endswith: '.plist'
                     sha1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+                    Protocol: 'tcp'
                 condition: sel
         """
     )
@@ -130,6 +137,7 @@ def test_python_fields_mapping(mock_click):
             event.deep_get("event", "TargetFilename", default="").endswith(".plist"),
             event.deep_get("event", "SHA1HashData", default="")
             == "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            event.deep_get("event", "Protocol", default="") == 6,
         ]
     ):
         return True
