@@ -91,3 +91,48 @@ def test_basic(mock_click):
     )
 
     assert backend.convert(rule) == expected
+
+
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_python_fields_mapping(mock_click):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "crowdstrike_panther"}
+    )
+    resolver = ProcessingPipelineResolver({"crowdstrike_panther": crowdstrike_panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("crowdstrike_panther")
+    backend = PantherBackend(pipeline)
+
+    rule_id = uuid.uuid4()
+    rule = SigmaCollection.from_yaml(
+        f"""
+            title: Test Title
+            id: {rule_id}
+            description: description
+            logsource:
+                category: process_creation
+                product: windows
+            detection:
+                sel:
+                    ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
+                    TargetFilename|endswith: '.plist'
+                condition: sel
+        """
+    )
+
+    expected = """def rule(event):
+    if all(
+        [
+            event.deep_get("event_platform", default="") == "Windows",
+            event.deep_get("event_simpleName", default="")
+            in ["ProcessRollup2", "SyntheticProcessRollup2"],
+            event.deep_get("ParentBaseFileName", default="") == "MonitoringHost.exe",
+            event.deep_get("event", "TargetFilename", default="").endswith(".plist"),
+        ]
+    ):
+        return True
+    return False
+"""
+
+    result = backend.convert(rule, output_format="python")
+
+    assert result["Detection"][0] == expected
