@@ -33,6 +33,7 @@ def test_basic(mock_click):
                 DestinationIp: 127.0.0.1
                 Initiated: "true"
                 ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
+                TargetFilename|endswith: '.plist'
             condition: sel
     """
     )
@@ -77,6 +78,11 @@ def test_basic(mock_click):
                             "Condition": "Equals",
                             "KeyPath": "ParentBaseFileName",
                             "Value": "MonitoringHost.exe",
+                        },
+                        {
+                            "Condition": "EndsWith",
+                            "KeyPath": "event.TargetFilename",
+                            "Value": ".plist",
                         },
                     ]
                 }

@@ -8,6 +8,7 @@ from sigma.processing.conditions import IncludeFieldCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
+    AddFieldnamePrefixTransformation,
     ChangeLogsourceTransformation,
     DropDetectionItemTransformation,
     FieldMappingTransformation,
@@ -218,17 +219,20 @@ def crowdstrike_panther_pipeline():
                 rule_conditions=[logsource_network_connection()],
             ),
             ProcessingItem(
-                transformation=FieldMappingTransformation(
-                    {
-                        "sha256": "event.SHA256HashData",
-                        "sha1": "event.SHA1HashData",
-                        "ParentImage": "event.ParentBaseFileName",
-                        "Image": "event.ImageFileName",
-                        "CommandLine": "event.CommandLine",
-                        "md5": "event.MD5HashData",
-                        "TargetFileName": "event.TargetFileName",
-                    }
-                ),
+                transformation=AddFieldnamePrefixTransformation(prefix="event."),
+                field_name_conditions=[
+                    IncludeFieldCondition(
+                        fields=[
+                            "sha256",
+                            "sha1",
+                            "ParentImage",
+                            "Image",
+                            "CommandLine",
+                            "md5",
+                            "TargetFilename",
+                        ]
+                    ),
+                ],
             ),
             ProcessingItem(
                 transformation=DropDetectionItemTransformation(),
