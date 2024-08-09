@@ -219,31 +219,36 @@ def crowdstrike_panther_pipeline():
                 rule_conditions=[logsource_network_connection()],
             ),
             ProcessingItem(
+                transformation=FieldMappingTransformation(
+                    {
+                        "sha256": "SHA256HashData",
+                        "sha1": "SHA1HashData",
+                        "ParentImage": "ParentBaseFileName",
+                        "Image": "ImageFileName",
+                        "md5": "MD5HashData",
+                    }
+                ),
+            ),
+            ProcessingItem(
                 transformation=AddFieldnamePrefixTransformation(prefix="event."),
                 field_name_conditions=[
                     IncludeFieldCondition(
                         fields=[
-                            "sha256",
-                            "sha1",
-                            "ParentImage",
-                            "Image",
                             "CommandLine",
-                            "md5",
+                            "DomainName",
+                            "ImageFileName",
+                            "IP4Records",
+                            "MD5HashData",
+                            "ParentBaseFileName",
+                            "Protocol",
+                            "RemoteAddressIP4",
+                            "RemotePort",
+                            "SHA1HashData",
+                            "SHA256HashData",
                             "TargetFilename",
                         ]
                     ),
                 ],
-            ),
-            ProcessingItem(
-                transformation=FieldMappingTransformation(
-                    {
-                        "event.sha256": "event.SHA256HashData",
-                        "event.sha1": "event.SHA1HashData",
-                        "event.ParentImage": "event.ParentBaseFileName",
-                        "event.Image": "event.ImageFileName",
-                        "event.md5": "event.MD5HashData",
-                    }
-                ),
             ),
             ProcessingItem(
                 transformation=DropDetectionItemTransformation(),
