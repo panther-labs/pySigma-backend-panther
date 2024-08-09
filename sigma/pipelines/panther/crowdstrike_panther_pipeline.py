@@ -235,6 +235,17 @@ def crowdstrike_panther_pipeline():
                 ],
             ),
             ProcessingItem(
+                transformation=FieldMappingTransformation(
+                    {
+                        "event.sha256": "event.SHA256HashData",
+                        "event.sha1": "event.SHA1HashData",
+                        "event.ParentImage": "event.ParentBaseFileName",
+                        "event.Image": "event.ImageFileName",
+                        "event.md5": "event.MD5HashData",
+                    }
+                ),
+            ),
+            ProcessingItem(
                 transformation=DropDetectionItemTransformation(),
                 field_name_conditions=[IncludeFieldCondition(fields=["DestinationHostname"])],
             ),

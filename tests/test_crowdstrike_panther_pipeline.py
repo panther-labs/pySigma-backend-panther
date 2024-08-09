@@ -115,6 +115,7 @@ def test_python_fields_mapping(mock_click):
                 sel:
                     ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
                     TargetFilename|endswith: '.plist'
+                    sha1: da39a3ee5e6b4b0d3255bfef95601890afd80709
                 condition: sel
         """
     )
@@ -125,8 +126,10 @@ def test_python_fields_mapping(mock_click):
             event.deep_get("event_platform", default="") == "Windows",
             event.deep_get("event_simpleName", default="")
             in ["ProcessRollup2", "SyntheticProcessRollup2"],
-            event.deep_get("event", "ParentBaseFileName", default="") == "MonitoringHost.exe",
+            event.deep_get("ParentBaseFileName", default="") == "MonitoringHost.exe",
             event.deep_get("event", "TargetFilename", default="").endswith(".plist"),
+            event.deep_get("event", "SHA1HashData", default="")
+            == "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ]
     ):
         return True
