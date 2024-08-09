@@ -125,7 +125,7 @@ def test_python_fields_mapping(mock_click):
             event.deep_get("event_platform", default="") == "Windows",
             event.deep_get("event_simpleName", default="")
             in ["ProcessRollup2", "SyntheticProcessRollup2"],
-            event.deep_get("ParentBaseFileName", default="") == "MonitoringHost.exe",
+            event.deep_get("event", "ParentBaseFileName", default="") == "MonitoringHost.exe",
             event.deep_get("event", "TargetFilename", default="").endswith(".plist"),
         ]
     ):
