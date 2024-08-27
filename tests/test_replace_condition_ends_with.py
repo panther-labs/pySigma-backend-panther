@@ -21,7 +21,7 @@ class TestReplaceConditionEndsWith:
             condition: sel
         """
 
-        expected = f"""
+        expected = """
         AnalysisType: rule
         Description: null
         Detection:
@@ -59,7 +59,7 @@ class TestReplaceConditionEndsWith:
             condition: sel
         """
 
-        expected = f"""
+        expected = """
         AnalysisType: rule
         Description: null
         Detection:
@@ -106,7 +106,7 @@ class TestReplaceConditionEndsWith:
             condition: all of selection_* and not 1 of filter_*
         """
 
-        expected = f"""
+        expected = """
         AnalysisType: rule
         Description: null
         Detection:
