@@ -37,4 +37,4 @@ def test_basic(sigma_backend):
         }
     )
 
-    assert sigma_backend.convert(rule) == expected
+    assert sigma_backend.convert(rule, output_format="sdyaml") == expected
