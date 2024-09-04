@@ -52,6 +52,11 @@ def test_basic(mock_click):
                     "All": [
                         {
                             "Condition": "Equals",
+                            "KeyPath": "event.Protocol",
+                            "Value": 17,
+                        },
+                        {
+                            "Condition": "Equals",
                             "KeyPath": "event_platform",
                             "Value": "Windows",
                         },
@@ -84,11 +89,6 @@ def test_basic(mock_click):
                             "Condition": "EndsWith",
                             "KeyPath": "event.TargetFilename",
                             "Value": ".plist",
-                        },
-                        {
-                            "Condition": "Equals",
-                            "KeyPath": "event.Protocol",
-                            "Value": 17,
                         },
                     ]
                 }
@@ -130,6 +130,7 @@ def test_python_fields_mapping(mock_click):
     expected = """def rule(event):
     if all(
         [
+            event.deep_get("event", "Protocol", default="") == 6,
             event.deep_get("event_platform", default="") == "Windows",
             event.deep_get("event_simpleName", default="")
             in ["ProcessRollup2", "SyntheticProcessRollup2"],
@@ -137,7 +138,6 @@ def test_python_fields_mapping(mock_click):
             event.deep_get("event", "TargetFilename", default="").endswith(".plist"),
             event.deep_get("event", "SHA1HashData", default="")
             == "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            event.deep_get("event", "Protocol", default="") == 6,
         ]
     ):
         return True
