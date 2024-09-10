@@ -80,7 +80,7 @@ def test_basic(mock_click):
         }
     )
 
-    assert backend.convert(rule) == expected
+    assert backend.convert(rule, output_format="sdyaml") == expected
 
 
 @mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")

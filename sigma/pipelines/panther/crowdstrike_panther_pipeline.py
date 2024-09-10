@@ -1,3 +1,4 @@
+from sigma.exceptions import SigmaConfigurationError, SigmaValueError
 from sigma.pipelines.common import (
     logsource_windows_dns_query,
     logsource_windows_network_connection,
@@ -14,7 +15,9 @@ from sigma.processing.transformations import (
     FieldMappingTransformation,
     ReplaceStringTransformation,
     RuleFailureTransformation,
+    ValueTransformation,
 )
+from sigma.types import SigmaNumber, SigmaType
 
 from sigma.pipelines.panther.panther_pipeline import (
     logsource_file_event,
@@ -26,6 +29,16 @@ from sigma.pipelines.panther.panther_pipeline import (
 )
 from sigma.pipelines.panther.processing import RuleIContainsDetectionItemCondition
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
+
+
+class StrToIntValueTransformation(ValueTransformation):
+    def apply_value(self, field: str, val: SigmaType) -> SigmaType:
+        try:
+            return SigmaNumber(str(val))
+        except (TypeError, SigmaValueError):
+            raise SigmaConfigurationError(
+                f"Value '{val}' can't be converted to number for {str(self)}"
+            )
 
 
 def crowdstrike_panther_pipeline():
@@ -240,7 +253,6 @@ def crowdstrike_panther_pipeline():
                             "IP4Records",
                             "MD5HashData",
                             "ParentBaseFileName",
-                            "Protocol",
                             "RemoteAddressIP4",
                             "RemotePort",
                             "SHA1HashData",
@@ -255,39 +267,47 @@ def crowdstrike_panther_pipeline():
                 field_name_conditions=[IncludeFieldCondition(fields=["DestinationHostname"])],
             ),
             ProcessingItem(
-                transformation=AddConditionTransformation({"event.Protocol": "ICMP"}),
+                transformation=AddConditionTransformation({"event.Protocol": "1"}),
                 rule_conditions=[
                     RuleIContainsDetectionItemCondition(
                         field="Protocol",
-                        value=1,
+                        value="ICMP",
                     ),
                 ],
             ),
             ProcessingItem(
-                transformation=AddConditionTransformation({"event.Protocol": "TCP"}),
+                transformation=AddConditionTransformation({"event.Protocol": "6"}),
                 rule_conditions=[
                     RuleIContainsDetectionItemCondition(
                         field="Protocol",
-                        value=6,
+                        value="TCP",
                     ),
                 ],
             ),
             ProcessingItem(
-                transformation=AddConditionTransformation({"event.Protocol": "UDP"}),
+                transformation=AddConditionTransformation({"event.Protocol": "17"}),
                 rule_conditions=[
                     RuleIContainsDetectionItemCondition(
                         field="Protocol",
-                        value=17,
+                        value="UDP",
                     ),
                 ],
             ),
             ProcessingItem(
-                transformation=AddConditionTransformation({"event.Protocol": "IPv6-ICMP"}),
+                transformation=AddConditionTransformation({"event.Protocol": "58"}),
                 rule_conditions=[
                     RuleIContainsDetectionItemCondition(
                         field="Protocol",
-                        value=58,
+                        value="IPv6-ICMP",
                     ),
+                ],
+            ),
+            ProcessingItem(
+                transformation=StrToIntValueTransformation(),
+                field_name_conditions=[
+                    IncludeFieldCondition(
+                        fields=["event.Protocol"],
+                    )
                 ],
             ),
             ProcessingItem(

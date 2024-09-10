@@ -41,7 +41,7 @@ class TestReplaceConditionEndsWith:
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
-        res = sigma_backend.convert(SigmaCollection(rules=[rule]))
+        res = sigma_backend.convert(SigmaCollection(rules=[rule]), output_format="sdyaml")
         assert yaml.safe_load(res) == yaml.safe_load(expected)
 
     def test_with_multiple_values(self, pipeline, sigma_backend):
@@ -83,7 +83,7 @@ class TestReplaceConditionEndsWith:
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
-        res = sigma_backend.convert(SigmaCollection(rules=[rule]))
+        res = sigma_backend.convert(SigmaCollection(rules=[rule]), output_format="sdyaml")
         assert yaml.safe_load(res) == yaml.safe_load(expected)
 
     def test_with_nested_detections(self, pipeline, sigma_backend):
@@ -140,5 +140,5 @@ class TestReplaceConditionEndsWith:
         rule = SigmaRule.from_yaml(raw_rule)
         transformation.apply(pipeline, rule)
 
-        res = sigma_backend.convert(SigmaCollection(rules=[rule]))
+        res = sigma_backend.convert(SigmaCollection(rules=[rule]), output_format="sdyaml")
         assert yaml.safe_load(res) == yaml.safe_load(expected)
