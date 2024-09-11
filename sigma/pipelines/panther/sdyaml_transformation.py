@@ -96,8 +96,8 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
             if any(
                 [
-                    "windows-audit" in cli_context.params["pipeline"],
-                    "windows-logsources" in cli_context.params["pipeline"],
+                    "windows_audit_panther" in cli_context.params["pipeline"],
+                    "windows_logsource_panther" in cli_context.params["pipeline"],
                 ]
             ):
                 log_types.append("Windows.EventLogs")

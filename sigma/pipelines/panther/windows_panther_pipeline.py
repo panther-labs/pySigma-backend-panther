@@ -76,7 +76,7 @@ panther_windows_prefix = ProcessingItem(
 )
 
 
-def windows_logsource_pipeline() -> ProcessingPipeline:
+def windows_logsource_panther_pipeline() -> ProcessingPipeline:
     the_service = generate_windows_logsource_items(
         cond_field_template="Channel",
         cond_value_template="{source}",
@@ -131,7 +131,7 @@ def windows_logsource_pipeline() -> ProcessingPipeline:
     )
 
 
-def windows_audit_pipeline() -> ProcessingPipeline:
+def windows_audit_panther_pipeline() -> ProcessingPipeline:
     return ProcessingPipeline(
         name="Map generic log sources to Windows audit logs",
         priority=10,
