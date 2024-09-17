@@ -34,6 +34,7 @@ def test_basic(mock_click):
                 Initiated: "true"
                 ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
                 TargetFilename|endswith: '.plist'
+                Protocol: udp
             condition: sel
     """
     )
@@ -49,6 +50,11 @@ def test_basic(mock_click):
             "Detection": [
                 {
                     "All": [
+                        {
+                            "Condition": "Equals",
+                            "KeyPath": "event.Protocol",
+                            "Value": 17,
+                        },
                         {
                             "Condition": "Equals",
                             "KeyPath": "event_platform",
@@ -90,7 +96,7 @@ def test_basic(mock_click):
         }
     )
 
-    assert backend.convert(rule) == expected
+    assert backend.convert(rule, output_format="sdyaml") == expected
 
 
 @mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
@@ -116,6 +122,7 @@ def test_python_fields_mapping(mock_click):
                     ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
                     TargetFilename|endswith: '.plist'
                     sha1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+                    Protocol: 'tcp'
                 condition: sel
         """
     )
@@ -123,6 +130,7 @@ def test_python_fields_mapping(mock_click):
     expected = """def rule(event):
     if all(
         [
+            event.deep_get("event", "Protocol", default="") == 6,
             event.deep_get("event_platform", default="") == "Windows",
             event.deep_get("event_simpleName", default="")
             in ["ProcessRollup2", "SyntheticProcessRollup2"],
