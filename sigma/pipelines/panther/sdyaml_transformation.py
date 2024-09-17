@@ -1,4 +1,3 @@
-import logging
 from os import path
 from typing import Any
 
@@ -64,7 +63,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
         log_types = self._detect_log_types(rule)
         if len(log_types) == 0:
-            raise SigmaFeatureNotSupportedByBackendError(f"Can't map any LogTypes")
+            raise SigmaFeatureNotSupportedByBackendError("Can't map any LogTypes")
         else:
             res["LogTypes"] = log_types
 
@@ -94,4 +93,12 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
             if "sentinelone_panther" in cli_context.params["pipeline"]:
                 log_types.append("SentinelOne.DeepVisibilityV2")
+
+            if any(
+                [
+                    "windows_audit_panther" in cli_context.params["pipeline"],
+                    "windows_logsource_panther" in cli_context.params["pipeline"],
+                ]
+            ):
+                log_types.append("Windows.EventLogs")
         return log_types
