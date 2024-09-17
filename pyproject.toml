@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "pySigma-backend-panther"
-version = "0.2.4"
+version = "0.2.5"
 description = "pySigma backend for Panther"
-authors = ["Josh Esbrook <jehockey@umich.edu>"]
+authors = ["Panther Labs Inc <pypi@runpanther.io>"]
 maintainers = ["Panther Labs Inc <pypi@runpanther.io>"]
 license = "LGPL-3.0-only"
 repository = "https://github.com/panther-labs/pySigma-backend-panther"
