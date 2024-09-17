@@ -80,7 +80,7 @@ class PythonHelper(BasePantherBackendHelper):
     def convert_condition_field_eq_val_num(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Any:
-        return f'{self.get_key_path_value(cond.field)} == "{cond.value.to_plain()}"'
+        return f"{self.get_key_path_value(cond.field)} == {cond.value.to_plain()}"
 
     def convert_condition_field_eq_val_null(
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
