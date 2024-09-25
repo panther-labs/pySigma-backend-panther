@@ -29,14 +29,14 @@ from sigma.pipelines.panther import panther_pipeline
 
 class PantherBackend(Backend):
     # `output_dir` param should be used for saving each rule into separate file
-    # `sigma convert -t panther_sdyaml -O output_dir=/tmp/directory`
+    # `sigma convert -t panther -O output_dir=/tmp/directory`
     output_dir: Optional[str] = None
 
-    name: ClassVar[str] = "panther sdyaml backend"
+    name: ClassVar[str] = "panther backend"
 
-    default_format: ClassVar[str] = "sdyaml"
+    default_format: ClassVar[str] = "python"
     formats = {
-        "default": "sdyaml",
+        "default": "python",
         "sdyaml": "sdyaml",
         "python": "python",
     }
@@ -47,7 +47,7 @@ class PantherBackend(Backend):
     }
 
     format_helpers = {
-        "default": SDYAMLHelper(),
+        "default": PythonHelper(),
         "sdyaml": SDYAMLHelper(),
         "python": PythonHelper(),
     }
@@ -292,7 +292,7 @@ class PantherBackend(Backend):
         )
 
     def finalize_output_default(self, queries: List[Any]) -> Any:
-        return self.finalize_output_sdyaml(queries)
+        return self.finalize_output_python(queries)
 
     def finalize_output_sdyaml(self, queries):
         if self.output_dir:
