@@ -1,0 +1,44 @@
+name: Build, Test, Publish Github and PyPI Releases
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish_github_release_and_pypi:
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest' ]
+        python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12' ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: poetry install
+      - name: Run lint
+        run: poetry run black --check . &&  poetry run isort --check-only .
+      - name: Run tests
+        run: poetry run pytest --cov=sigma --cov-report term --cov-report xml:cov.xml -vv
+      - name: Build packages
+        run: poetry build
+      - name: Create Github Release
+        run: |
+          export NEW_VERSION=$(cat VERSION)
+          git config user.name "dac-bot"
+          git config user.email "dac-bot@panther.com"
+          gh release create v$NEW_VERSION dist/* -t v$NEW_VERSION --draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure Poetry
+        run: |
+            poetry config pypi-token.pypi "${{ secrets.PYPI_API_TOKEN }}"
+      - name: Publish to PyPI
+        run: poetry publish

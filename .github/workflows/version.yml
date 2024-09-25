@@ -1,0 +1,49 @@
+name: Create Version Bump PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version Bump Type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        required: true
+        default: 'prerelease'
+
+permissions:
+  contents: write
+
+jobs:
+  version_bump_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        with:
+          egress-policy: audit
+      - name: Check out the repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
+        with:
+          python-version: '3.11'
+      - name: Install Requirements
+        run: |
+          pip install --upgrade pip poetry
+      - name: Collect old version
+        id: collect_old_version
+        run: echo "old_version=$(poetry version --short)" >> $GITHUB_OUTPUT
+      - name: Bump version
+        run: poetry version "${{ github.event.inputs.bump_type }}"
+      - name: Create Branch and Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.PANTHER_BOT_AUTOMATION_TOKEN }}
+        run: |
+          NEW_VERSION="$(poetry version --short)"
+          OLD_VERSION="${{ steps.collect_old_version.outputs.old_version }}"
+          git config user.name "dac-bot[bot]"
+          git config user.email "dac-bot@panther.com"
+          git checkout -b "$NEW_VERSION"
+          git commit -a -m "Bump version to $NEW_VERSION"
+          git push --set-upstream origin "$NEW_VERSION"
+          gh pr create -t "Version bump to v$NEW_VERSION" -b "Bumping Version from v$OLD_VERSION to v$NEW_VERSION."

@@ -36,16 +36,3 @@ jobs:
         run: poetry run black --check . &&  poetry run isort --check-only .
       - name: Run tests
         run: poetry run pytest --cov=sigma --cov-report term --cov-report xml:cov.xml -vv
-      - name: Store coverage for badge
-        if: ${{ runner.os == 'Linux' }}
-        run: poetry run python print-coverage.py >> $GITHUB_ENV
-      - name: Create coverage badge
-        if: ${{ github.repository == 'panther-labs/pySigma-backend-panther-sdyaml' && github.event_name == 'push' && runner.os == 'Linux' }}
-        uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: GitHub Gist identifier containing coverage badge JSON expected by shields.io.
-          filename: panther-labs-pySigma-backend-panther-sdyaml.json
-          label: Coverage
-          message: ${{ env.COVERAGE }}
-          color: ${{ env.COVERAGE_COLOR }}
