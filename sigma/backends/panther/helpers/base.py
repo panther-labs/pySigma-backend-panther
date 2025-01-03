@@ -102,8 +102,9 @@ class BasePantherBackendHelper(ABC):
             file_name = self._add_rule_prefix(query, file_name)
             file_name = self._add_rule_suffix(query, file_name)
 
-            file_path_yml = path.join(output_dir, file_name)
-            self.write_queries_into_files(file_path_yml, query)
+            file_name_without_extension = file_name[:-4]
+            file_path = path.join(output_dir, file_name_without_extension)
+            self.write_query_into_file(file_path, query)
 
     @abstractmethod
-    def write_queries_into_files(self, file_path_yml: str, query: Any): ...
+    def write_query_into_file(self, file_path_yml: str, query: Any): ...

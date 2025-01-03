@@ -131,9 +131,10 @@ class PythonHelper(BasePantherBackendHelper):
     def _add_rule_suffix(self, query, file_name):
         return file_name
 
-    def write_queries_into_files(self, file_path_yml: str, query: Any):
+    def write_query_into_file(self, file_path: str, query: Any):
         detection = query.pop("Detection", "pass")[0]
-        file_path_python = file_path_yml[:-3] + "py"
+        file_path_python = file_path + ".py"
+        file_path_yml = file_path + ".yml"
         query["Filename"] = file_path_python.split("/")[-1]
         with open(file_path_python, "w") as file:
             file.write(detection)

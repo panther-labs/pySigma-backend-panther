@@ -22,6 +22,7 @@ from sigma.exceptions import (
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
 
+from sigma.backends.panther.helpers.pantherflow_helper import PantherFlowHelper
 from sigma.backends.panther.helpers.python_helper import PythonHelper
 from sigma.backends.panther.helpers.sdyaml_helper import SDYAMLHelper
 from sigma.pipelines.panther import panther_pipeline
@@ -39,17 +40,20 @@ class PantherBackend(Backend):
         "default": "python",
         "sdyaml": "sdyaml",
         "python": "python",
+        "pantherflow": "pantherflow",
     }
     output_format_processing_pipeline = {
         "default": ProcessingPipeline(),
         "sdyaml": ProcessingPipeline(),
         "python": ProcessingPipeline(),
+        "pantherflow": ProcessingPipeline(),
     }
 
     format_helpers = {
         "default": PythonHelper(),
         "sdyaml": SDYAMLHelper(),
         "python": PythonHelper(),
+        "pantherflow": PantherFlowHelper(),
     }
 
     convert_or_as_in: ClassVar[bool] = True
@@ -321,6 +325,18 @@ class PantherBackend(Backend):
             return queries[0]
         return queries
 
+    def finalize_output_pantherflow(self, queries):
+        if self.output_dir:
+            self.save_queries_into_individual_files(queries)
+
+        cli_context = click.get_current_context(silent=True)
+        if cli_context:
+            return "Converted queries are successfully saved"
+
+        if len(queries) == 1:
+            return queries[0]
+        return queries
+
     def finalize_query_sdyaml(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
@@ -353,3 +369,11 @@ class PantherBackend(Backend):
             raise SigmaFeatureNotSupportedByBackendError(
                 f"Invalid input for formatting python code: {query}"
             )
+
+    def finalize_query_pantherflow(
+        self, rule: SigmaRule, query: Any, index: int, state: ConversionState
+    ):
+        query = f""" | where p_event_time > time.ago(1d)
+ | where {query}
+"""
+        return query
