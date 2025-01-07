@@ -148,6 +148,7 @@ def test_python_fields_mapping(mock_click):
 
     assert result["Detection"][0] == expected
 
+
 @mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
 def test_pantherflow_query(mock_click):
     mock_click.get_current_context.return_value = mock.MagicMock(

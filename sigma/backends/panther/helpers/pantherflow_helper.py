@@ -14,15 +14,16 @@ from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
 LOG_TYPES_MAP = {
-        "Crowdstrike.FDREvent": "crowdstrike_fdrevent",
-        "CarbonBlack.EndpointEvent": "carbonblack_endpointevent",
-        "SentinelOne.DeepVisibilityV2": "sentinelone_deepvisibilityv2",
-        "Windows.EventLogs": "windows_eventlogs",
-        "Okta.SystemLog": "okta_systemlog",
-        "AWS.CloudTrail": "aws_cloudtrail",
-        "GitHub.Audit": "github_audit",
-        "GCP.AuditLog": "gcp_auditlog",
-    }
+    "Crowdstrike.FDREvent": "crowdstrike_fdrevent",
+    "CarbonBlack.EndpointEvent": "carbonblack_endpointevent",
+    "SentinelOne.DeepVisibilityV2": "sentinelone_deepvisibilityv2",
+    "Windows.EventLogs": "windows_eventlogs",
+    "Okta.SystemLog": "okta_systemlog",
+    "AWS.CloudTrail": "aws_cloudtrail",
+    "GitHub.Audit": "github_audit",
+    "GCP.AuditLog": "gcp_auditlog",
+}
+
 
 class PantherFlowHelper(BasePantherBackendHelper):
     WILDCARD_SYMBOL = "*"
