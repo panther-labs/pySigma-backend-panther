@@ -1,3 +1,4 @@
+from http.cookiejar import deepvalues
 from typing import Any, Union
 
 from sigma.conditions import (
@@ -12,12 +13,8 @@ from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
 
 from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
-
-class PantherFlowHelper(BasePantherBackendHelper):
-    WILDCARD_SYMBOL = "*"
-
-    LOG_TYPES_MAP = {
-        "Crowdstrike.FDREvent": "crowdstrike_eventstreams",
+LOG_TYPES_MAP = {
+        "Crowdstrike.FDREvent": "crowdstrike_fdrevent",
         "CarbonBlack.EndpointEvent": "carbonblack_endpointevent",
         "SentinelOne.DeepVisibilityV2": "sentinelone_deepvisibilityv2",
         "Windows.EventLogs": "windows_eventlogs",
@@ -27,12 +24,8 @@ class PantherFlowHelper(BasePantherBackendHelper):
         "GCP.AuditLog": "gcp_auditlog",
     }
 
-    def table_name(self, query):
-        log_type = query["LogTypes"][0]
-        try:
-            return "panther_logs.public." + self.LOG_TYPES_MAP[log_type]
-        except KeyError:
-            raise SigmaFeatureNotSupportedByBackendError("Can't map any LogTypes")
+class PantherFlowHelper(BasePantherBackendHelper):
+    WILDCARD_SYMBOL = "*"
 
     def update_parsed_conditions(
         self, condition: ParentChainMixin, negated: bool = False
@@ -139,7 +132,6 @@ class PantherFlowHelper(BasePantherBackendHelper):
         file_path_txt = file_path + ".txt"
         with open(file_path_txt, "w") as file:
             file.write(
-                f"""{self.table_name(query)}
-{detection}
+                f"""{detection}
 """
             )

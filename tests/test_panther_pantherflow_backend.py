@@ -2,9 +2,10 @@ from unittest import mock
 
 import pytest
 from sigma.collection import SigmaCollection
+from sigma.processing.resolver import ProcessingPipelineResolver
 
 from sigma.backends.panther import PantherBackend
-from sigma.pipelines.panther import carbon_black_panther_pipeline
+from sigma.pipelines.panther import carbon_black_panther_pipeline, panther_pipeline
 
 
 def convert_rule(rule, pipeline=None):
@@ -519,4 +520,35 @@ def test_pipeline_simplification(mock_click, backend):
 """
 
     result = convert_rule(rule, pipeline=carbon_black_panther_pipeline())
+    assert result["Detection"][0] == expected_result
+
+
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_pantherflow_with_table_name(mock_click):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "panther", "format": "pantherflow"}
+    )
+    rule = """
+    title: Test
+    logsource:
+        service: okta
+        product: okta
+    detection:
+        selection:
+            fieldA:
+                - valueA
+                - valueB
+                - valueC
+        condition: selection
+    """
+    expected_result = """panther_logs.public.okta_systemlog
+ | where p_event_time > time.ago(1d)
+ | where fieldA in ['valueA', 'valueB', 'valueC']
+"""
+
+    resolver = ProcessingPipelineResolver({"panther": panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("panther")
+    result = PantherBackend(pipeline).convert(
+        rule_collection=SigmaCollection.from_yaml(rule), output_format="pantherflow"
+    )
     assert result["Detection"][0] == expected_result
