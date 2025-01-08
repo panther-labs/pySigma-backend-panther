@@ -175,28 +175,40 @@ class PantherBackend(Backend):
         )
 
     def convert_correlation_event_count_rule(
-        rule: "SigmaCorrelationRule", output_format: str | None = None, method: str | None = None
+        self,
+        rule: "SigmaCorrelationRule",
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
     ) -> Any:
         raise SigmaFeatureNotSupportedByBackendError(
             "Conversion of event count correlation rule into the target data structure is not supported right now"
         )
 
     def convert_correlation_temporal_rule(
-        rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
     ) -> List[Any]:
         raise SigmaFeatureNotSupportedByBackendError(
             "Conversion of temporal correlation rule into the target data structure is not supported right now"
         )
 
     def convert_correlation_value_count_rule(
-        rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
     ) -> List[Any]:
         raise SigmaFeatureNotSupportedByBackendError(
             "Conversion of value count correlation rule into the target data structure is not supported right now"
         )
 
     def convert_correlation_temporal_ordered_rule(
-        rule: SigmaCorrelationRule, output_format: str | None = None, method: str | None = None
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
     ) -> List[Any]:
         raise SigmaFeatureNotSupportedByBackendError(
             "Conversion of ordered temporal correlation rule into the target data structure is not supported right now"
