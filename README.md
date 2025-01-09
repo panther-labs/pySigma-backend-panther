@@ -13,9 +13,10 @@ It supports the following output formats:
 - sdyaml (`-f sdyaml`): [Panther YAML Detections](https://docs.panther.com/detections/rules/yaml#simple-detections)
 To save each rule in separate file you can use `output_dir` backend option.
 
-> $ sigma convert -t panther path/to/rules -p panther -O output_dir=output/directory
-> or
-> $ sigma convert -t panther -f sdyaml path/to/rules -p panther -O output_dir=output/directory
+>  sigma convert -t panther path/to/rules -p panther -O output_dir=output/directory
+
+or
+> sigma convert -t panther -f sdyaml path/to/rules -p panther -O output_dir=output/directory
 
 Further, it contains the following processing pipelines in `sigma.pipelines.panther`:
 

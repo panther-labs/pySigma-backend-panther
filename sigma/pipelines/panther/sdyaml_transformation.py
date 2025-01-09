@@ -7,6 +7,8 @@ from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
 from sigma.rule import SigmaLevel, SigmaRule
 
+from sigma.backends.panther.helpers.pantherflow_helper import LOG_TYPES_MAP
+
 SEVERITY_MAPPING = {
     SigmaLevel.INFORMATIONAL: "Info",
     SigmaLevel.LOW: "Low",
@@ -66,6 +68,12 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             raise SigmaFeatureNotSupportedByBackendError("Can't map any LogTypes")
         else:
             res["LogTypes"] = log_types
+
+        cli_context = click.get_current_context(silent=True)
+        if cli_context:
+            if cli_context.params.get("format", "") == "pantherflow":
+                log_type = res["LogTypes"][0]
+                res["Detection"] = [f"panther_logs.public.{LOG_TYPES_MAP[log_type]}\n{query}"]
 
         if rule.tags:
             mittre_tags = []

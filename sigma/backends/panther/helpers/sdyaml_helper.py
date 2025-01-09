@@ -248,8 +248,10 @@ class SDYAMLHelper(BasePantherBackendHelper):
         file_name_pieces = file_name.split(".")
         file_extension = file_name_pieces[-1]
         file_name = "".join(file_name_pieces[:-1])
-        return f"{file_name}{suffix}.{file_extension}"
+        result = f"{file_name}{suffix}.{file_extension}"
+        return result
 
-    def write_queries_into_files(self, file_path_yml: str, query: Any):
+    def write_query_into_file(self, file_path: str, query: Any):
+        file_path_yml = file_path + ".yml"
         with open(file_path_yml, "w") as file:
             yaml.dump(query, file)

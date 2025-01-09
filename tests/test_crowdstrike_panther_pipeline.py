@@ -147,3 +147,44 @@ def test_python_fields_mapping(mock_click):
     result = backend.convert(rule, output_format="python")
 
     assert result["Detection"][0] == expected
+
+
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_pantherflow_query(mock_click):
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "crowdstrike_panther", "format": "pantherflow"}
+    )
+    resolver = ProcessingPipelineResolver({"crowdstrike_panther": crowdstrike_panther_pipeline()})
+    pipeline = resolver.resolve_pipeline("crowdstrike_panther")
+    backend = PantherBackend(pipeline)
+
+    rule_id = uuid.uuid4()
+    rule = SigmaCollection.from_yaml(
+        f"""
+            title: Test Title
+            id: {rule_id}
+            description: description
+            logsource:
+                category: process_creation
+                product: windows
+            detection:
+                sel:
+                    ParentImage: C:\\Program Files\\Microsoft Monitoring Agent\\Agent\\MonitoringHost.exe
+                    Protocol: 'tcp'
+                    Field1: 'banana'
+                condition: sel
+        """
+    )
+
+    expected = """panther_logs.public.crowdstrike_fdrevent
+ | where p_event_time > time.ago(1d)
+ | where event.Protocol == 6
+    and event_platform == 'Windows'
+    and event_simpleName in ['ProcessRollup2', 'SyntheticProcessRollup2']
+    and event.ParentBaseFileName == 'MonitoringHost.exe'
+    and Field1 == 'banana'
+"""
+
+    result = backend.convert(rule, output_format="pantherflow")
+
+    assert result["Detection"][0] == expected
