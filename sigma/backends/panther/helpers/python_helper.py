@@ -13,19 +13,19 @@ from sigma.conversion.state import ConversionState
 from sigma.backends.panther.helpers.base import BasePantherBackendHelper
 
 
+def simplify(func):
+    def inner(helper, key_cond_values) -> str:
+        if len(key_cond_values) == 1:
+            result = key_cond_values[0]
+        else:
+            result = func(helper, key_cond_values)
+        return result
+
+    return inner
+
+
 class PythonHelper(BasePantherBackendHelper):
     WILDCARD_SYMBOL = "*"
-
-    @staticmethod
-    def simplify(func):
-        def inner(helper, key_cond_values) -> str:
-            if len(key_cond_values) == 1:
-                result = key_cond_values[0]
-            else:
-                result = func(helper, key_cond_values)
-            return result
-
-        return inner
 
     @staticmethod
     def get_key_path_value(path: str):
