@@ -7,13 +7,10 @@ jobs:
   publish_github_release_and_pypi:
     strategy:
       matrix:
-        os: [ 'ubuntu-latest' ]
-        python-version: [ '3.9', '3.10', '3.11', '3.12' ]
+        os: ["ubuntu-latest"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
-        with:
-          egress-policy: audit
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
       - name: Install Poetry
         run: pipx install poetry
@@ -39,6 +36,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Configure Poetry
         run: |
-            poetry config pypi-token.pypi "${{ secrets.PYPI_API_TOKEN }}"
+          poetry config pypi-token.pypi "${{ secrets.PYPI_API_TOKEN }}"
       - name: Publish to PyPI
         run: poetry publish
+

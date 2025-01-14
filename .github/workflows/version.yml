@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       bump_type:
-        description: 'Version Bump Type (patch, minor, major, prepatch, preminor, premajor, prerelease)'
+        description: "Version Bump Type (patch, minor, major, prepatch, preminor, premajor, prerelease)"
         required: true
-        default: 'prerelease'
+        default: "prerelease"
 
 permissions:
   contents: write
@@ -14,11 +14,7 @@ permissions:
 jobs:
   version_bump_pr:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
-        with:
-          egress-policy: audit
       - name: Check out the repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
         with:
@@ -26,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install Requirements
         run: |
           pip install --upgrade pip poetry
@@ -47,3 +43,4 @@ jobs:
           git commit -a -m "Bump version to $NEW_VERSION"
           git push --set-upstream origin "$NEW_VERSION"
           gh pr create -t "Version bump to v$NEW_VERSION" -b "Bumping Version from v$OLD_VERSION to v$NEW_VERSION."
+

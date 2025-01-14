@@ -2,7 +2,7 @@ name: Tag with Latest Version on PR Merge
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [closed]
 
 jobs:
   tag-on-merge:
@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
-        with:
-          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -20,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install Requirements
         run: |
           pip install --upgrade pip poetry
@@ -31,7 +28,7 @@ jobs:
       - name: Check and update tag
         run: |
           VERSION="v$(poetry version --short)"
-          
+
           if [[ $(git tag -l $VERSION) ]]; then
             echo "Tag $VERSION already exists"
           else
@@ -39,3 +36,4 @@ jobs:
             git tag "$VERSION"
             git push origin --tags
           fi
+
