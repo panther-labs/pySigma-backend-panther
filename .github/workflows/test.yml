@@ -15,14 +15,6 @@ jobs:
         python-version: [ '3.9', '3.10', '3.11', '3.12' ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
-        with:
-          disable-sudo: true
-          egress-policy: block
-          allowed-endpoints: >
-            files.pythonhosted.org:443
-            github.com:443
-            pypi.org:443
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
       - name: Install Poetry
         run: pipx install poetry
