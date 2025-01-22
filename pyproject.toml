@@ -7,6 +7,7 @@ maintainers = ["Panther Labs Inc <pypi@runpanther.io>"]
 license = "LGPL-3.0-only"
 repository = "https://github.com/panther-labs/pySigma-backend-panther"
 packages = [{ include = "sigma" }]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
