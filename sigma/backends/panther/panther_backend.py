@@ -349,6 +349,11 @@ class PantherBackend(Backend):
             return queries[0]
         return queries
 
+    def finalize_query_default(
+        self, rule: SigmaRule, query: Any, index: int, state: ConversionState
+    ):
+        return self.finalize_query_python(rule, query, index, state)
+
     def finalize_query_sdyaml(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
