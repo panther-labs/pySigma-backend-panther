@@ -14,9 +14,7 @@ def test_sysmon_basic_sdyaml(mock_click):
     mock_click.get_current_context.return_value = mock.MagicMock(
         params={"pipeline": "sysmon_panther"}
     )
-    resolver = ProcessingPipelineResolver(
-        {"sysmon_panther": sysmon_panther_pipeline()}
-    )
+    resolver = ProcessingPipelineResolver({"sysmon_panther": sysmon_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("sysmon_panther")
     backend = PantherBackend(pipeline)
 
@@ -88,9 +86,7 @@ def test_sysmon_basic_python(mock_click):
     mock_click.get_current_context.return_value = mock.MagicMock(
         params={"pipeline": "sysmon_panther"}
     )
-    resolver = ProcessingPipelineResolver(
-        {"sysmon_panther": sysmon_panther_pipeline()}
-    )
+    resolver = ProcessingPipelineResolver({"sysmon_panther": sysmon_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("sysmon_panther")
     backend = PantherBackend(pipeline)
 
@@ -138,14 +134,13 @@ def test_sysmon_basic_python(mock_click):
 
     assert backend.convert(rule_collection=rule, output_format="python") == expected
 
+
 @mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
 def test_sysmon_basic_pantherflow(mock_click):
     mock_click.get_current_context.return_value = mock.MagicMock(
         params={"pipeline": "sysmon_panther"}
     )
-    resolver = ProcessingPipelineResolver(
-        {"sysmon_panther": sysmon_panther_pipeline()}
-    )
+    resolver = ProcessingPipelineResolver({"sysmon_panther": sysmon_panther_pipeline()})
     pipeline = resolver.resolve_pipeline("sysmon_panther")
     backend = PantherBackend(pipeline)
 
@@ -175,5 +170,5 @@ def test_sysmon_basic_pantherflow(mock_click):
     and Image == 'test_image'
 """
 
-    result = (backend.convert(rule_collection=rule, output_format="pantherflow"))
+    result = backend.convert(rule_collection=rule, output_format="pantherflow")
     assert result["Detection"][0] == expected
