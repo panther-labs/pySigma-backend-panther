@@ -80,6 +80,8 @@ class BasePantherBackendHelper(ABC):
             prefix = "cs_"
         if "sentinelone_panther" in enabled_pipelines:
             prefix = "s1_"
+        if "sysmon_panther" in enabled_pipelines:
+            prefix = "sysmon_"
         if (
             "windows_logsource_panther" in enabled_pipelines
             or "windows_audit_panther" in enabled_pipelines
