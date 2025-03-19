@@ -15,27 +15,22 @@ install-poetry:
 
 install: install-poetry ## Install project dependencies
 	@echo "Installing dependencies..."
-	pip install poetry || python3 -m pip install poetry
 	poetry install
 
 dev: install-poetry ## Set up development environment
 	@echo "Setting up development environment..."
-	pip install poetry || python3 -m pip install poetry
 	poetry install --with dev
 	poetry run pip install -e .
 
 test: install-poetry ## Run tests with coverage
 	@echo "Running tests..."
-	pip install poetry || python3 -m pip install poetry
 	poetry run pytest tests/ --cov=sigma
 
 lint: install-poetry ## Run linters (isort)
 	@echo "Running linters..."
-	pip install poetry || python3 -m pip install poetry
 	poetry run isort --check-only sigma/ tests/
 
 format: install-poetry ## Format code (black, isort)
 	@echo "Formatting code..."
-	pip install poetry || python3 -m pip install poetry
 	poetry run black sigma/ tests/
 	poetry run isort sigma/ tests/ 
