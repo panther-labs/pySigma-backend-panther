@@ -3,9 +3,10 @@ from sigma.processing.conditions import LogsourceCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
-    ChangeLogsourceTransformation,
+    ChangeLogsourceTransformation, RuleFailureTransformation,
 )
 
+from sigma.pipelines.panther.panther_pipeline import logsource_windows
 from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
@@ -76,6 +77,15 @@ def sysmon_panther_pipeline() -> ProcessingPipeline:
                         }
                     ),
                     rule_conditions=[LogsourceCondition(category=log_source, product="windows")],
+                ),
+                ProcessingItem(
+                    identifier="sysmon_fail_not_implemented",
+                    rule_condition_linking=any,
+                    transformation=RuleFailureTransformation(
+                        "Rule type not supported by the Sysmon pipeline"
+                    ),
+                    rule_condition_negation=True,
+                    rule_conditions=[logsource_windows()],
                 ),
             )
         ],

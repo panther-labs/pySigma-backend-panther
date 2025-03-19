@@ -382,9 +382,9 @@ class PantherBackend(Backend):
                 src_contents=query, fast=True, mode=black.FileMode(line_length=100)
             )
             return formatted_query
-        except black.parsing.InvalidInput:
+        except black.parsing.InvalidInput as err:
             raise SigmaFeatureNotSupportedByBackendError(
-                f"Invalid input for formatting python code: {query}"
+                f"Invalid input for formatting python code: {query}, err {err}"
             )
 
     def finalize_query_pantherflow(
