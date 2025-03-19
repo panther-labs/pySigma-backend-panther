@@ -3,7 +3,8 @@ from sigma.processing.conditions import LogsourceCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.processing.transformations import (
     AddConditionTransformation,
-    ChangeLogsourceTransformation, RuleFailureTransformation,
+    ChangeLogsourceTransformation,
+    RuleFailureTransformation,
 )
 
 from sigma.pipelines.panther.panther_pipeline import logsource_windows
