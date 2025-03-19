@@ -30,7 +30,7 @@ lint: install-poetry ## Run linters (isort)
 	@echo "Running linters..."
 	poetry run isort --check-only sigma/ tests/
 
-format: install-poetry ## Format code (black, isort)
+fmt: install-poetry ## Format code (black, isort)
 	@echo "Formatting code..."
 	poetry run black sigma/ tests/
 	poetry run isort sigma/ tests/ 
