@@ -1,4 +1,4 @@
-.PHONY: help install dev test install-poetry
+.PHONY: help install dev test install-poetry lint format
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -27,4 +27,15 @@ dev: install-poetry ## Set up development environment
 test: install-poetry ## Run tests with coverage
 	@echo "Running tests..."
 	pip install poetry || python3 -m pip install poetry
-	poetry run pytest tests/ --cov=sigma 
+	poetry run pytest tests/ --cov=sigma
+
+lint: install-poetry ## Run linters (isort)
+	@echo "Running linters..."
+	pip install poetry || python3 -m pip install poetry
+	poetry run isort --check-only sigma/ tests/
+
+format: install-poetry ## Format code (black, isort)
+	@echo "Formatting code..."
+	pip install poetry || python3 -m pip install poetry
+	poetry run black sigma/ tests/
+	poetry run isort sigma/ tests/ 
