@@ -92,8 +92,7 @@ class PythonHelper(BasePantherBackendHelper):
     ) -> Any:
         key_path = self.get_key_path_value(cond.field)
         value = str(cond.value.regexp)
-        value = value.replace('"', '\\"')
-        value = value.replace('\\\\"', '\\"')
+        value = self.prepare_cond_value(value)
         return f're.match(r"{value}", {key_path})'
 
     def convert_condition_field_eq_val_cidr(

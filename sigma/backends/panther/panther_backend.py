@@ -1,3 +1,4 @@
+import re
 from os import path
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
@@ -364,7 +365,7 @@ class PantherBackend(Backend):
     ):
         import_ipaddress = "import ipaddress\n" if "ipaddress." in query else ""
         import_json = "import json\n" if "json." in query else ""
-        import_re = "import re\n" if "re." in query else ""
+        import_re = "import re\n" if bool(re.search("[^a-zA-Z]re\.", query)) else ""
         empty_strings = "\n\n" if import_ipaddress or import_json or import_re else ""
         query = (
             import_ipaddress
