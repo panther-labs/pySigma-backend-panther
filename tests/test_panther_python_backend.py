@@ -279,7 +279,9 @@ def test_convert_condition_field_eq_val_re(backend):
 
 
 def rule(event):
-    if re.match(r"^[Cc]:\\[Pp]rogram[Dd]ata\\.{1,9}\\.exe", event.deep_get("ImagePath", default="")):
+    if re.match(
+        r"^[Cc]:\\\\[Pp]rogram[Dd]ata\\\\.{1,9}\\\\.exe", event.deep_get("ImagePath", default="")
+    ):
         return True
     return False
 """
