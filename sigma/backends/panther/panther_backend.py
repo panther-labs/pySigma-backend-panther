@@ -1,3 +1,4 @@
+import re
 from os import path
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
@@ -364,7 +365,7 @@ class PantherBackend(Backend):
     ):
         import_ipaddress = "import ipaddress\n" if "ipaddress." in query else ""
         import_json = "import json\n" if "json." in query else ""
-        import_re = "import re\n" if "re." in query else ""
+        import_re = "import re\n" if re.search(r"\bre\.", query) else ""
         empty_strings = "\n\n" if import_ipaddress or import_json or import_re else ""
         query = (
             import_ipaddress
@@ -382,9 +383,9 @@ class PantherBackend(Backend):
                 src_contents=query, fast=True, mode=black.FileMode(line_length=100)
             )
             return formatted_query
-        except black.parsing.InvalidInput:
+        except black.parsing.InvalidInput as err:
             raise SigmaFeatureNotSupportedByBackendError(
-                f"Invalid input for formatting python code: {query}"
+                f"Invalid input for formatting python code: {query}, err {err}"
             )
 
     def finalize_query_pantherflow(

@@ -106,6 +106,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
                 [
                     "windows_audit_panther" in cli_context.params["pipeline"],
                     "windows_logsource_panther" in cli_context.params["pipeline"],
+                    "sysmon_panther" in cli_context.params["pipeline"],
                 ]
             ):
                 log_types.append("Windows.EventLogs")
