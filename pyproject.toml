@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pySigma-backend-panther"
-version = "0.2.6"
+version = "0.2.7"
 description = "pySigma backend for Panther"
 authors = ["Panther Labs Inc <pypi@runpanther.io>"]
 maintainers = ["Panther Labs Inc <pypi@runpanther.io>"]
