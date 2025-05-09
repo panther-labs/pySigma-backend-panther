@@ -245,6 +245,20 @@ class PantherBackend(Backend):
             "Conversion of value-only plain query expressions is not supported right now"
         )
 
+    def convert_condition_field_eq_val_timestamp_part(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Timestamp part comparison is not supported right now"
+        )
+
+    def convert_condition_val_timestamp_part(
+        self, cond: ConditionValueExpression, state: ConversionState
+    ) -> Any:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Timestamp part comparison is not supported right now"
+        )
+
     def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None) -> List[Any]:
         """
         Copy-pasted base class convert_rule, with the addition of update_parsed_conditions
