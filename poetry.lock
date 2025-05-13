@@ -754,7 +754,7 @@ name = "urllib3"
 version = "2.2.2"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
     {file = "urllib3-2.2.2-py3-none-any.whl", hash = "sha256:a448b2f64d686155468037e1ace9f2d2199776e17f0a46610480d311f73e3472"},
@@ -782,4 +782,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "11784275723ad8f2e42d99d125e95af43c596f3601baee524b009748dd2d3151"
+content-hash = "d31a3726e8ebe9374a7b750f43e1f9b8bc1c3d05d432d86e3e92214de9b88384"
