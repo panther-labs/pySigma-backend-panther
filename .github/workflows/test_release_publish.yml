@@ -3,6 +3,9 @@ name: Build, Test, Publish Github and PyPI Releases
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   publish_github_release_and_pypi:
     strategy:
