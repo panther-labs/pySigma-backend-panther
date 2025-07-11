@@ -106,11 +106,47 @@ class TestSdYamlTransformation:
         res = transformation.apply(pipeline, rule, "")
         assert res["Description"] == "False Positives: fp1, fp2"
 
-    def test_mittre_tags(self, pipeline, rule):
+    @pytest.mark.parametrize(
+        ("tag", "expected_result"),
+        (
+            ("initial-access", "TA0001"),
+            ("execution", "TA0002"),
+            ("persistence", "TA0003"),
+            ("privilege-escalation", "TA0004"),
+            ("defense-evasion", "TA0005"),
+            ("credential-access", "TA0006"),
+            ("discovery", "TA0007"),
+            ("lateral-movement", "TA0008"),
+            ("collection", "TA0009"),
+            ("exfiltration", "TA0010"),
+            ("command-and-control", "TA0011"),
+            ("impact", "TA0040"),
+            ("resource-development", "TA0042"),
+            ("reconnaissance", "TA0043"),
+        ),
+    )
+    def test_mitre_tags(self, pipeline, rule, tag, expected_result):
         transformation = SdYamlTransformation()
         res = transformation.apply(pipeline, rule, "")
         assert "Reports" not in res
 
-        rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("dunno", "t1001")]
+        rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("attack", tag)]
         res = transformation.apply(pipeline, rule, "")
-        assert res["Reports"] == {"MITRE ATT&CK": ["T1001"]}
+        assert res["Reports"] == {"MITRE ATT&CK": [f"{expected_result}:T1001"]}
+
+    def test_mitre_tags_unknown_tactic(self, pipeline, rule):
+        transformation = SdYamlTransformation()
+        res = transformation.apply(pipeline, rule, "")
+        assert "Reports" not in res
+
+        rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("attack", "fake-tactic-name")]
+        with pytest.raises(SigmaFeatureNotSupportedByBackendError) as err:
+            transformation.apply(pipeline, rule, "")
+        assert err.value.args[0] == "MITRE ATT&CK tactic fake-tactic-name not found recognized"
+
+    def test_mitre_tags_technique(self, pipeline, rule):
+        transformation = SdYamlTransformation()
+        res = transformation.apply(pipeline, rule, "")
+        assert "Reports" not in res
+
+        rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("attack", "T1002")]
