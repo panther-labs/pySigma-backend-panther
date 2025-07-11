@@ -1,6 +1,6 @@
+import warnings
 from os import path
 from typing import Any
-import warnings
 
 import click
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
@@ -102,14 +102,20 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
                         if tag.name in MITRE_TAGS_MAP:
                             tactics.append(MITRE_TAGS_MAP[tag.name])
                         else:
-                            raise SigmaFeatureNotSupportedByBackendError(f"MITRE ATT&CK tactic {tag.name} not found recognized")
+                            raise SigmaFeatureNotSupportedByBackendError(
+                                f"MITRE ATT&CK tactic {tag.name} not found recognized"
+                            )
                     else:
                         techniques.append(tag.name.upper())
             if tactics:
-                res["Reports"] = {"MITRE ATT&CK": [f"{tac}:{teq}" for tac in tactics for teq in techniques]}
+                res["Reports"] = {
+                    "MITRE ATT&CK": [f"{tac}:{teq}" for tac in tactics for teq in techniques]
+                }
             else:
                 rule_id = dict(res).get("RuleID", "")
-                warnings.warn(f"Unable to determine MITRE Technique; skipping MITRE Mapping for rule{' ' + rule_id if rule_id else ''}")
+                warnings.warn(
+                    f"Unable to determine MITRE Technique; skipping MITRE Mapping for rule{' ' + rule_id if rule_id else ''}"
+                )
 
         return res
 
