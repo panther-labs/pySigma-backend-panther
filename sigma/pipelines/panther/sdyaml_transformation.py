@@ -1,5 +1,6 @@
 from os import path
 from typing import Any
+import warnings
 
 import click
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
@@ -107,7 +108,8 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
             if tactics:
                 res["Reports"] = {"MITRE ATT&CK": [f"{tac}:{teq}" for tac in tactics for teq in techniques]}
             else:
-                res["Reports"] = {"MITRE ATT&CK": techniques}
+                rule_id = dict(res).get("RuleID", "")
+                warnings.warn(f"Unable to determine MITRE Technique; skipping MITRE Mapping for rule{' ' + rule_id if rule_id else ''}")
 
         return res
 

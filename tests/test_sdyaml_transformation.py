@@ -144,9 +144,9 @@ class TestSdYamlTransformation:
             transformation.apply(pipeline, rule, "")
         assert err.value.args[0] == "MITRE ATT&CK tactic fake-tactic-name not found recognized"
 
-    def test_mitre_tags_technique(self, pipeline, rule):
+    def test_mitre_tags_no_tactic(self, pipeline, rule):
         transformation = SdYamlTransformation()
-        res = transformation.apply(pipeline, rule, "")
+        rule.tags = [SigmaRuleTag("attack", "t1001")]
+        with pytest.warns():
+            res = transformation.apply(pipeline, rule, "")
         assert "Reports" not in res
-
-        rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("attack", "T1002")]
