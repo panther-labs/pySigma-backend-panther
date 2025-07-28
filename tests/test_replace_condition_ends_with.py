@@ -95,7 +95,7 @@ class TestReplaceConditionEndsWith:
             product: okta
         detection:
             selection_img:
-                - Image|endswith: '\WMIC.exe'
+                - Image|endswith: '\\WMIC.exe'
                 - OriginalFileName: 'wmic.exe'
             selection_cli:
                 CommandLine|contains: '/node:'
