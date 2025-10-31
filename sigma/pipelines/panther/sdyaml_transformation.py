@@ -1,3 +1,4 @@
+import warnings
 from os import path
 from typing import Any
 
@@ -15,6 +16,23 @@ SEVERITY_MAPPING = {
     SigmaLevel.MEDIUM: "Medium",
     SigmaLevel.HIGH: "High",
     SigmaLevel.CRITICAL: "Critical",
+}
+
+MITRE_TAGS_MAP = {
+    "initial-access": "TA0001",
+    "execution": "TA0002",
+    "persistence": "TA0003",
+    "privilege-escalation": "TA0004",
+    "defense-evasion": "TA0005",
+    "credential-access": "TA0006",
+    "discovery": "TA0007",
+    "lateral-movement": "TA0008",
+    "collection": "TA0009",
+    "exfiltration": "TA0010",
+    "command-and-control": "TA0011",
+    "impact": "TA0040",
+    "resource-development": "TA0042",
+    "reconnaissance": "TA0043",
 }
 
 
@@ -76,15 +94,32 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
                 res["Detection"] = [f"panther_logs.public.{LOG_TYPES_MAP[log_type]}\n{query}"]
 
         if rule.tags:
-            mittre_tags = []
+            tactics = []
+            techniques = []
             for tag in rule.tags:
-                if tag.namespace == "attack" and tag.name.startswith("t"):
-                    mittre_tags.append(tag.name.upper())
-            res["Reports"] = {"MITRE ATT&CK": mittre_tags}
+                if tag.namespace == "attack":
+                    if not tag.name[1].isdigit():
+                        if tag.name in MITRE_TAGS_MAP:
+                            tactics.append(MITRE_TAGS_MAP[tag.name])
+                        else:
+                            raise SigmaFeatureNotSupportedByBackendError(
+                                f"MITRE ATT&CK tactic {tag.name} not found recognized"
+                            )
+                    else:
+                        techniques.append(tag.name.upper())
+            if tactics:
+                res["Reports"] = {
+                    "MITRE ATT&CK": [f"{tac}:{teq}" for tac in tactics for teq in techniques]
+                }
+            else:
+                rule_id = dict(res).get("RuleID", "")
+                warnings.warn(
+                    f"Unable to determine MITRE Technique; skipping MITRE Mapping for rule{' ' + rule_id if rule_id else ''}"
+                )
 
         return res
 
-    def _detect_log_types(self, rule: SigmaRule) -> [str]:
+    def _detect_log_types(self, rule: SigmaRule) -> list[str]:
         log_types = []
 
         mapped_log_type = self._logsources_map.get((rule.logsource.product, rule.logsource.service))
