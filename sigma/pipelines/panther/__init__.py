@@ -3,6 +3,7 @@ from .crowdstrike_panther_pipeline import crowdstrike_panther_pipeline
 from .panther_pipeline import panther_pipeline
 from .sentinelone_panther_pipeline import sentinelone_panther_pipeline
 from .sysmon_panther_pipeline import sysmon_panther_pipeline
+from .unified_sigma_edrs_panther_pipeline import unified_sigma_edrs_panther_pipeline
 from .windows_panther_pipeline import (
     windows_audit_panther_pipeline,
     windows_logsource_panther_pipeline,
