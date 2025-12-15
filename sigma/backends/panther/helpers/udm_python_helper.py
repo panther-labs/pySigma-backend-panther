@@ -44,7 +44,7 @@ class UdmPythonHelper(BasePantherBackendHelper):
         For example: "Image" becomes event.udm("Image", default="")
         """
         # Use event.udm() with the Sigma field name directly
-        key_path_value = f'event.udm("{path}") or ""'
+        key_path_value = f'event.udm("{path}", default="")'
         return key_path_value
 
     def update_parsed_conditions(
