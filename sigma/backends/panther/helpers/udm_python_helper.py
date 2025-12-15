@@ -41,7 +41,7 @@ class UdmPythonHelper(BasePantherBackendHelper):
         """
         Generate event.udm() accessor instead of event.deep_get().
 
-        For example: "Image" becomes event.udm("Image") or ""
+        For example: "Image" becomes event.udm("Image", default="")
         """
         # Use event.udm() with the Sigma field name directly
         key_path_value = f'event.udm("{path}") or ""'
