@@ -319,7 +319,7 @@ class PantherBackend(Backend):
             "Timestamp part comparison is not supported right now"
         )
 
-    def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None) -> List[Any]:
+    def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None, callback=None) -> List[Any]:
         """
         Copy-pasted base class convert_rule, with the addition of update_parsed_conditions
         """
