@@ -37,7 +37,7 @@ class TestRuleIContainsDetectionItemCondition:
 class TestDetectionContainsFieldName:
     def test_match(self, pipeline):
         detection_item = SigmaDetectionItem(
-            field=None, value=[("SuspiciousOperation",), ("DisallowedHost",)], modifiers=[]
+            field=None, value=[SigmaString("SuspiciousOperation"), SigmaString("DisallowedHost")], modifiers=[]
         )
         condition = DetectionContainsFieldName()
         assert not condition.match(pipeline, detection_item)

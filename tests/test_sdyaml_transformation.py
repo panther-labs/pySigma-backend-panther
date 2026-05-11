@@ -16,11 +16,11 @@ class TestSdYamlTransformation:
             "https://example3.com/",
         ]
 
-        res = transformation.apply(pipeline, rule, "query")
+        res = transformation.apply(rule, "query")
         assert "Reference" not in res
 
         rule.references = references
-        res = transformation.apply(pipeline, rule, "query")
+        res = transformation.apply(rule, "query")
         assert res["Reference"] == references[0]  # only first reference should be used
 
     def test_apply_author(self, pipeline, sigma_detection):
@@ -34,31 +34,31 @@ class TestSdYamlTransformation:
             detection=sigma_detection,
             description=description,
         )
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Description"] == description
 
         rule.author = author
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Description"] == f"{description}\n\nAuthor: {author}"
 
     def test_apply_status(self, pipeline, rule):
         rule.description = "Some description"
         transformation = SdYamlTransformation()
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Description"] == "Some description"
 
         rule.status = SigmaStatus.EXPERIMENTAL
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Description"] == "Some description\n\nStatus: experimental"
 
     def test_apply_severity(self, pipeline, rule):
         severity = SigmaLevel.CRITICAL
         transformation = SdYamlTransformation()
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert "Severity" not in res
 
         rule.level = severity
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Severity"] == "Critical"
 
     @pytest.mark.parametrize(
@@ -72,14 +72,14 @@ class TestSdYamlTransformation:
     def test_apply_log_types(self, expected_result, sigma_log_source, pipeline, rule):
         transformation = SdYamlTransformation()
         rule.logsource = sigma_log_source
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res.get("LogTypes") == expected_result
 
     def test_apply_log_types_no_logtype(self, pipeline, rule):
         transformation = SdYamlTransformation()
         rule.logsource = SigmaLogSource(product="unknown")
         with pytest.raises(SigmaFeatureNotSupportedByBackendError) as err:
-            transformation.apply(pipeline, rule, "")
+            transformation.apply(rule, "")
         assert err.value.args[0] == "Can't map any LogTypes"
 
     def test_apply_log_types_crowdstrike(self, pipeline, rule):
@@ -88,7 +88,7 @@ class TestSdYamlTransformation:
         with mock.patch("click.get_current_context") as mock_get_current_context:
             rule.logsource = SigmaLogSource(product="product", service="service")
             mock_get_current_context.return_value.params = {"pipeline": ["crowdstrike_panther"]}
-            res = transformation.apply(pipeline, rule, "")
+            res = transformation.apply(rule, "")
             assert res["LogTypes"] == ["Crowdstrike.FDREvent"]
 
     def test_apply_false_positives(self, pipeline, sigma_detection):
@@ -99,11 +99,11 @@ class TestSdYamlTransformation:
             detection=sigma_detection,
             falsepositives=[],
         )
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Description"] is None
 
         rule.falsepositives = ["fp1", "fp2"]
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Description"] == "False Positives: fp1, fp2"
 
     @pytest.mark.parametrize(
@@ -127,26 +127,26 @@ class TestSdYamlTransformation:
     )
     def test_mitre_tags(self, pipeline, rule, tag, expected_result):
         transformation = SdYamlTransformation()
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert "Reports" not in res
 
         rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("attack", tag)]
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert res["Reports"] == {"MITRE ATT&CK": [f"{expected_result}:T1001"]}
 
     def test_mitre_tags_unknown_tactic(self, pipeline, rule):
         transformation = SdYamlTransformation()
-        res = transformation.apply(pipeline, rule, "")
+        res = transformation.apply(rule, "")
         assert "Reports" not in res
 
         rule.tags = [SigmaRuleTag("attack", "t1001"), SigmaRuleTag("attack", "fake-tactic-name")]
         with pytest.raises(SigmaFeatureNotSupportedByBackendError) as err:
-            transformation.apply(pipeline, rule, "")
+            transformation.apply(rule, "")
         assert err.value.args[0] == "MITRE ATT&CK tactic fake-tactic-name not found recognized"
 
     def test_mitre_tags_no_tactic(self, pipeline, rule):
         transformation = SdYamlTransformation()
         rule.tags = [SigmaRuleTag("attack", "t1001")]
         with pytest.warns():
-            res = transformation.apply(pipeline, rule, "")
+            res = transformation.apply(rule, "")
         assert "Reports" not in res

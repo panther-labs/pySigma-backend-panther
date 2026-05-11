@@ -45,35 +45,36 @@ generic_logsource_to_windows_audit_event_mapping: Dict = (
 )
 
 
-panther_windows_prefix = ProcessingItem(
-    transformation=AddFieldnamePrefixTransformation(prefix="ExtraEventData."),
-    field_name_conditions=[
-        ExcludeFieldCondition(
-            fields=[
-                "ProcessID",
-                "ThreadID",
-                "TimeCreated",
-                "EventID",
-                "ProviderName",
-                "ProviderGuid",
-                "Qualifiers",
-                "Version",
-                "Level",
-                "Task",
-                "Opcode",
-                "Keywords",
-                "EventRecordID",
-                "ActivityID",
-                "RelatedActivityID",
-                "Channel",
-                "Computer",
-                "UserID",
-                "Message",
-                "MessageTitle",
-            ]
-        ),
-    ],
-)
+def _make_panther_windows_prefix() -> ProcessingItem:
+    return ProcessingItem(
+        transformation=AddFieldnamePrefixTransformation(prefix="ExtraEventData."),
+        field_name_conditions=[
+            ExcludeFieldCondition(
+                fields=[
+                    "ProcessID",
+                    "ThreadID",
+                    "TimeCreated",
+                    "EventID",
+                    "ProviderName",
+                    "ProviderGuid",
+                    "Qualifiers",
+                    "Version",
+                    "Level",
+                    "Task",
+                    "Opcode",
+                    "Keywords",
+                    "EventRecordID",
+                    "ActivityID",
+                    "RelatedActivityID",
+                    "Channel",
+                    "Computer",
+                    "UserID",
+                    "Message",
+                    "MessageTitle",
+                ]
+            ),
+        ],
+    )
 
 
 def windows_logsource_panther_pipeline() -> ProcessingPipeline:
@@ -104,7 +105,7 @@ def windows_logsource_panther_pipeline() -> ProcessingPipeline:
             ),
         )
     ] + [
-        panther_windows_prefix,
+        _make_panther_windows_prefix(),
         ProcessingItem(
             identifier="windows_fail_not_implemented_rule_type",
             rule_condition_linking=any,
@@ -179,7 +180,7 @@ def windows_audit_panther_pipeline() -> ProcessingPipeline:
                     logsource_windows("security"),
                 ],
             ),
-            panther_windows_prefix,
+            _make_panther_windows_prefix(),
             ProcessingItem(
                 identifier="windows_fail_not_implemented_rule_type",
                 rule_condition_linking=any,
