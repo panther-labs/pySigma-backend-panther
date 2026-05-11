@@ -50,6 +50,8 @@ class SDYAMLHelper(BasePantherBackendHelper):
           negation down the tree (flipping ANDs and ORs and swapping operators, i.e.,
           = becomes !=, etc.)
         """
+        if condition is None:
+            return None
         if isinstance(condition, ConditionItem):
             if isinstance(condition, ConditionNOT):
                 negated = not negated
@@ -64,11 +66,19 @@ class SDYAMLHelper(BasePantherBackendHelper):
                         newcond = ConditionAND(condition.args, condition.source)
                     # Update the parent references to reflect the new structure
                     newcond.parent = condition.parent
+                    # Filter None args (empty detections) before setting parent refs
+                    condition.args = [arg for arg in condition.args if arg is not None]
                     for i in range(len(condition.args)):
                         condition.args[i].parent = newcond
                         condition.args[i] = self.update_parsed_conditions(
                             condition.args[i], negated
                         )
+                    newcond.args = [arg for arg in condition.args if arg is not None]
+                    if len(newcond.args) == 0:
+                        return None
+                    if len(newcond.args) == 1:
+                        setattr(newcond.args[0], "negated", negated)
+                        return newcond.args[0]
                     setattr(newcond, "negated", negated)
                     return newcond
                 else:
@@ -76,6 +86,15 @@ class SDYAMLHelper(BasePantherBackendHelper):
                         condition.args[i] = self.update_parsed_conditions(
                             condition.args[i], negated
                         )
+                    # Filter out None args from empty detections
+                    condition.args = [arg for arg in condition.args if arg is not None]
+                    if len(condition.args) == 0:
+                        return None
+                    # Reduce single-arg AND (redundant after empty detections filtered);
+                    # preserve single-arg OR since it represents an intentional detection group
+                    if isinstance(condition, ConditionAND) and len(condition.args) == 1:
+                        setattr(condition.args[0], "negated", negated)
+                        return condition.args[0]
         # Record negation appropriately
         # NOTE: the negated property does not exist on the above classes,
         # so using setattr to set it dynamically
