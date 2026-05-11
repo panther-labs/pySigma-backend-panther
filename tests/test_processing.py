@@ -42,4 +42,4 @@ class TestDetectionContainsFieldName:
             modifiers=[],
         )
         condition = DetectionContainsFieldName()
-        assert not condition.match(pipeline, detection_item)
+        assert not condition.match(detection_item)
