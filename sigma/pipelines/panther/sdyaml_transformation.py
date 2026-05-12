@@ -4,7 +4,6 @@ from typing import Any
 
 import click
 from sigma.exceptions import SigmaFeatureNotSupportedByBackendError
-from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
 from sigma.rule import SigmaLevel, SigmaRule
 
@@ -46,7 +45,7 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
         ("gcp", "gcp.audit"): "GCP.AuditLog",
     }
 
-    def apply(self, pipeline: ProcessingPipeline, rule: SigmaRule, query: Any) -> Any:
+    def apply(self, rule: SigmaRule, query: Any) -> Any:
         res = {
             "AnalysisType": "rule",
             "DisplayName": rule.title,

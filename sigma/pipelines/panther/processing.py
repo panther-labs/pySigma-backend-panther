@@ -30,7 +30,6 @@ class RuleIContainsDetectionItemCondition(RuleContainsDetectionItemCondition):
 class DetectionContainsFieldName(DetectionItemProcessingCondition):
     def match(
         self,
-        pipeline: "sigma.processing.pipeline.ProcessingPipeline",
         detection_item: SigmaDetectionItem,
     ) -> bool:
         if detection_item.field is not None:

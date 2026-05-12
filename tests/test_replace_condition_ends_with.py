@@ -39,9 +39,9 @@ class TestReplaceConditionEndsWith:
             source_field_name="Field", target_field_name="UpdatedField"
         )
         rule = SigmaRule.from_yaml(raw_rule)
-        transformation.apply(pipeline, rule)
+        transformation.apply(rule)
 
-        res = sigma_backend.convert(SigmaCollection(rules=[rule]), output_format="sdyaml")
+        res = sigma_backend.convert(SigmaCollection(init_rules=[rule]), output_format="sdyaml")
         assert yaml.safe_load(res) == yaml.safe_load(expected)
 
     def test_with_multiple_values(self, pipeline, sigma_backend):
@@ -81,9 +81,9 @@ class TestReplaceConditionEndsWith:
             source_field_name="Field", target_field_name="UpdatedField"
         )
         rule = SigmaRule.from_yaml(raw_rule)
-        transformation.apply(pipeline, rule)
+        transformation.apply(rule)
 
-        res = sigma_backend.convert(SigmaCollection(rules=[rule]), output_format="sdyaml")
+        res = sigma_backend.convert(SigmaCollection(init_rules=[rule]), output_format="sdyaml")
         assert yaml.safe_load(res) == yaml.safe_load(expected)
 
     def test_with_nested_detections(self, pipeline, sigma_backend):
@@ -138,7 +138,7 @@ class TestReplaceConditionEndsWith:
             source_field_name="OriginalFileName", target_field_name="ReplacedFileName"
         )
         rule = SigmaRule.from_yaml(raw_rule)
-        transformation.apply(pipeline, rule)
+        transformation.apply(rule)
 
-        res = sigma_backend.convert(SigmaCollection(rules=[rule]), output_format="sdyaml")
+        res = sigma_backend.convert(SigmaCollection(init_rules=[rule]), output_format="sdyaml")
         assert yaml.safe_load(res) == yaml.safe_load(expected)

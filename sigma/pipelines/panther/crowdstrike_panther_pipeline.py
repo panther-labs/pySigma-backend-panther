@@ -15,8 +15,8 @@ from sigma.processing.transformations import (
     FieldMappingTransformation,
     ReplaceStringTransformation,
     RuleFailureTransformation,
-    ValueTransformation,
 )
+from sigma.processing.transformations.values import ValueTransformation
 from sigma.types import SigmaNumber, SigmaType
 
 from sigma.pipelines.panther.panther_pipeline import (
@@ -32,7 +32,7 @@ from sigma.pipelines.panther.sdyaml_transformation import SdYamlTransformation
 
 
 class StrToIntValueTransformation(ValueTransformation):
-    def apply_value(self, field: str, val: SigmaType) -> SigmaType:
+    def apply_value(self, field: str | None, val: SigmaType) -> SigmaType:
         try:
             return SigmaNumber(str(val))
         except (TypeError, SigmaValueError):

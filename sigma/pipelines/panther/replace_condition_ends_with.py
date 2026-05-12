@@ -2,7 +2,6 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional
 
-from sigma.processing.pipeline import ProcessingPipeline
 from sigma.processing.transformations import AddConditionTransformation
 from sigma.rule import SigmaDetection, SigmaDetectionItem, SigmaRule
 
@@ -36,7 +35,7 @@ class ReplaceConditionEndsWith(AddConditionTransformation):
     source_field_name: Optional[str] = field(default=None)
     target_field_name: Optional[str] = field(default=None)
 
-    def apply(self, pipeline: ProcessingPipeline, rule: SigmaRule):
+    def apply(self, rule: SigmaRule):
         fields_mapping = {}
         if not rule.detection:
             return
@@ -56,4 +55,4 @@ class ReplaceConditionEndsWith(AddConditionTransformation):
 
         if not self.conditions:
             return
-        super().apply(pipeline, rule)
+        super().apply(rule)

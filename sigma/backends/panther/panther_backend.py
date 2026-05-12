@@ -219,6 +219,66 @@ class PantherBackend(Backend):
             "Conversion of ordered temporal correlation rule into the target data structure is not supported right now"
         )
 
+    def convert_correlation_extended_temporal_rule(
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of extended temporal correlation rule into the target data structure is not supported right now"
+        )
+
+    def convert_correlation_extended_temporal_ordered_rule(
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of extended ordered temporal correlation rule into the target data structure is not supported right now"
+        )
+
+    def convert_correlation_value_avg_rule(
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value avg correlation rule into the target data structure is not supported right now"
+        )
+
+    def convert_correlation_value_median_rule(
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value median correlation rule into the target data structure is not supported right now"
+        )
+
+    def convert_correlation_value_percentile_rule(
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value percentile correlation rule into the target data structure is not supported right now"
+        )
+
+    def convert_correlation_value_sum_rule(
+        self,
+        rule: SigmaCorrelationRule,
+        output_format: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> List[Any]:
+        raise SigmaFeatureNotSupportedByBackendError(
+            "Conversion of value sum correlation rule into the target data structure is not supported right now"
+        )
+
     def convert_condition_val_str(
         self, cond: ConditionValueExpression, state: ConversionState
     ) -> Any:
@@ -259,7 +319,9 @@ class PantherBackend(Backend):
             "Timestamp part comparison is not supported right now"
         )
 
-    def convert_rule(self, rule: SigmaRule, output_format: Optional[str] = None) -> List[Any]:
+    def convert_rule(
+        self, rule: SigmaRule, output_format: Optional[str] = None, callback=None
+    ) -> List[Any]:
         """
         Copy-pasted base class convert_rule, with the addition of update_parsed_conditions
         """
