@@ -5,6 +5,8 @@ on:
 
 jobs:
   publish_github_release_and_pypi:
+    permissions:
+      contents: write
     strategy:
       matrix:
         os: [ 'ubuntu-latest' ]
@@ -27,15 +29,18 @@ jobs:
       - name: Build packages
         run: poetry build
       - name: Create Github Release
+        if: matrix.python-version == '3.12'
         run: |
-          export NEW_VERSION=$(cat VERSION)
+          export NEW_VERSION=$(poetry version --short)
           git config user.name "dac-bot"
           git config user.email "dac-bot@panther.com"
           gh release create v$NEW_VERSION dist/* -t v$NEW_VERSION --draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Configure Poetry
+        if: matrix.python-version == '3.12'
         run: |
             poetry config pypi-token.pypi "${{ secrets.PYPI_API_TOKEN }}"
       - name: Publish to PyPI
+        if: matrix.python-version == '3.12'
         run: poetry publish
