@@ -127,6 +127,14 @@ class SdYamlTransformation(QueryPostprocessingTransformation):
 
         cli_context = click.get_current_context(silent=True)
         if cli_context:
+            if "unified_sigma_edrs_panther" in cli_context.params["pipeline"]:
+                # Unified EDR pipeline - add all three EDR log types
+                log_types.extend([
+                    "SentinelOne.DeepVisibility",
+                    "Crowdstrike.FDREvent",
+                    "CarbonBlack.EndpointEvent",
+                ])
+
             if "crowdstrike_panther" in cli_context.params["pipeline"]:
                 log_types.append("Crowdstrike.FDREvent")
 

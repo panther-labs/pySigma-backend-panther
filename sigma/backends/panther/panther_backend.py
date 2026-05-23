@@ -26,6 +26,7 @@ from sigma.rule import SigmaRule
 from sigma.backends.panther.helpers.pantherflow_helper import PantherFlowHelper
 from sigma.backends.panther.helpers.python_helper import PythonHelper
 from sigma.backends.panther.helpers.sdyaml_helper import SDYAMLHelper
+from sigma.backends.panther.helpers.udm_python_helper import UdmPythonHelper
 from sigma.pipelines.panther import panther_pipeline
 
 
@@ -42,12 +43,14 @@ class PantherBackend(Backend):
         "sdyaml": "sdyaml",
         "python": "python",
         "pantherflow": "pantherflow",
+        "udm": "udm",
     }
     output_format_processing_pipeline = {
         "default": ProcessingPipeline(),
         "sdyaml": ProcessingPipeline(),
         "python": ProcessingPipeline(),
         "pantherflow": ProcessingPipeline(),
+        "udm": ProcessingPipeline(),
     }
 
     format_helpers = {
@@ -55,6 +58,7 @@ class PantherBackend(Backend):
         "sdyaml": SDYAMLHelper(),
         "python": PythonHelper(),
         "pantherflow": PantherFlowHelper(),
+        "udm": UdmPythonHelper(),
     }
 
     convert_or_as_in: ClassVar[bool] = True
@@ -426,6 +430,22 @@ class PantherBackend(Backend):
             return queries[0]
         return queries
 
+    def finalize_output_udm(self, queries):
+        """Finalize output for UDM format (same as sdyaml)"""
+        if self.output_dir:
+            self.save_queries_into_individual_files(queries)
+        # cleanup of SigmaFile key
+        for query in queries:
+            query.pop("SigmaFile", None)
+
+        cli_context = click.get_current_context(silent=True)
+        if cli_context:
+            return "Converted rules are successfully saved"
+
+        if len(queries) == 1:
+            return yaml.dump(queries[0])
+        return yaml.dump(queries)
+
     def finalize_query_default(
         self, rule: SigmaRule, query: Any, index: int, state: ConversionState
     ):
@@ -471,3 +491,32 @@ class PantherBackend(Backend):
  | where {query}
 """
         return query
+
+    def finalize_query_udm(
+        self, rule: SigmaRule, query: Any, index: int, state: ConversionState
+    ):
+        """Finalize query for UDM format - similar to python but with event.udm() calls"""
+        import_ipaddress = "import ipaddress\n" if "ipaddress." in query else ""
+        import_json = "import json\n" if "json." in query else ""
+        import_re = "import re\n" if re.search(r"\bre\.", query) else ""
+        empty_strings = "\n\n" if import_ipaddress or import_json or import_re else ""
+        query = (
+            import_ipaddress
+            + import_json
+            + import_re
+            + empty_strings
+            + f"""def rule(event):
+    if {query}:
+        return True
+    return False
+        """
+        )
+        try:
+            formatted_query = black.format_file_contents(
+                src_contents=query, fast=True, mode=black.FileMode(line_length=100)
+            )
+            return formatted_query
+        except black.parsing.InvalidInput as err:
+            raise SigmaFeatureNotSupportedByBackendError(
+                f"Invalid input for formatting python code: {query}, err {err}"
+            )
