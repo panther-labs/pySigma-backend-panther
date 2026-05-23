@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [ closed ]
 
+permissions:
+  contents: write
+
 jobs:
   tag-on-merge:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
