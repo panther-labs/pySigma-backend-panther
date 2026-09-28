@@ -54,6 +54,8 @@ class SDYAMLHelper(BasePantherBackendHelper):
             return None
         if isinstance(condition, ConditionItem):
             if isinstance(condition, ConditionNOT):
+                if condition.args[0] is None:  # negated detection was dropped by the pipeline
+                    return None
                 negated = not negated
                 # Remove the ConditionNOT as the parent
                 condition.args[0].parent = condition.parent
