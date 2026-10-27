@@ -8,12 +8,12 @@ on:
         required: true
         default: 'prerelease'
 
-permissions:
-  contents: write
-
 jobs:
   version_bump_pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
       - name: Generate GitHub App token
@@ -41,6 +41,12 @@ jobs:
         run: echo "old_version=$(poetry version --short)" >> $GITHUB_OUTPUT
       - name: Bump version
         run: poetry version "${{ github.event.inputs.bump_type }}"
+      - name: Generate GitHub automation token
+        id: app-token
+        uses: ./.github/actions/github-automation-token
+        with:
+          token_url: ${{ secrets.APP_TOKEN_SERVICE_URL }}
+          permissions: '{"pull_requests":"write"}'
       - name: Create Branch and Pull Request
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
