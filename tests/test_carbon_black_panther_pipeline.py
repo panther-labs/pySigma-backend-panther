@@ -115,3 +115,49 @@ def test_not_supported_rule_type(mock_click):
     assert (
         err.value.args[0] == "Rule type not currently supported by the CarbonBlack Sigma pipeline"
     )
+
+
+@pytest.mark.parametrize("output_format", ["python", "pantherflow", "sdyaml"])
+@pytest.mark.parametrize(
+    "condition,expected_condition",
+    [
+        ("sel or dropped", "sel"),
+        ("sel and not dropped", "sel"),
+    ],
+)
+@mock.patch("sigma.pipelines.panther.sdyaml_transformation.click")
+def test_dropped_detection_item(mock_click, output_format, condition, expected_condition):
+    # OriginalFileName is dropped by the pipeline, which leaves a None argument in the condition
+    mock_click.get_current_context.return_value = mock.MagicMock(
+        params={"pipeline": "carbon_black_panther"}
+    )
+    backend = PantherBackend(carbon_black_panther_pipeline())
+    rule_id = uuid.uuid4()
+    rule = """
+        title: Test Title
+        id: {rule_id}
+        description: description
+        logsource:
+            category: process_creation
+            product: windows
+        detection:
+            sel:
+                Image|endswith: '\cmd.exe'
+            dropped:
+                OriginalFileName: 'Cmd.Exe'
+            condition: {condition}
+    """
+
+    converted = backend.convert(
+        SigmaCollection.from_yaml(rule.format(rule_id=rule_id, condition=condition)),
+        output_format=output_format,
+    )
+    assert "Cmd.Exe" not in str(converted)
+    if output_format == "sdyaml":
+        # SDYAML keeps a single-item Any/All block instead of collapsing it
+        assert "cmd.exe" in converted
+    else:
+        assert converted == backend.convert(
+            SigmaCollection.from_yaml(rule.format(rule_id=rule_id, condition=expected_condition)),
+            output_format=output_format,
+        )

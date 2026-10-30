@@ -79,9 +79,10 @@ class PantherBackend(Backend):
             self.output_dir = output_dir
 
     def get_key_condition_values(self, cond, state):
-        rv = (self.convert_condition(arg, state) for arg in cond.args)  # generator object
+        # Detection items dropped by a processing pipeline leave None arguments behind.
+        rv = (self.convert_condition(arg, state) for arg in cond.args if arg is not None)
 
-        return list(rv)
+        return [value for value in rv if value is not None]
 
     def simplify_convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
@@ -89,15 +90,21 @@ class PantherBackend(Backend):
 
     def convert_condition_and(self, cond: ConditionAND, state: ConversionState) -> Any:
         simplified_key_cond_values = self.simplify_convert_condition_and(cond, state)
+        if not simplified_key_cond_values:
+            return None
         return self.format_helper.convert_condition_and(simplified_key_cond_values)
 
     def convert_condition_or(self, cond: ConditionOR, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
+        if not key_cond_values:
+            return None
 
         return self.format_helper.convert_condition_or(key_cond_values)
 
     def convert_condition_not(self, cond: ConditionNOT, state: ConversionState) -> Any:
         key_cond_values = self.get_key_condition_values(cond, state)
+        if not key_cond_values:
+            return None
         return self.format_helper.convert_condition_not(key_cond_values)
 
     def convert_condition_as_in_expression(
